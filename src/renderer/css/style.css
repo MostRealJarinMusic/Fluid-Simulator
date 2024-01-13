@@ -1,0 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=REM:wght@100&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    background-color: #282a36;
+}
+
+.row {
+    display: flex;
+}
+
+.column {
+    flex: 33%;
+}
+
+p,
+h1,
+input,
+select,
+label,
+button {
+    background-color: #44475a;
+    font-family: "REM", sans-serif;
+    font-weight: 200;
+    font-size: 11px;
+    color: #f8f8f2;
+    text-decoration: none;
+}
+
+/* Graphs and simulations */
+.graphs {
+    display: block;
+    background-color: #44475a;
+    margin: 10px auto 10px;
+}
+
+.simulation {
+    display: block;
+    border-radius: 10px;
+    background-color: #44475a;
+    /*background-color: #8be9fd;*/
+    margin: 10px auto 10px;
+}
+
+
+
+/* GENERAL TEXT */
+.moduleContainer {
+    border-radius: 10px;
+    background-color: #44475a;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin: 20px 20px;
+    width: 90%;
+    display: block;
+}
+
+.moduleText {
+    padding-left: 15px;
+}
+
+#airfoilDesignerParameters {
+    background-color: #44475a;
+    padding-left: 15px;
+    margin: 5px 0px 10px;
+    display: block;
+}
+
+#airfoilDesignerGeneralControls,
+#airfoilInfoContainer {
+    background-color: #44475a;
+    padding-left: 15px;
+    margin: 10px 0px 10px;
+    display: block;
+}
+
+h1 {
+    padding-left: 15px;
+    margin: 5px 0px 5px;
+    font-size: 24px;
+    text-align: start;
+}
+
+input {
+    border-radius: 2px;
+    margin: 0px 0px 0px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #f8f8f2;
+}
+
+input[type="number" i] {
+    padding-block: 0px;
+    padding-inline: 4px;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+}
+
+label {
+    margin-right: 10px;
+}
+
+select {
+    margin-bottom: 5px;
+    border-width: 1px;
+    border-radius: 2px;
+    border-style: solid;
+    border-color: #f8f8f2;
+}
+
+button {
+    border-width: 1px;
+    border-radius: 2px;
+    border-style: solid;
+    border-color: #f8f8f2;
+}
+
+#airfoilDesignerResetButton:hover {
+    background-color: #6272a4;
+    cursor: pointer;
+}
+
+/* 
+button {
+    display: block;
+    height: 25px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #EDF0F1;    
+}
+
+select {
+    margin-bottom: 5px;
+}
+
+h1 {
+    margin: 5px auto;
+    font-size: 32px;
+    text-align: center;
+}
+
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px 10%;
+}
+*/
+html {
+    height: 100%;
+    width: 100%;
+}

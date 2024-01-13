@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.0"></script>
+
+    <title>Fluid Simulator</title>
+
+    <link href="src/renderer/css/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div class="row">
+        <div class="column">
+            <div class="moduleContainer" id="airfoilDesignerContainer">
+                <h1>Airfoil Designer.</h1>
+
+                <canvas class="graphs" id="airfoilGraph" width="300" height="300">
+                    <p>Your browser doesn't support the canvas tag - please use one that does.</p>
+                </canvas>
+
+                <div id="airfoilDesignerGeneralControls">
+                    <select name="Airfoil Preset" id="airfoilTypeSelector" onchange="updateChosenShape()">
+                        <option value="Airfoil" selected>4-digit NACA Airfoil</option>
+                        <option value="Rectangle">Rectangle</option>
+                        <!--
+                            <option value="Circle">Circle</option>
+                        -->
+                        <option value="Ellipse">Ellipse</option>
+                        <option value="Line">Line</option>
+                    </select>
+                    <button id="airfoilDesignerResetButton" type="button"
+                        onclick="resetAirfoilParameters()">Reset</button>
+                </div>
+
+                <p class="moduleText">Parameters: </p>
+
+                <div class="parameterContainer" id="airfoilDesignerParameters">
+                </div>
+
+                <div id="airfoilInfoContainer">
+                    <p id="airfoilProfileNum">This is a test.</p>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="moduleContainer" id="fluidSimulationContainer">
+                <h1>Fluid Simulation.</h1>
+
+                <canvas class="simulation" id="fluidSimulation" width="320" height="160">
+                    <p>Your browser doesn't support the canvas tag - please use one that does.</p>
+                </canvas>
+
+                <div class="parameterContainer" id="fluidSimulationParameters">
+                </div>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="moduleContainer" id="dataGraphContainer">
+                <h1>Graphs. </h1>
+
+                <canvas class="graphs" id="dataGraph" width="300" height="300">
+                    <p>Your browser doesn't support the canvas tag - please use one that does.</p>
+                </canvas>
+
+                <p class="moduleText">This is a test.</p>
+
+                <div class="parameterContainer" id="dataGraphParameters">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+
+    <script src="dist/classes/colourMap.js"></script>
+    <script src="dist/classes/utility.js"></script>
+    <script src="dist/classes/shapes.js"></script>
+
+    <script src="dist/classes/airfoilDesigner.js"></script>
+    <script src="dist/classes/fluid.js"></script>
+
+    <script src="dist/renderer/renderer.js" defer></script>
+</body>
+
+</html>
