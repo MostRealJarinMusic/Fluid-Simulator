@@ -16,7 +16,7 @@ abstract class Shape {
     protected graphDatasets: GraphDataset[] = [];
     protected params: Record<string, number> = {};
 
-    abstract parameterInfo: Record<string, ShapeParameterInfo>;//{ [key: string]: ShapeParameterInfo };
+    abstract parameterInfo: Record<string, ShapeParameterInfo>;
 
     abstract updateParameters(newParameters: Record<string, number>): void;
     abstract get Area(): number;
@@ -116,9 +116,9 @@ class Airfoil extends Shape {
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
-        var testM = newParameters['m'];
-        var testP = newParameters['p'];
-        var testT = newParameters['t'];
+        let testM = newParameters['m'];
+        let testP = newParameters['p'];
+        let testT = newParameters['t'];
 
         if (testM === 0) testP = 0;
         if (testM > 0 && (testP >= 0 && testP < 10)) testP = 10;
@@ -132,14 +132,14 @@ class Airfoil extends Shape {
     }
 
     private updateGraphDatasets(): void {
-        var airfoilUpper = [];
-        var airfoilLower = [];
-        var meanCamberLine = [];
+        let airfoilUpper = [];
+        let airfoilLower = [];
+        let meanCamberLine = [];
 
         //Slight modification for sampling points evenly using cosine
         //Credit: http://airfoiltools.com/airfoil/naca4digit?MNaca4DigitForm%5Bcamber%5D=9&MNaca4DigitForm%5Bposition%5D=40&MNaca4DigitForm%5Bthick%5D=14&MNaca4DigitForm%5BnumPoints%5D=81&MNaca4DigitForm%5BcosSpace%5D=0&MNaca4DigitForm%5BcosSpace%5D=1&MNaca4DigitForm%5BcloseTe%5D=0&MNaca4DigitForm%5BcloseTe%5D=1&yt0=Plot
-        for (var beta = 0; beta <= Math.PI; beta += 0.01) { //Can control the fineness of sampling
-            var sampleX = (1 - Math.cos(beta)) / 2;
+        for (let beta = 0; beta <= Math.PI; beta += 0.01) { //Can control the fineness of sampling
+            let sampleX = (1 - Math.cos(beta)) / 2;
             //Upper surface point
             airfoilUpper.push({
                 x: sampleX - (this.calculateHalfThickness(sampleX) * Math.sin(this.calculateTheta(sampleX))),
@@ -159,9 +159,9 @@ class Airfoil extends Shape {
             });
         }
 
-        var airfoilUpperDataset: GraphDataset = { label: "Upper Airfoil Surface", plotPoints: airfoilUpper, colour: 'rgba(80, 250, 123,1)' };
-        var airfoilLowerDataset: GraphDataset = { label: "Lower Airfoil Surface", plotPoints: airfoilLower, colour: 'rgba(255, 184, 108,1)' };
-        var meanCamberLineDataset: GraphDataset = { label: "Mean Camber Line", plotPoints: meanCamberLine, colour: 'rgba(255, 121, 198,1)' };
+        let airfoilUpperDataset: GraphDataset = { label: "Upper Airfoil Surface", plotPoints: airfoilUpper, colour: 'rgba(80, 250, 123,1)' };
+        let airfoilLowerDataset: GraphDataset = { label: "Lower Airfoil Surface", plotPoints: airfoilLower, colour: 'rgba(255, 184, 108,1)' };
+        let meanCamberLineDataset: GraphDataset = { label: "Mean Camber Line", plotPoints: meanCamberLine, colour: 'rgba(255, 121, 198,1)' };
 
         this.graphDatasets = [airfoilUpperDataset, airfoilLowerDataset, meanCamberLineDataset];
     }

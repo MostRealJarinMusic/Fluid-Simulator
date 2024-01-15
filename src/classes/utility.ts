@@ -29,7 +29,7 @@ function enforceBounds(value: number, bounds: number[]): number {
 
 function create2DArrayFill(rows: number, columns: number, fill: number): number[][] {
     let arr = new Array(rows);
-    for (var i = 0; i < rows; i++) {
+    for (let i = 0; i < rows; i++) {
         arr[i] = new Array(columns).fill(fill);
     }
     return arr;

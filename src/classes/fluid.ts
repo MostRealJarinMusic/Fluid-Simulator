@@ -81,6 +81,8 @@ class Fluid {
         this.solid = new Array(this.numCells).fill(false);
         //#endregion
 
+        console.log(this.distribution)
+
         //#region Image setup
         this.canvas = canvas;
         this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -97,7 +99,7 @@ class Fluid {
 
     public setupObstacle(): void {
         let radiusSqr = 5 ** 2;
-        let obstacleX = this.width / 4;
+        let obstacleX = this.width / 3;
         let obstacleY = this.height / 2;
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
@@ -115,29 +117,56 @@ class Fluid {
     }
 
     public initFluid(): void {
-        for (var x = 0; x < this.width; x++) {
-            for (var y = 0; y < this.height; y++) {
-                this.distribution[this.index(x, y)][3] = this.inVelocity; //INVELOCITY
+        let velocityVector = [this.inVelocity, 0]
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                //for (let i in this.latticeIndices) {
+                //this.distribution[this.index(x, y)][i] = this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, parseInt(i));
+                //}
+
+                //this.distribution[this.index(x, y)][2] = this.inVelocity;//this.getEquilibrium(this.latticeWeights[2], this.density, velocityVector, 2);
+                this.distribution[this.index(x, y)][3] = this.inVelocity;//this.getEquilibrium(this.latticeWeights[3], this.density, velocityVector, 3);
+                //this.distribution[this.index(x, y)][4] = this.inVelocity//this.getEquilibrium(this.latticeWeights[4], this.density, [this.inVelocity, 0], 4);
             }
         }
-        //console.log(this.distribution)
+        //this.computeEquilibrium();
 
+        this.showDebug();
+    }
+
+    private showDebug() {
+        console.log("DIST")
+        console.log(this.distribution)
+        console.log("EQUIL DIST")
+        console.log(this.equilibriumDistribution)
     }
 
     public runMainLoop(): void {
         this.stream();
+        //this.setInflow();
         this.computeMoments();
         this.applyBoundaryConditions();
         this.computeEquilibrium();
         this.collideLocally();
 
+        //this.showDebug();
+
         //console.log(this.distribution)
     }
 
     //#region Main loop functions
+
+    private setInflow(): void {
+        for (let y = 0; y < this.height; y++) {
+            //this.distribution[this.index(0, y)][2] = this.getEquilibrium(1, this.density, [this.inVelocity, 0], 2);
+            this.distribution[this.index(0, y)][3] = this.getEquilibrium(1, this.density, [this.inVelocity, 0], 3);
+            //this.distribution[this.index(0, y)][4] = this.inVelocity;
+        }
+    }
+
     private computeMoments(): void {
-        for (var x = 0; x < this.width; x++) {
-            for (var y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
                 //console.log(this.#distribution[this.index(x, y)]);
 
                 //Functions
@@ -163,8 +192,8 @@ class Fluid {
     }
 
     private applyBoundaryConditions(): void {
-        for (var x = 0; x < this.width - 2; x++) {
-            for (var y = 0; y < this.height - 2; y++) {
+        for (let x = 0; x < this.width - 2; x++) {
+            for (let y = 0; y < this.height - 2; y++) {
                 if (this.solid[this.index(x, y)]) {
                     //Reflect fluid distribution
                     this.distribution[this.index(x, y)] = this.oppositeIndices.map(
@@ -179,18 +208,28 @@ class Fluid {
         }
     }
 
+
+    private getEquilibrium(weight: number, rho: number, velocityVector: number[], latticeIndex: number): number {
+        let latticeDotU = this.latticeXs[latticeIndex] * velocityVector[0] + this.latticeYs[latticeIndex] * velocityVector[1];
+
+        return weight * rho * (1 + 3 * latticeDotU +
+            (9 / 2) * latticeDotU ** 2 -
+            (3 / 2) * (velocityVector[0] ** 2 + velocityVector[1] ** 2));
+    }
+
     private computeEquilibrium(): void {
-        for (var x = 0; x < this.width; x++) {
-            for (var y = 0; y < this.height; y++) {
-                for (var i in this.latticeIndices) {
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                for (let i in this.latticeIndices) {
                     let localDensity = this.localDensity[this.index(x, y)];
                     let localUX = this.localUXs[this.index(x, y)];
                     let localUY = this.localUYs[this.index(x, y)];
                     let weight = this.latticeWeights[i];
-                    let latticeX = this.latticeXs[i];
-                    let latticeY = this.latticeYs[i];
 
-                    let latticeDotU = latticeX * localUX + latticeY * localUY; //Pre-calculations
+                    var latticeX = this.latticeXs[i];
+                    var latticeY = this.latticeYs[i];
+
+                    var latticeDotU = latticeX * localUX + latticeY * localUY; //Pre-calculations
 
                     this.equilibriumDistribution[this.index(x, y)][i] =
                         weight *
@@ -199,15 +238,17 @@ class Fluid {
                             3 * latticeDotU +
                             (9 / 2) * latticeDotU ** 2 -
                             (3 / 2) * (localUX ** 2 + localUY ** 2));
+
+                    //this.equilibriumDistribution[this.index(x, y)][i] = this.getEquilibrium(weight, localDensity, [localUX, localUY], parseInt(i));
                 }
             }
         }
     }
 
     private collideLocally(): void {
-        for (var x = 0; x < this.width; x++) {
-            for (var y = 0; y < this.height; y++) {
-                for (var i in this.latticeIndices) {
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                for (let i in this.latticeIndices) {
                     this.distribution[this.index(x, y)][i] =
                         this.distribution[this.index(x, y)][i] -
                         (1 / this.timescale) *
@@ -220,8 +261,8 @@ class Fluid {
 
     private stream(): void {
         //NORTH WEST AND NORTH - INDEX 8 AND 1
-        for (var y = this.height - 2; y > 0; y--) {
-            for (var x = 1; x < this.width - 1; x++) {
+        for (let y = this.height - 2; y > 0; y--) {
+            for (let x = 1; x < this.width - 1; x++) {
                 //NORTH-WEST
                 this.distribution[this.index(x, y)][8] =
                     this.distribution[this.index(x + 1, y - 1)][8];
@@ -232,8 +273,8 @@ class Fluid {
         }
 
         //NORTH EAST AND EAST - INDEX 2 AND 3
-        for (var y = this.height - 2; y > 0; y--) {
-            for (var x = this.width - 2; x > 0; x--) {
+        for (let y = this.height - 2; y > 0; y--) {
+            for (let x = this.width - 2; x > 0; x--) {
                 //NORTH EAST
                 this.distribution[this.index(x, y)][2] =
                     this.distribution[this.index(x - 1, y - 1)][2];
@@ -244,8 +285,8 @@ class Fluid {
         }
 
         //SOUTH EAST AND SOUTH - INDEX 4 AND 5
-        for (var y = 1; y < this.height - 1; y++) {
-            for (var x = this.width - 2; x > 0; x--) {
+        for (let y = 1; y < this.height - 1; y++) {
+            for (let x = this.width - 2; x > 0; x--) {
                 //SOUTH EAST
                 this.distribution[this.index(x, y)][4] =
                     this.distribution[this.index(x - 1, y + 1)][4];
@@ -256,8 +297,8 @@ class Fluid {
         }
 
         //SOUTH WEST AND WEST
-        for (var y = 1; y < this.height - 1; y++) {
-            for (var x = 1; x < this.width - 1; x++) {
+        for (let y = 1; y < this.height - 1; y++) {
+            for (let x = 1; x < this.width - 1; x++) {
                 //SOUTH WEST
                 this.distribution[this.index(x, y)][6] =
                     this.distribution[this.index(x + 1, y + 1)][6];
@@ -272,8 +313,8 @@ class Fluid {
     //#region Drawing functions
 
     drawFluid() {
-        for (var y = 1; y < this.height - 1; y++) {
-            for (var x = 1; x < this.width - 1; x++) {
+        for (let y = 1; y < this.height - 1; y++) {
+            for (let x = 1; x < this.width - 1; x++) {
                 let colour = [255, 255, 255, 255];
                 let colourIndex = 0;
                 let contrast = Math.pow(1.2, 0.1);
@@ -290,8 +331,8 @@ class Fluid {
 
                 let pxPerNd = this.pxPerNode
                 let tempY = this.height - y - 1;
-                for (var pixelY = tempY * pxPerNd; pixelY < (tempY + 1) * pxPerNd; pixelY++) {
-                    for (var pixelX = x * pxPerNd; pixelX < (x + 1) * pxPerNd; pixelX++) {
+                for (let pixelY = tempY * pxPerNd; pixelY < (tempY + 1) * pxPerNd; pixelY++) {
+                    for (let pixelX = x * pxPerNd; pixelX < (x + 1) * pxPerNd; pixelX++) {
                         let imageIndex = (pixelX + pixelY * this.image.width) * 4;
                         this.image.data[imageIndex] = colour[0];
                         this.image.data[imageIndex + 1] = colour[1];
@@ -306,4 +347,12 @@ class Fluid {
     }
 
     //#endregion
+}
+
+class Tracer {
+
+}
+
+class StreamLine {
+
 }

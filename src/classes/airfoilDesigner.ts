@@ -45,7 +45,7 @@ class AirfoilDesigner {
         parameterElement.min = parameterInfo.bounds[0].toString();
         parameterElement.max = parameterInfo.bounds[1].toString();
         parameterElement.step = "0.1";
-        //parameterElement.onchange = updateAirfoilParameters;
+        parameterElement.onchange = updateAirfoilParameters;
         return parameterElement;
     }
 
@@ -65,17 +65,29 @@ class AirfoilDesigner {
                 maintainAspectRatio: true,
                 scales: {
                     xAxes: [{
-                        type: 'linear',
-                        position: 'bottom',
-                    }],
-                    /*
-                    yAxes: [{
-
                         gridLines: {
-                            color: '#f8f8f2',
+                            color: '#282a36',
                         },
-
-                        /*
+                        ticks: {
+                            min: -0.2,
+                            max: 1.2,
+                            stepSize: 0.1,
+                            fontFamily: "'REM', sans-serif",
+                            fontSize: 8,
+                            fontColor: '#f8f8f2',
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'X',
+                            fontFamily: "'REM', sans-serif",
+                            fontSize: 10,
+                            fontColor: '#f8f8f2',
+                        }
+                    }],
+                    yAxes: [{
+                        gridLines: {
+                            color: '#282a36',
+                        },
                         ticks: {
                             min: -0.4,
                             max: 0.4,
@@ -83,43 +95,33 @@ class AirfoilDesigner {
                             fontSize: 8,
                             fontColor: '#f8f8f2',
                         },
-                        */
-                    /*
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'y',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Y',
+                            fontFamily: "'REM', sans-serif",
+                            fontSize: 10,
+                            fontColor: '#f8f8f2',
+                        }
+                    }],
+                },
+                tooltips: {
+                    enabled: false
+                },
+                legend: {
+                    onClick: function (_event: any, _legendItem: any) {
+                        //Stops the default of getting hiding the dataset
+                    },
+                    labels: {
+                        fontColor: '#f8f8f2',
                         fontFamily: "'REM', sans-serif",
                         fontSize: 8,
-                        fontColor: '#f8f8f2',
-                    }
-                    */
-                    //}],
-
-                },
-
-                plugins: {
-                    tooltip: {
-                        enabled: false
                     },
-                    legend: {
-                        onClick: function (_event: any, _legendItem: any) {
-                            //Stops the default of getting hiding the dataset
-                        },
-                        labels: {
-                            color: '#f8f8f2',
-                            font: {
-                                family: "'REM', sans-serif",
-                                weight: 200,
-                                size: '10px',
-                            },
-                        },
-                        position: 'bottom',
-                    },
+                    position: 'bottom',
                 },
             }
         });
 
-        console.log(this.graph.options.scales?.xAxes);
+        //console.log(this.graph.options.scales?.xAxes);
     }
 
     private updateGraph(): void {
@@ -244,7 +246,7 @@ class AirfoilDesigner {
                     this.disableGraph();
                 }
 
-                //var currentParameters = this.#getParametersFromInput();
+                //let currentParameters = this.#getParametersFromInput();
                 this.updateProfileNumber(this.shape.Parameters);
             }
         }
@@ -254,7 +256,7 @@ class AirfoilDesigner {
         //Change background colour
         let datasets: Chart.ChartDataSets[] = this.graph.data.datasets || [];
 
-        for (var i = 0; i < datasets.length; i++) {
+        for (let i = 0; i < datasets.length; i++) {
             datasets[i].backgroundColor = 'rgba(192, 192, 192, 0.2)';
             datasets[i].borderColor = 'rgba(192, 192, 192, 0.2)';
         }
