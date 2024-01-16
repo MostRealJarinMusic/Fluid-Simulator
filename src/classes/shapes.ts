@@ -1,6 +1,15 @@
+type Vector = {
+    x: number;
+    y: number;
+}
+
+type GridPoints = {
+    gridPoints: Vector[];
+}
+
 type GraphDataset = {
     label: string;
-    plotPoints: { x: number, y: number }[];
+    plotPoints: Vector[];
     colour: string;
 }
 
@@ -18,9 +27,13 @@ abstract class Shape {
 
     abstract parameterInfo: Record<string, ShapeParameterInfo>;
 
+
     abstract updateParameters(newParameters: Record<string, number>): void;
+    //abstract updateGridPoints(): void;
     abstract get Area(): number;
 
+
+    //#region Getters
     get ParameterInfo(): Record<string, ShapeParameterInfo> {
         return this.parameterInfo;
     }
@@ -36,6 +49,7 @@ abstract class Shape {
     get GraphDatasets(): GraphDataset[] {
         return this.graphDatasets;
     }
+    //#endregion
 }
 
 class Ellipse extends Shape {

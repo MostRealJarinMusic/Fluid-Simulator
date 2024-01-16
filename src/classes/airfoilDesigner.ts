@@ -66,7 +66,7 @@ class AirfoilDesigner {
                 scales: {
                     xAxes: [{
                         gridLines: {
-                            color: '#282a36',
+                            color: '#f8f8f2',
                         },
                         ticks: {
                             min: -0.2,
@@ -86,7 +86,7 @@ class AirfoilDesigner {
                     }],
                     yAxes: [{
                         gridLines: {
-                            color: '#282a36',
+                            color: '#f8f8f2',
                         },
                         ticks: {
                             min: -0.4,
@@ -191,20 +191,20 @@ class AirfoilDesigner {
                 let m = Math.floor(currentParameters.m).toString();
                 let p = Math.floor(currentParameters.p).toString()[0];
                 let t = Math.floor(currentParameters.t).toString();
-                numString = m + p + t;
+                numString = "Profile Number: " + m + p + t;
                 break;
             case "Circle":
             case "Ellipse":
             case "Rectangle":
             case "Line":
-                numString = "N/A";
+                numString = "";
                 break;
             default:
                 console.log("Something has gone terribly wrong...");
                 break;
         }
 
-        this.airfoilProfileNumText.innerHTML = "Profile Number: " + numString;
+        this.airfoilProfileNumText.innerHTML = numString;
     }
 
 
@@ -246,7 +246,6 @@ class AirfoilDesigner {
                     this.disableGraph();
                 }
 
-                //let currentParameters = this.#getParametersFromInput();
                 this.updateProfileNumber(this.shape.Parameters);
             }
         }

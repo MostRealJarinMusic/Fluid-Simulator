@@ -45,7 +45,6 @@ class ColourMap {
     }
 
     //#region Getters
-
     get RedList(): number[] {
         return this.redList;
     }
@@ -61,6 +60,5 @@ class ColourMap {
     get NumColours(): number {
         return this.numColours;
     }
-
     //#endregion
 }

@@ -1,18 +1,3 @@
-
-/*
-class Utility {
-    public static setupParameters(setupInformation: { [key: string]: ShapeParameterInfo }): { [key: string]: number } {
-        var temp: { [key: string]: number } = {};
-
-        for (const [parameterName, parameterInfo] of Object.entries(setupInformation)) {
-            temp[parameterName] = parameterInfo.defaultValue;
-        }
-
-        return temp;
-    }
-}
-*/
-
 function setupParameters(setupInformation: Record<string, ShapeParameterInfo>): Record<string, number> {
     let temp: Record<string, number> = {};
 
@@ -34,4 +19,3 @@ function create2DArrayFill(rows: number, columns: number, fill: number): number[
     }
     return arr;
 }
-

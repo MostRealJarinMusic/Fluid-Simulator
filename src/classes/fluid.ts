@@ -350,9 +350,61 @@ class Fluid {
 }
 
 class Tracer {
+    private position: Vector;
+    private velocity: Vector;
+
+    constructor(startPosition: Vector, startVelocity: Vector) {
+        this.position = startPosition;
+        this.velocity = startVelocity;
+    }
+
+    set Velocity(newVelocity: Vector) {
+        this.velocity = newVelocity;
+    }
+
+    get Position(): Vector {
+        return this.position;
+    }
+
+    move() {
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+    }
 
 }
 
 class StreamLine {
+    private startPosition: Vector;
+    private stepSize: number;
+    private maxSteps: number;
+    private linePoints: Vector[];
+
+    constructor(startPosition: Vector, stepSize: number) {
+        this.startPosition = startPosition;
+        this.stepSize = stepSize;
+        this.maxSteps = 5;
+        this.linePoints = [this.startPosition];
+    }
+
+    calculateLinePoints() {
+        let tempPosition: Vector = this.startPosition;
+        for (let n = 0; n < this.maxSteps; n++) {
+            /*
+            let velocity = //some sampling function here
+            tempPosition.x += velocity.x * this.stepSize;
+            tempPosition.y += velocity.y * this.stepSize;
+
+            this.linePoints.push(tempPosition)
+            */
+        }
+    }
+
+    get LinePoints(): Vector[] {
+        return this.linePoints;
+    }
+
+
+
+
 
 }
