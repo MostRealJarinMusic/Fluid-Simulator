@@ -24,6 +24,9 @@ class Fluid {
     private image: ImageData;
     private colourMap: ColourMap;
     private pxPerNode: number;
+
+    private airfoilGridPoints!: Vector[];
+    private running: boolean;
     //#endregion
 
     constructor(width: number, height: number, density: number, inVelocity: number, timescale: number, canvas: HTMLCanvasElement) {
@@ -81,7 +84,7 @@ class Fluid {
         this.solid = new Array(this.numCells).fill(false);
         //#endregion
 
-        console.log(this.distribution)
+        //console.log(this.distribution)
 
         //#region Image setup
         this.canvas = canvas;
@@ -91,68 +94,61 @@ class Fluid {
         this.colourMap = new ColourMap();
         this.pxPerNode = 2;
         //#endregion
+
+        //#region Airfoil setup
+        this.running = true;
+        this.airfoilGridPoints = [];
+
+        //#endregion
     }
 
     private index(i: number, j: number): number {
         return i * this.height + j;
     }
 
-    public setupObstacle(): void {
-        let radiusSqr = 5 ** 2;
-        let obstacleX = this.width / 3;
-        let obstacleY = this.height / 2;
-        for (let y = 0; y < this.height; y++) {
-            for (let x = 0; x < this.width; x++) {
-                if (this.distanceBetweenSqr(obstacleX, obstacleY, x, y) < radiusSqr) {
-                    this.solid[this.index(x, y)] = true;
-                } else {
-                    this.solid[this.index(x, y)] = false;
-                }
-            }
-        }
-    }
-
-    private distanceBetweenSqr(x1: number, y1: number, x2: number, y2: number): number {
-        return (x2 - x1) ** 2 + (y2 - y1) ** 2;
-    }
-
     public initFluid(): void {
         let velocityVector = [this.inVelocity, 0]
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
-                //for (let i in this.latticeIndices) {
-                //this.distribution[this.index(x, y)][i] = this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, parseInt(i));
-                //}
+                for (let i = 0; i < this.discreteVelocities; i++) {
+                    if (i === 3) {
+                        this.distribution[this.index(x, y)][i] = this.inVelocity;//this.getEquilibrium(this.latticeWeights[3], this.density, velocityVector, 3);
+                    } else {
+                        this.distribution[this.index(x, y)][i] = 1//this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, parseInt(i));
+                    }
+                    this.equilibriumDistribution[this.index(x, y)][i] = 1;
+                }
 
                 //this.distribution[this.index(x, y)][2] = this.inVelocity;//this.getEquilibrium(this.latticeWeights[2], this.density, velocityVector, 2);
-                this.distribution[this.index(x, y)][3] = this.inVelocity;//this.getEquilibrium(this.latticeWeights[3], this.density, velocityVector, 3);
+                //this.distribution[this.index(x, y)][3] = this.inVelocity;//this.getEquilibrium(this.latticeWeights[3], this.density, velocityVector, 3);
                 //this.distribution[this.index(x, y)][4] = this.inVelocity//this.getEquilibrium(this.latticeWeights[4], this.density, [this.inVelocity, 0], 4);
             }
         }
         //this.computeEquilibrium();
-
-        this.showDebug();
+        //this.showDebug();
     }
 
-    private showDebug() {
-        console.log("DIST")
+    public showDebug() {
+        console.log("Distribution")
         console.log(this.distribution)
-        console.log("EQUIL DIST")
+        console.log("Equilibrium Distribution")
         console.log(this.equilibriumDistribution)
     }
 
     public runMainLoop(): void {
-        this.stream();
-        //this.setInflow();
-        this.computeMoments();
-        this.applyBoundaryConditions();
-        this.computeEquilibrium();
-        this.collideLocally();
+        if (this.running) {
+            this.stream();
+            //this.setInflow();
+            this.computeMoments();
+            this.applyBoundaryConditions();
+            this.computeEquilibrium();
+            this.collideLocally();
 
-        //this.showDebug();
-
-        //console.log(this.distribution)
+            //this.showDebug();
+            //console.log(this.distribution)
+        }
     }
+
 
     //#region Main loop functions
 
@@ -317,7 +313,7 @@ class Fluid {
             for (let x = 1; x < this.width - 1; x++) {
                 let colour = [255, 255, 255, 255];
                 let colourIndex = 0;
-                let contrast = Math.pow(1.2, 0.1);
+                let contrast = Math.pow(1.2, 0.01);
 
                 if (this.solid[this.index(x, y)]) {
                     //Solid
@@ -347,6 +343,50 @@ class Fluid {
     }
 
     //#endregion
+
+    //#region Airfoil functions
+
+    public setupDefaultObstacle(): void {
+        let radiusSqr = 10 ** 2;
+        let obstacleX = this.width / 3;
+        let obstacleY = this.height / 2;
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                if (this.distanceBetweenSqr(obstacleX, obstacleY, x, y) < radiusSqr) {
+                    this.solid[this.index(x, y)] = true;
+                } else {
+                    this.solid[this.index(x, y)] = false;
+                }
+            }
+        }
+    }
+
+    public setupObstacle(): void {
+        //Reset solid
+        this.solid = new Array(this.numCells).fill(false);
+        let originX = Math.round(this.width / 3 + this.width / 9);
+        let originY = Math.round(this.height / 2);
+
+        for (let i = 0; i < this.airfoilGridPoints.length; i++) {
+            let point = this.airfoilGridPoints[i];
+            let index = this.index(originX + point.x, originY + point.y);
+            this.solid[index] = true;
+        }
+
+        this.initFluid();
+    }
+
+    private distanceBetweenSqr(x1: number, y1: number, x2: number, y2: number): number {
+        return (x2 - x1) ** 2 + (y2 - y1) ** 2;
+    }
+
+    public updateAirfoil(newGridPoints: Vector[]): void {
+        this.airfoilGridPoints = newGridPoints;
+
+        this.setupObstacle();
+    }
+
+    //#endregion
 }
 
 class Tracer {
@@ -367,8 +407,9 @@ class Tracer {
     }
 
     move() {
-        this.position.x += this.velocity.x;
-        this.position.y += this.velocity.y;
+        this.position = addVectors(this.position, this.velocity);
+        //this.position.x += this.velocity.x;
+        //this.position.y += this.velocity.y;
     }
 
 }

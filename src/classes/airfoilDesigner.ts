@@ -1,23 +1,28 @@
-
-
 class AirfoilDesigner {
     //#region Private variables
     private graph!: Chart;
+    private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
     private shape!: Shape;
+    private parameterCache!: Record<string, number>
     private parameterInputContainer: HTMLDivElement;
     private parameterInputIDs!: Record<string, HTMLInputElement>;
     private airfoilSelector: HTMLSelectElement;
     private airfoilProfileNumText: HTMLParagraphElement;
     //#endregion
 
-    constructor(context: CanvasRenderingContext2D, typeSelector: HTMLSelectElement, parameterInputContainer: HTMLDivElement, airfoilProfileNumText: HTMLParagraphElement) {
-        this.context = context;
+    constructor(canvas: HTMLCanvasElement, typeSelector: HTMLSelectElement, parameterInputContainer: HTMLDivElement, airfoilProfileNumText: HTMLParagraphElement) {
+        this.canvas = canvas;
+        this.context = this.canvas.getContext('2d') as CanvasRenderingContext2D;
         this.airfoilSelector = typeSelector;
         this.parameterInputContainer = parameterInputContainer
         this.airfoilProfileNumText = airfoilProfileNumText;
 
         this.changeAirfoil();
+    }
+
+    get ShapeGridPoints(): Vector[] {
+        return this.shape.GridPoints;
     }
 
     //#region Mapping
@@ -51,6 +56,7 @@ class AirfoilDesigner {
 
     //#endregion
 
+    //#region Graphs
 
     private setupGraph(): void {
         let datasets = this.shape.GraphDatasets;
@@ -130,11 +136,27 @@ class AirfoilDesigner {
         this.graph.update();
     }
 
+    private disableGraph(): void {
+        //Change background colour
+        let datasets: Chart.ChartDataSets[] = this.graph.data.datasets || [];
+
+        for (let i = 0; i < datasets.length; i++) {
+            datasets[i].backgroundColor = 'rgba(192, 192, 192, 0.2)';
+            datasets[i].borderColor = 'rgba(192, 192, 192, 0.2)';
+        }
+
+        this.graph.update();
+    }
+
+    //#endregion
+
+    //#region Airfoil functions
     public updateAirfoil(): void {
         //Euler's number is allowed as it is considered a number - BUG
 
         let airfoilType = this.shape.constructor.name;
         let currentParameters = this.getParametersFromInput();
+        //console.log(currentParameters)
 
         switch (airfoilType) {
             case "Airfoil":
@@ -156,7 +178,7 @@ class AirfoilDesigner {
         this.updateProfileNumber(this.shape.Parameters);
     }
 
-    resetAirfoil(): void {
+    public resetAirfoil(): void {
         let parameters: Record<string, number> = {};
         //Obtain default parameters
         for (const [ID, _reference] of Object.entries(this.parameterInputIDs)) {
@@ -172,46 +194,6 @@ class AirfoilDesigner {
 
         this.publishParameters(parameters);
         this.updateProfileNumber(parameters);
-    }
-
-    private getParametersFromInput(): Record<string, number> {
-        let parameters: Record<string, number> = {};
-        for (const [ID, reference] of Object.entries(this.parameterInputIDs)) {
-            parameters[ID] = enforceBounds(parseInt(reference.value), this.shape.ParameterInfo[ID].bounds);
-        }
-        return parameters;
-    }
-
-    private updateProfileNumber(currentParameters: Record<string, number>): void {
-        let shapeType = this.shape.constructor.name;
-        let numString = "";
-
-        switch (shapeType) {
-            case "Airfoil":
-                let m = Math.floor(currentParameters.m).toString();
-                let p = Math.floor(currentParameters.p).toString()[0];
-                let t = Math.floor(currentParameters.t).toString();
-                numString = "Profile Number: " + m + p + t;
-                break;
-            case "Circle":
-            case "Ellipse":
-            case "Rectangle":
-            case "Line":
-                numString = "";
-                break;
-            default:
-                console.log("Something has gone terribly wrong...");
-                break;
-        }
-
-        this.airfoilProfileNumText.innerHTML = numString;
-    }
-
-
-    private publishParameters(currentParameters: Record<string, number>): void {
-        for (const [ID, reference] of Object.entries(this.parameterInputIDs)) {
-            reference.value = currentParameters[ID].toString();
-        }
     }
 
     //Disable displaying the chart unless the selected preset is Airfoil
@@ -251,18 +233,6 @@ class AirfoilDesigner {
         }
     }
 
-    private disableGraph(): void {
-        //Change background colour
-        let datasets: Chart.ChartDataSets[] = this.graph.data.datasets || [];
-
-        for (let i = 0; i < datasets.length; i++) {
-            datasets[i].backgroundColor = 'rgba(192, 192, 192, 0.2)';
-            datasets[i].borderColor = 'rgba(192, 192, 192, 0.2)';
-        }
-
-        this.graph.update();
-    }
-
     private switchAirfoil(newType: string): void {
         switch (newType) {
             case "Airfoil":
@@ -283,6 +253,59 @@ class AirfoilDesigner {
         }
     }
 
+    private updateProfileNumber(currentParameters: Record<string, number>): void {
+        let shapeType = this.shape.constructor.name;
+        let numString = "";
+
+        switch (shapeType) {
+            case "Airfoil":
+                let m = Math.floor(currentParameters.m).toString();
+                let p = Math.floor(currentParameters.p).toString()[0];
+                let t = Math.floor(currentParameters.t).toString();
+                if (currentParameters.t < 10) {
+                    t = "0" + t
+                }
+
+                numString = "Profile Number: " + m + p + t;
+                break;
+            case "Circle":
+            case "Ellipse":
+            case "Rectangle":
+            case "Line":
+                numString = "";
+                break;
+            default:
+                console.log("Something has gone terribly wrong...");
+                break;
+        }
+
+        this.airfoilProfileNumText.innerHTML = numString;
+    }
+    //#endregion
+
+    //#region Parameter setup and handling functions
+    private getParametersFromInput(): Record<string, number> {
+        let parameters: Record<string, number> = {};
+        for (const [ID, reference] of Object.entries(this.parameterInputIDs)) {
+            let referenceValue = parseInt(reference.value);
+            if (isNaN(referenceValue)) {
+                referenceValue = this.parameterCache[ID];
+            }
+
+            parameters[ID] = enforceBounds(referenceValue, this.shape.ParameterInfo[ID].bounds);
+        }
+        return parameters;
+    }
+
+    private publishParameters(currentParameters: Record<string, number>): void {
+        for (const [ID, reference] of Object.entries(this.parameterInputIDs)) {
+            reference.value = currentParameters[ID].toString();
+        }
+        this.parameterCache = currentParameters;
+
+        //console.log(this.parameterCache);
+    }
+
     //Dynamically generate parameter inputs for each shape with labels
     //Credit: https://stackoverflow.com/questions/14853779/dynamically-creating-a-specific-number-of-input-form-elements
     private setupParameterInputs(): void {
@@ -296,6 +319,7 @@ class AirfoilDesigner {
 
         //Clear current parameters
         this.parameterInputIDs = {};
+        this.parameterCache = {};
 
         for (const [parameterName, parameterInfo] of Object.entries(shape.ParameterInfo)) {
             let parameterInputLabel = document.createElement("label");
@@ -307,16 +331,12 @@ class AirfoilDesigner {
             container.appendChild(parameterInput);
             container.appendChild(document.createElement("br"));
 
+            let element = document.getElementById(parameterName) as HTMLInputElement;
+            this.parameterInputIDs[`${parameterName}`] = element;
+            this.parameterCache[`${parameterName}`] = parseInt(element.value);
 
-            let element = document.getElementById(parameterName);
-            if (element !== null && element instanceof HTMLInputElement) {  //Type checking
-                this.parameterInputIDs[`${parameterName}`] = element;
-            }
+            //console.log(this.parameterCache)
         }
     }
-
-
-
-
-
+    //#endregion
 }

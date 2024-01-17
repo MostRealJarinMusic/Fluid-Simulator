@@ -1,27 +1,14 @@
-type Vector = {
-    x: number;
-    y: number;
-}
+//#region Types
+type Vector = { x: number; y: number; }
+type GridPoints = { gridPoints: Vector[]; }
+type GraphDataset = { label: string; plotPoints: Vector[]; colour: string; }
+type ShapeParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: number[]; }
+//#endregion
 
-type GridPoints = {
-    gridPoints: Vector[];
-}
-
-type GraphDataset = {
-    label: string;
-    plotPoints: Vector[];
-    colour: string;
-}
-
-type ShapeParameterInfo = {
-    name: string;
-    labelText: string;
-    defaultValue: number;
-    bounds: number[];
-}
+//#region Shape parent class
 
 abstract class Shape {
-    protected gridPoints: number[] = [];
+    protected gridPoints: Vector[] = [];
     protected graphDatasets: GraphDataset[] = [];
     protected params: Record<string, number> = {};
 
@@ -29,9 +16,8 @@ abstract class Shape {
 
 
     abstract updateParameters(newParameters: Record<string, number>): void;
-    //abstract updateGridPoints(): void;
+    abstract updateGridPoints(): void;
     abstract get Area(): number;
-
 
     //#region Getters
     get ParameterInfo(): Record<string, ShapeParameterInfo> {
@@ -42,7 +28,7 @@ abstract class Shape {
         return this.params;
     }
 
-    get GridPoints(): number[] {
+    get GridPoints(): Vector[] {
         return this.gridPoints;
     }
 
@@ -51,6 +37,10 @@ abstract class Shape {
     }
     //#endregion
 }
+
+//#endregion
+
+//Shapes
 
 class Ellipse extends Shape {
     override parameterInfo: Record<string, ShapeParameterInfo> = {
@@ -72,6 +62,11 @@ class Ellipse extends Shape {
         this.params['xRadius'] = newParameters['xRadius'];
         this.params['yRadius'] = newParameters['yRadius'];
     }
+
+    override updateGridPoints(): void {
+        throw new Error("Method not implemented.");
+    }
+
 }
 
 class Rectangle extends Shape {
@@ -93,6 +88,10 @@ class Rectangle extends Shape {
         this.params['width'] = newParameters['width'];
         this.params['height'] = newParameters['height'];
     }
+
+    override updateGridPoints(): void {
+        throw new Error("Method not implemented.");
+    }
 }
 
 class Line extends Shape {
@@ -110,6 +109,10 @@ class Line extends Shape {
     override updateParameters(newParameters: Record<string, number>): void {
         this.params['lineLength'] = newParameters['lineLength'];
     }
+
+    override updateGridPoints(): void {
+        throw new Error("Method not implemented.");
+    }
 }
 
 class Airfoil extends Shape {
@@ -123,6 +126,8 @@ class Airfoil extends Shape {
         super();
         this.params = setupParameters(this.parameterInfo);
         this.updateGraphDatasets();
+
+        this.updateGridPoints();
     }
 
     override get Area(): number {
@@ -143,6 +148,7 @@ class Airfoil extends Shape {
         this.params['t'] = testT;
 
         this.updateGraphDatasets();
+        this.updateGridPoints();
     }
 
     private updateGraphDatasets(): void {
@@ -178,6 +184,63 @@ class Airfoil extends Shape {
         let meanCamberLineDataset: GraphDataset = { label: "Mean Camber Line", plotPoints: meanCamberLine, colour: 'rgba(255, 121, 198,1)' };
 
         this.graphDatasets = [airfoilUpperDataset, airfoilLowerDataset, meanCamberLineDataset];
+    }
+
+    override updateGridPoints(): void {
+        this.gridPoints = [];
+        let tempGridPoints: Vector[] = [];
+        let scaleFactor = 60;   //Chord length - this can be used for scaling the airfoil 
+        let xOffset = scaleFactor / 2;
+
+        //Outline
+        for (let beta = 0; beta <= Math.PI; beta += 0.01) {
+            let sampleX = (1 - Math.cos(beta)) / 2;
+
+            let upperX: number = sampleX - (this.calculateHalfThickness(sampleX) * Math.sin(this.calculateTheta(sampleX)));
+            let upperY: number = this.calculateMeanCamber(sampleX) + (this.calculateHalfThickness(sampleX) * Math.cos(this.calculateTheta(sampleX)));
+            let lowerX: number = sampleX + (this.calculateHalfThickness(sampleX) * Math.sin(this.calculateTheta(sampleX)));
+            let lowerY: number = this.calculateMeanCamber(sampleX) - (this.calculateHalfThickness(sampleX) * Math.cos(this.calculateTheta(sampleX)));
+
+            let testLower: Vector = { x: Math.round((upperX * scaleFactor) - xOffset), y: Math.round(upperY * scaleFactor) };
+            let testUpper: Vector = { x: Math.round((lowerX * scaleFactor) - xOffset), y: Math.round(lowerY * scaleFactor) };
+
+            if (!checkInVectorList(tempGridPoints, testLower)) {
+                tempGridPoints.push(testLower);
+            }
+            if (!checkInVectorList(tempGridPoints, testUpper)) {
+                tempGridPoints.push(testUpper);
+            }
+        }
+
+        tempGridPoints = getFullShape(-xOffset - 5, scaleFactor - xOffset + 5, tempGridPoints);
+        /*
+        for (let testX = -xOffset - 5; testX < scaleFactor - xOffset + 5; testX++) {
+            let sameXVectors = tempGridPoints.filter((vector) => vector.x === testX);
+            if (sameXVectors.length > 0) {
+                let smallestY = sameXVectors.reduce((accumulator, currentValue) => {
+                    return (accumulator.y < currentValue.y ? accumulator : currentValue);
+                }).y;
+                let largestY = sameXVectors.reduce((accumulator, currentValue) => {
+                    return (accumulator.y > currentValue.y ? accumulator : currentValue);
+                }).y;
+                //console.log(testX);
+                //console.log("SMALLEST: " + smallestY);
+                //console.log("LARGEST: " + largestY);
+                //console.log(sameXVectors);
+
+                for (let testY = smallestY + 1; testY < largestY; testY++) {
+                    let testVector: Vector = { x: testX, y: testY };
+                    if (!checkInVectorList(tempGridPoints, testVector)) {
+                        tempGridPoints.push(testVector);
+                    }
+                }
+            }
+        }
+        */
+        tempGridPoints.sort((vector1, vector2) => vector1.x - vector2.x);
+        //console.log(tempGridPoints);
+
+        this.gridPoints = tempGridPoints;
     }
 
     //#region Airfoil geometry functions

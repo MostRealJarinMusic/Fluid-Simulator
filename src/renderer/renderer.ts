@@ -4,18 +4,39 @@
 
 //Airfoil graph
 let airfoilGraphCanvas: HTMLCanvasElement = document.getElementById('airfoilGraph') as HTMLCanvasElement;
-let airfoilGraphContext: CanvasRenderingContext2D = airfoilGraphCanvas.getContext('2d') as CanvasRenderingContext2D;
 
 //Designer
 let ADTypeSelector = document.getElementById('airfoilTypeSelector') as HTMLSelectElement;
 let ADParameterInputContainer = document.getElementById("airfoilDesignerParameters") as HTMLDivElement;
 let ADProfileNumText = document.getElementById("airfoilProfileNum") as HTMLParagraphElement;
 
-const airfoilDesigner = new AirfoilDesigner(airfoilGraphContext, ADTypeSelector, ADParameterInputContainer, ADProfileNumText);
+const airfoilDesigner = new AirfoilDesigner(airfoilGraphCanvas, ADTypeSelector, ADParameterInputContainer, ADProfileNumText);
+//console.log(airfoilDesigner.ShapeGridPoints)
+//#endregion
 
+//#region Simulation
+//Simulation
+let FSCanvas = document.getElementById("fluidSimulation") as HTMLCanvasElement;
+
+//160, 80
+const fluidSimulation = new Fluid(160, 80, 1, 2.5, 0.53, FSCanvas);
+//fluidSimulation.setupDefaultObstacle();
+fluidSimulation.updateAirfoil(airfoilDesigner.ShapeGridPoints)
+fluidSimulation.initFluid();
+
+//#endregion
+
+//#region Data and Graphs
+
+
+//#endregion
+
+
+//#region Listener events
 //Airfoil designer listener events
 function updateAirfoilParameters(): void {
     airfoilDesigner.updateAirfoil();
+    fluidSimulation.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 }
 
 function updateChosenShape(): void {
@@ -24,36 +45,21 @@ function updateChosenShape(): void {
 
 function resetAirfoilParameters(): void {
     airfoilDesigner.resetAirfoil();
+    fluidSimulation.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 }
+
+
 
 //#endregion
 
-
-
-
-//#region Simulation
-
-//Simulation
-let FSCanvas = document.getElementById("fluidSimulation") as HTMLCanvasElement;
-
-//160, 80
-const fluidSimulation = new Fluid(160, 80, 1, 2.7, 0.53, FSCanvas);
-
-fluidSimulation.setupObstacle();
-fluidSimulation.initFluid();
-
-function updateFluidSimulation(): void {
+//#region Updating
+function update(): void {
     fluidSimulation.runMainLoop();
     fluidSimulation.drawFluid();
-    requestAnimationFrame(updateFluidSimulation);
+    requestAnimationFrame(update);
 }
 
-updateFluidSimulation();
-//#endregion
-
-
-//#region Data and Graphs
-
-
+update();
 
 //#endregion
+
