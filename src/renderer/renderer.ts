@@ -16,13 +16,20 @@ const airfoilDesigner = new AirfoilDesigner(airfoilGraphCanvas, ADTypeSelector, 
 
 //#region Simulation
 //Simulation
-let FSCanvas = document.getElementById("fluidSimulation") as HTMLCanvasElement;
+let FMCanvas = document.getElementById("fluidSimulation") as HTMLCanvasElement;
+let FMParameterInputContainer = document.getElementById("fluidSimulationParameters") as HTMLDivElement;
 
 //160, 80
-const fluidSimulation = new Fluid(160, 80, 1, 2.5, 0.53, FSCanvas);
+//const fluidSimulation = new Fluid(160, 80, 1, 2.5, 0.53, FMCanvas);
+const fluidManager = new FluidManager(FMCanvas, FMParameterInputContainer);
+
 //fluidSimulation.setupDefaultObstacle();
-fluidSimulation.updateAirfoil(airfoilDesigner.ShapeGridPoints)
-fluidSimulation.initFluid();
+
+fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
+fluidManager.initFluid();
+
+//fluidSimulation.updateAirfoil(airfoilDesigner.ShapeGridPoints)
+//fluidSimulation.initFluid();
 
 //#endregion
 
@@ -36,7 +43,7 @@ fluidSimulation.initFluid();
 //Airfoil designer listener events
 function updateAirfoilParameters(): void {
     airfoilDesigner.updateAirfoil();
-    fluidSimulation.updateAirfoil(airfoilDesigner.ShapeGridPoints);
+    fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 }
 
 function updateChosenShape(): void {
@@ -45,7 +52,7 @@ function updateChosenShape(): void {
 
 function resetAirfoilParameters(): void {
     airfoilDesigner.resetAirfoil();
-    fluidSimulation.updateAirfoil(airfoilDesigner.ShapeGridPoints);
+    fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 }
 
 
@@ -54,8 +61,8 @@ function resetAirfoilParameters(): void {
 
 //#region Updating
 function update(): void {
-    fluidSimulation.runMainLoop();
-    fluidSimulation.drawFluid();
+    fluidManager.runMainLoop();
+    fluidManager.drawFluid();
     requestAnimationFrame(update);
 }
 

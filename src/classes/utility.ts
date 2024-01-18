@@ -47,10 +47,21 @@ function scaleVector(vector1: Vector, scalar: number): Vector {
     return { x: vector1.x * scalar, y: vector1.y * scalar };
 }
 
+/**
+ * Returns a vector with its components rounded to the nearest integer.
+ * @param vector - The vector to be 'rounded'.
+ */
 function roundVector(vector: Vector): Vector {
     return { x: Math.round(vector.x), y: Math.round(vector.y) };
 }
 
+
+/**
+ * Filters an array of vectors for either the largest or smallest component.
+ * @param vectors - The vector array to be filtered.
+ * @param component - The component which all vectors will be compared with.
+ * @param comparison - Specifies the aim of the filter.
+ */
 function filterVectors(vectors: Vector[], component: 'x' | 'y', comparison: 'least' | 'most'): number {
     if (comparison === 'least') {
         return vectors.reduce((accumulator, currentValue) => {
@@ -65,27 +76,22 @@ function filterVectors(vectors: Vector[], component: 'x' | 'y', comparison: 'lea
 
 function getFullShape(outline: Vector[]): Vector[] {
     let fullShape: Vector[] = [];
-    /*
-    let smallestX = outline.reduce((accumulator, currentValue) => {
-        return (accumulator.x < currentValue.x ? accumulator : currentValue)
-    }).x;
-    */
-    let smallestX = filterVectors(outline, 'x', 'least');
-    let largestX = filterVectors(outline, 'x', 'most');
+    let xMin = filterVectors(outline, 'x', 'least');
+    let xMax = filterVectors(outline, 'x', 'most');
 
-    for (let testX = smallestX; testX <= largestX; testX++) {
+    for (let testX = xMin; testX <= xMax; testX++) {
         let vectorSubset = outline.filter((vector) => vector.x === testX);
         if (vectorSubset.length > 0) {
-            let smallestY = filterVectors(vectorSubset, 'y', 'least');
-            let largestY = filterVectors(vectorSubset, 'y', 'most')
+            let yMin = filterVectors(vectorSubset, 'y', 'least');
+            let yMax = filterVectors(vectorSubset, 'y', 'most')
             //console.log(testX);
             //console.log("SMALLEST: " + smallestY);
             //console.log("LARGEST: " + largestY);
             //console.log(vectorSubset);
 
-            for (let testY = smallestY; testY <= largestY; testY++) {
+            for (let testY = yMin; testY <= yMax; testY++) {
                 let testVector: Vector = { x: testX, y: testY };
-                if (!checkInVectorList(fullShape, testVector)) {
+                if (!checkInVectorList(fullShape, testVector)) {    //Slightly redundant
                     fullShape.push(testVector);
                 }
             }

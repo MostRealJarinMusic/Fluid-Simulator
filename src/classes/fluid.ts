@@ -345,7 +345,7 @@ class Fluid {
     //#endregion
 
     //#region Airfoil functions
-
+    /*
     public setupDefaultObstacle(): void {
         let radiusSqr = 10 ** 2;
         let obstacleX = this.width / 3;
@@ -360,8 +360,9 @@ class Fluid {
             }
         }
     }
+    */
 
-    public setupObstacle(): void {
+    private setupObstacle(): void {
         //Reset solid
         this.solid = new Array(this.numCells).fill(false);
         let originX = Math.round(this.width / 3 + this.width / 9);
@@ -376,13 +377,14 @@ class Fluid {
         this.initFluid();
     }
 
+    /*
     private distanceBetweenSqr(x1: number, y1: number, x2: number, y2: number): number {
         return (x2 - x1) ** 2 + (y2 - y1) ** 2;
     }
+    */
 
     public updateAirfoil(newGridPoints: Vector[]): void {
         this.airfoilGridPoints = newGridPoints;
-
         this.setupObstacle();
     }
 

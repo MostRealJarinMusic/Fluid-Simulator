@@ -175,19 +175,6 @@ class Airfoil extends Shape {
         this.graphDatasets = [airfoilUpperDataset, airfoilLowerDataset, meanCamberLineDataset];
     }
 
-    private getUpperPoint(xValue: number): Vector {
-        return {
-            x: xValue - (this.calculateHalfThickness(xValue) * Math.sin(this.calculateTheta(xValue))),
-            y: this.calculateMeanCamber(xValue) + (this.calculateHalfThickness(xValue) * Math.cos(this.calculateTheta(xValue)))
-        }
-    }
-
-    private getLowerPoint(xValue: number): Vector {
-        return {
-            x: xValue + (this.calculateHalfThickness(xValue) * Math.sin(this.calculateTheta(xValue))),
-            y: this.calculateMeanCamber(xValue) - (this.calculateHalfThickness(xValue) * Math.cos(this.calculateTheta(xValue)))
-        }
-    }
 
 
     override updateGridPoints(): void {
@@ -219,6 +206,20 @@ class Airfoil extends Shape {
     }
 
     //#region Airfoil geometry functions
+
+    private getUpperPoint(xValue: number): Vector {
+        return {
+            x: xValue - (this.calculateHalfThickness(xValue) * Math.sin(this.calculateTheta(xValue))),
+            y: this.calculateMeanCamber(xValue) + (this.calculateHalfThickness(xValue) * Math.cos(this.calculateTheta(xValue)))
+        }
+    }
+
+    private getLowerPoint(xValue: number): Vector {
+        return {
+            x: xValue + (this.calculateHalfThickness(xValue) * Math.sin(this.calculateTheta(xValue))),
+            y: this.calculateMeanCamber(xValue) - (this.calculateHalfThickness(xValue) * Math.cos(this.calculateTheta(xValue)))
+        }
+    }
 
     //General equation for half-thickness at any given x
     private calculateHalfThickness(x: number): number {
@@ -260,8 +261,5 @@ class Airfoil extends Shape {
     private calculateTheta(x: number): number {
         return Math.atan(this.calculateCamberDerivative(x));
     }
-
-
-
     //#endregion
 }
