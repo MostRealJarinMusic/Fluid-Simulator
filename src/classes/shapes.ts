@@ -1,9 +1,4 @@
-//#region Types
-type Vector = { x: number; y: number; }
-type GridPoints = { gridPoints: Vector[]; }
-type GraphDataset = { label: string; plotPoints: Vector[]; colour: string; }
-type ShapeParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: number[]; }
-//#endregion
+
 
 //#region Shape parent class
 
@@ -161,16 +156,10 @@ class Airfoil extends Shape {
         for (let beta = 0; beta <= Math.PI; beta += 0.01) { //Can control the fineness of sampling
             let sampleX = (1 - Math.cos(beta)) / 2;
             //Upper surface point
-            airfoilUpper.push({
-                x: sampleX - (this.calculateHalfThickness(sampleX) * Math.sin(this.calculateTheta(sampleX))),
-                y: this.calculateMeanCamber(sampleX) + (this.calculateHalfThickness(sampleX) * Math.cos(this.calculateTheta(sampleX)))
-            });
+            airfoilUpper.push(this.getUpperPoint(sampleX));
 
             //Lower surface point
-            airfoilLower.push({
-                x: sampleX + (this.calculateHalfThickness(sampleX) * Math.sin(this.calculateTheta(sampleX))),
-                y: this.calculateMeanCamber(sampleX) - (this.calculateHalfThickness(sampleX) * Math.cos(this.calculateTheta(sampleX)))
-            });
+            airfoilLower.push(this.getLowerPoint(sampleX));
 
             //Mean line of camber
             meanCamberLine.push({
@@ -186,23 +175,33 @@ class Airfoil extends Shape {
         this.graphDatasets = [airfoilUpperDataset, airfoilLowerDataset, meanCamberLineDataset];
     }
 
+    private getUpperPoint(xValue: number): Vector {
+        return {
+            x: xValue - (this.calculateHalfThickness(xValue) * Math.sin(this.calculateTheta(xValue))),
+            y: this.calculateMeanCamber(xValue) + (this.calculateHalfThickness(xValue) * Math.cos(this.calculateTheta(xValue)))
+        }
+    }
+
+    private getLowerPoint(xValue: number): Vector {
+        return {
+            x: xValue + (this.calculateHalfThickness(xValue) * Math.sin(this.calculateTheta(xValue))),
+            y: this.calculateMeanCamber(xValue) - (this.calculateHalfThickness(xValue) * Math.cos(this.calculateTheta(xValue)))
+        }
+    }
+
+
     override updateGridPoints(): void {
         this.gridPoints = [];
         let tempGridPoints: Vector[] = [];
+        //Magic number here - 
         let scaleFactor = 60;   //Chord length - this can be used for scaling the airfoil 
-        let xOffset = scaleFactor / 2;
+        let translation: Vector = { x: -Math.round(scaleFactor / 2), y: 0 };
 
         //Outline
         for (let beta = 0; beta <= Math.PI; beta += 0.01) {
             let sampleX = (1 - Math.cos(beta)) / 2;
-
-            let upperX: number = sampleX - (this.calculateHalfThickness(sampleX) * Math.sin(this.calculateTheta(sampleX)));
-            let upperY: number = this.calculateMeanCamber(sampleX) + (this.calculateHalfThickness(sampleX) * Math.cos(this.calculateTheta(sampleX)));
-            let lowerX: number = sampleX + (this.calculateHalfThickness(sampleX) * Math.sin(this.calculateTheta(sampleX)));
-            let lowerY: number = this.calculateMeanCamber(sampleX) - (this.calculateHalfThickness(sampleX) * Math.cos(this.calculateTheta(sampleX)));
-
-            let testLower: Vector = { x: Math.round((upperX * scaleFactor) - xOffset), y: Math.round(upperY * scaleFactor) };
-            let testUpper: Vector = { x: Math.round((lowerX * scaleFactor) - xOffset), y: Math.round(lowerY * scaleFactor) };
+            let testLower: Vector = roundVector(addVectors(scaleVector(this.getLowerPoint(sampleX), scaleFactor), translation));
+            let testUpper: Vector = roundVector(addVectors(scaleVector(this.getUpperPoint(sampleX), scaleFactor), translation));
 
             if (!checkInVectorList(tempGridPoints, testLower)) {
                 tempGridPoints.push(testLower);
@@ -212,32 +211,8 @@ class Airfoil extends Shape {
             }
         }
 
-        tempGridPoints = getFullShape(-xOffset - 5, scaleFactor - xOffset + 5, tempGridPoints);
-        /*
-        for (let testX = -xOffset - 5; testX < scaleFactor - xOffset + 5; testX++) {
-            let sameXVectors = tempGridPoints.filter((vector) => vector.x === testX);
-            if (sameXVectors.length > 0) {
-                let smallestY = sameXVectors.reduce((accumulator, currentValue) => {
-                    return (accumulator.y < currentValue.y ? accumulator : currentValue);
-                }).y;
-                let largestY = sameXVectors.reduce((accumulator, currentValue) => {
-                    return (accumulator.y > currentValue.y ? accumulator : currentValue);
-                }).y;
-                //console.log(testX);
-                //console.log("SMALLEST: " + smallestY);
-                //console.log("LARGEST: " + largestY);
-                //console.log(sameXVectors);
-
-                for (let testY = smallestY + 1; testY < largestY; testY++) {
-                    let testVector: Vector = { x: testX, y: testY };
-                    if (!checkInVectorList(tempGridPoints, testVector)) {
-                        tempGridPoints.push(testVector);
-                    }
-                }
-            }
-        }
-        */
-        tempGridPoints.sort((vector1, vector2) => vector1.x - vector2.x);
+        tempGridPoints = getFullShape(tempGridPoints);
+        //tempGridPoints.sort((vector1, vector2) => vector1.x - vector2.x);
         //console.log(tempGridPoints);
 
         this.gridPoints = tempGridPoints;

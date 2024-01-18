@@ -257,6 +257,8 @@ class AirfoilDesigner {
         let shapeType = this.shape.constructor.name;
         let numString = "";
 
+        //While I could use an if statement since there is only one different case
+        //I am using a switch, keeping in mind that I could add different specifications of airfoils
         switch (shapeType) {
             case "Airfoil":
                 let m = Math.floor(currentParameters.m).toString();
