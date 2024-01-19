@@ -39,14 +39,15 @@ abstract class Shape {
 
 class Ellipse extends Shape {
     override parameterInfo: Record<string, ShapeParameterInfo> = {
-        'xRadius': { name: 'xRadius', labelText: 'X Radius', defaultValue: 5, bounds: [1, 10] },
-        'yRadius': { name: 'yRadius', labelText: 'Y Radius', defaultValue: 5, bounds: [1, 10] }
+        'xRadius': { name: 'xRadius', labelText: 'X Radius', defaultValue: 0.1, bounds: [0.05, 0.25] },
+        'yRadius': { name: 'yRadius', labelText: 'Y Radius', defaultValue: 0.1, bounds: [0.05, 0.25] }
     };
 
     constructor() {
         super();
         this.params = setupParameters(this.parameterInfo);
         //console.log(this.params);
+        this.updateGridPoints();
     }
 
     override get Area(): number {
@@ -56,23 +57,44 @@ class Ellipse extends Shape {
     override updateParameters(newParameters: Record<string, number>): void {
         this.params['xRadius'] = newParameters['xRadius'];
         this.params['yRadius'] = newParameters['yRadius'];
+
+        this.updateGridPoints();
     }
 
     override updateGridPoints(): void {
-        throw new Error("Method not implemented.");
+        let scaleFactor = 60;
+        let xRadius = Math.round(this.params.xRadius * scaleFactor);
+        let yRadius = Math.round(this.params.yRadius * scaleFactor);
+        let tempGridPoints: Vector[] = [];
+
+        for (let theta = 0; theta <= 2 * Math.PI; theta += 0.01) {
+            tempGridPoints.push({
+                x: Math.round(xRadius * Math.cos(theta)),
+                y: Math.round(yRadius * Math.sin(theta)),
+            })
+        }
+
+        tempGridPoints = getFullShape(tempGridPoints);
+
+        this.gridPoints = tempGridPoints;
+
+
+        //throw new Error("Method not implemented.");
     }
 
 }
 
 class Rectangle extends Shape {
     override parameterInfo: Record<string, ShapeParameterInfo> = {
-        'width': { name: 'width', labelText: 'Width', defaultValue: 5, bounds: [1, 10] },
-        'height': { name: 'height', labelText: 'Height', defaultValue: 5, bounds: [1, 10] }
+        'width': { name: 'width', labelText: 'Width', defaultValue: 0.5, bounds: [0.05, 0.75] },
+        'height': { name: 'height', labelText: 'Height', defaultValue: 0.2, bounds: [0.05, 0.3] }
     }
 
     constructor() {
         super();
         this.params = setupParameters(this.parameterInfo);
+
+        this.updateGridPoints();
     }
 
     override get Area(): number {
@@ -82,31 +104,61 @@ class Rectangle extends Shape {
     override updateParameters(newParameters: Record<string, number>): void {
         this.params['width'] = newParameters['width'];
         this.params['height'] = newParameters['height'];
+
+        this.updateGridPoints();
     }
 
     override updateGridPoints(): void {
-        throw new Error("Method not implemented.");
+        let scaleFactor = 60;
+        let width = Math.round(this.params.width * scaleFactor);
+        let height = Math.round(this.params.height * scaleFactor);
+        let tempGridPoints: Vector[] = [];
+
+        for (let x = 0; x <= width; x++) {
+            for (let y = 0; y <= height; y++) {
+                tempGridPoints.push({
+                    x: Math.round(x - width / 2), y: Math.round(y - height / 2)
+                })
+            }
+        }
+
+        this.gridPoints = tempGridPoints;
+
+        //throw new Error("Method not implemented.");
     }
 }
 
 class Line extends Shape {
     override parameterInfo: Record<string, ShapeParameterInfo> = {
-        'lineLength': { name: 'lineLength', labelText: 'Length', defaultValue: 5, bounds: [1, 10] }
+        'lineLength': { name: 'lineLength', labelText: 'Length', defaultValue: 0.3, bounds: [0.1, 0.5] }
     }
     constructor() {
         super();
-        this.params = setupParameters(this.parameterInfo)
+        this.params = setupParameters(this.parameterInfo);
+        this.updateGridPoints();
     }
 
     override get Area(): number {
         return 1;
     }
+
     override updateParameters(newParameters: Record<string, number>): void {
         this.params['lineLength'] = newParameters['lineLength'];
+        this.updateGridPoints();
     }
 
     override updateGridPoints(): void {
-        throw new Error("Method not implemented.");
+        let scaleFactor = 60;
+        let pixelLength = Math.round(this.params.lineLength * scaleFactor);
+        let tempGridPoints: Vector[] = [];
+
+        for (let i = 0; i < pixelLength; i++) {
+            tempGridPoints.push({
+                x: 0, y: Math.round(i - pixelLength / 2)
+            })
+        }
+
+        this.gridPoints = tempGridPoints;
     }
 }
 
@@ -120,8 +172,8 @@ class Airfoil extends Shape {
     constructor() {
         super();
         this.params = setupParameters(this.parameterInfo);
-        this.updateGraphDatasets();
 
+        this.updateGraphDatasets();
         this.updateGridPoints();
     }
 
@@ -168,13 +220,12 @@ class Airfoil extends Shape {
             });
         }
 
-        let airfoilUpperDataset: GraphDataset = { label: "Upper Airfoil Surface", plotPoints: airfoilUpper, colour: 'rgba(80, 250, 123,1)' };
-        let airfoilLowerDataset: GraphDataset = { label: "Lower Airfoil Surface", plotPoints: airfoilLower, colour: 'rgba(255, 184, 108,1)' };
-        let meanCamberLineDataset: GraphDataset = { label: "Mean Camber Line", plotPoints: meanCamberLine, colour: 'rgba(255, 121, 198,1)' };
+        let airfoilUpperDataset: GraphDataset = { label: "Upper Airfoil Surface", points: airfoilUpper, colour: 'rgba(80, 250, 123,1)' };
+        let airfoilLowerDataset: GraphDataset = { label: "Lower Airfoil Surface", points: airfoilLower, colour: 'rgba(255, 184, 108,1)' };
+        let meanCamberLineDataset: GraphDataset = { label: "Mean Camber Line", points: meanCamberLine, colour: 'rgba(255, 121, 198,1)' };
 
         this.graphDatasets = [airfoilUpperDataset, airfoilLowerDataset, meanCamberLineDataset];
     }
-
 
 
     override updateGridPoints(): void {

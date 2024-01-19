@@ -3,7 +3,7 @@
 //#region Airfoil designer
 
 //Airfoil graph
-let airfoilGraphCanvas: HTMLCanvasElement = document.getElementById('airfoilGraph') as HTMLCanvasElement;
+let airfoilGraphCanvas = document.getElementById('airfoilGraph') as HTMLCanvasElement;
 
 //Designer
 let ADTypeSelector = document.getElementById('airfoilTypeSelector') as HTMLSelectElement;
@@ -11,7 +11,6 @@ let ADParameterInputContainer = document.getElementById("airfoilDesignerParamete
 let ADProfileNumText = document.getElementById("airfoilProfileNum") as HTMLParagraphElement;
 
 const airfoilDesigner = new AirfoilDesigner(airfoilGraphCanvas, ADTypeSelector, ADParameterInputContainer, ADProfileNumText);
-//console.log(airfoilDesigner.ShapeGridPoints)
 //#endregion
 
 //#region Simulation
@@ -27,9 +26,6 @@ const fluidManager = new FluidManager(FMCanvas, FMParameterInputContainer);
 
 fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 fluidManager.initFluid();
-
-//fluidSimulation.updateAirfoil(airfoilDesigner.ShapeGridPoints)
-//fluidSimulation.initFluid();
 
 //#endregion
 
@@ -48,6 +44,7 @@ function updateAirfoilParameters(): void {
 
 function updateChosenShape(): void {
     airfoilDesigner.changeAirfoil();
+    fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 }
 
 function resetAirfoilParameters(): void {

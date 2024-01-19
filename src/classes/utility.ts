@@ -1,9 +1,8 @@
 //#region Types
 type Vector = { x: number; y: number; }
-type GridPoints = { gridPoints: Vector[]; }
-type GraphDataset = { label: string; plotPoints: Vector[]; colour: string; }
+type GridPoints = { points: Vector[]; }
+type GraphDataset = GridPoints & { label: string; colour: string; }
 type ShapeParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: number[]; }
-type Matrix = { elements: number[][] }
 //#endregion
 
 

@@ -30,7 +30,7 @@ class AirfoilDesigner {
     private mapDatasets(datasets: GraphDataset[]): Chart.ChartDataSets[] {
         return datasets.map(dataset => ({
             label: dataset.label,
-            data: dataset.plotPoints,
+            data: dataset.points,
             pointRadius: 0.5,
             hoverRadius: 0.5,
             showLine: false,
@@ -49,7 +49,7 @@ class AirfoilDesigner {
         parameterElement.value = parameterInfo.defaultValue.toString();
         parameterElement.min = parameterInfo.bounds[0].toString();
         parameterElement.max = parameterInfo.bounds[1].toString();
-        parameterElement.step = "0.1";
+        parameterElement.step = "0.01";
         parameterElement.onchange = updateAirfoilParameters;
         return parameterElement;
     }
@@ -289,7 +289,7 @@ class AirfoilDesigner {
     private getParametersFromInput(): Record<string, number> {
         let parameters: Record<string, number> = {};
         for (const [ID, reference] of Object.entries(this.parameterInputIDs)) {
-            let referenceValue = parseInt(reference.value);
+            let referenceValue = parseFloat(reference.value);
             if (isNaN(referenceValue)) {
                 referenceValue = this.parameterCache[ID];
             }
@@ -335,7 +335,7 @@ class AirfoilDesigner {
 
             let element = document.getElementById(parameterName) as HTMLInputElement;
             this.parameterInputIDs[`${parameterName}`] = element;
-            this.parameterCache[`${parameterName}`] = parseInt(element.value);
+            this.parameterCache[`${parameterName}`] = parseFloat(element.value);
 
             //console.log(this.parameterCache)
         }
