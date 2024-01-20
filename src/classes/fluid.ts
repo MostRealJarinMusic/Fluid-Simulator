@@ -15,9 +15,7 @@ class Fluid {
     private distribution: number[][];
     private equilibriumDistribution: number[][];
     private localDensity: number[];
-    //private localUXs: number[];
-    //private localUYs: number[];
-    private localU: Vector[];
+    private localVelocity: Vector[];
 
     private solid: boolean[];
 
@@ -79,9 +77,7 @@ class Fluid {
 
         //#region Local properties
         this.localDensity = new Array(this.numCells).fill(this.density);
-        //this.localUXs = new Array(this.numCells).fill(0);
-        //this.localUYs = new Array(this.numCells).fill(0);
-        this.localU = new Array(this.numCells).fill({ x: 0, y: 0 });
+        this.localVelocity = new Array(this.numCells).fill({ x: 0, y: 0 });
 
         //Solidity marker
         this.solid = new Array(this.numCells).fill(false);
@@ -164,32 +160,24 @@ class Fluid {
     }
 
     private computeMoments(): void {
-        for (let x = 0; x < this.width; x++) {
-            for (let y = 0; y < this.height; y++) {
-                //Functions
-                const summation = (arr: number[]) => arr.reduce((acc, val) => acc + val, 0);
-                const mapToLat = (arr: number[], lat: number[]) => arr.map((val, i) => val * lat[i]);
+        for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
+            //Functions
+            const summation = (arr: number[]) => arr.reduce((acc, val) => acc + val, 0);
+            const mapToLat = (arr: number[], lat: number[]) => arr.map((val, i) => val * lat[i]);
 
-                let tempDistribution = this.distribution[this.index(x, y)];
-                let tempDensity = summation(tempDistribution);
+            let tempDistribution = this.distribution[nodeIndex];
+            let tempDensity = summation(tempDistribution);
 
-                //this.localUXs[this.index(x, y)] =
-                //summation(mapToLat(tempDistribution, this.latticeXs)) / tempDensity;
-
-                //this.localUYs[this.index(x, y)] =
-                //summation(mapToLat(tempDistribution, this.latticeYs)) / tempDensity;
-
-                this.localU[this.index(x, y)] = {
-                    x: summation(mapToLat(tempDistribution, this.latticeXs)) / tempDensity,
-                    y: summation(mapToLat(tempDistribution, this.latticeYs)) / tempDensity
-                }
-
-                this.localDensity[this.index(x, y)] = tempDensity;
-
-                //console.log(`Density: ${tempDensity}`);
-                //console.log(`UX: ${this.#localUXs[this.index(x, y)]}`);
-                //console.log(`UY: ${this.#localUYs[this.index(x, y)]}`);
+            this.localVelocity[nodeIndex] = {
+                x: summation(mapToLat(tempDistribution, this.latticeXs)) / tempDensity,
+                y: summation(mapToLat(tempDistribution, this.latticeYs)) / tempDensity
             }
+
+            this.localDensity[nodeIndex] = tempDensity;
+
+            //console.log(`Density: ${tempDensity}`);
+            //console.log(`UX: ${this.#localUXs[this.index(x, y)]}`);
+            //console.log(`UY: ${this.#localUYs[this.index(x, y)]}`);
         }
     }
 
@@ -203,7 +191,7 @@ class Fluid {
                     );
 
                     //Set velocity to 0
-                    this.localU[this.index(x, y)] = { x: 0, y: 0 };
+                    this.localVelocity[this.index(x, y)] = { x: 0, y: 0 };
                 }
             }
         }
@@ -219,93 +207,83 @@ class Fluid {
     }
 
     private computeEquilibrium(): void {
-        for (let x = 0; x < this.width; x++) {
-            for (let y = 0; y < this.height; y++) {
-                for (let i in this.latticeIndices) {
-                    let localDensity = this.localDensity[this.index(x, y)];
-                    let localU: Vector = this.localU[this.index(x, y)];
-                    let weight = this.latticeWeights[i];
+        for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
+            for (let i in this.latticeIndices) {
+                let localDensity = this.localDensity[nodeIndex];
+                let localVelocity: Vector = this.localVelocity[nodeIndex];
+                let weight = this.latticeWeights[i];
+                let latticeVector: Vector = { x: this.latticeXs[i], y: this.latticeYs[i] };
+                let latticeDotU = dotVectors(localVelocity, latticeVector) //Pre-calculations
+                let uDotU = dotVectors(localVelocity, localVelocity);
 
-                    let latticeX = this.latticeXs[i];
-                    let latticeY = this.latticeYs[i];
+                this.equilibriumDistribution[nodeIndex][i] =
+                    weight * localDensity *
+                    (1 +
+                        3 * latticeDotU +
+                        (9 / 2) * latticeDotU ** 2 -
+                        (3 / 2) * uDotU);
 
-                    let latticeVector: Vector = { x: latticeX, y: latticeY };
-
-                    let latticeDotU = dotVectors(localU, latticeVector) //latticeX * localUX + latticeY * localUY; //Pre-calculations
-                    let uDotU = dotVectors(localU, localU);
-
-                    this.equilibriumDistribution[this.index(x, y)][i] =
-                        weight *
-                        localDensity *
-                        (1 +
-                            3 * latticeDotU +
-                            (9 / 2) * latticeDotU ** 2 -
-                            (3 / 2) * uDotU);
-
-                    //this.equilibriumDistribution[this.index(x, y)][i] = this.getEquilibrium(weight, localDensity, [localUX, localUY], parseInt(i));
-                }
+                //this.equilibriumDistribution[this.index(x, y)][i] = this.getEquilibrium(weight, localDensity, [localUX, localUY], parseInt(i));
             }
         }
     }
 
     private collideLocally(): void {
-        for (let x = 0; x < this.width; x++) {
-            for (let y = 0; y < this.height; y++) {
-                for (let i in this.latticeIndices) {
-                    this.distribution[this.index(x, y)][i] =
-                        this.distribution[this.index(x, y)][i] -
-                        (1 / this.timescale) *
-                        (this.distribution[this.index(x, y)][i] -
-                            this.equilibriumDistribution[this.index(x, y)][i]);
-                }
+        for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
+            for (let i in this.latticeIndices) {
+                this.distribution[nodeIndex][i] =
+                    this.distribution[nodeIndex][i] -
+                    (1 / this.timescale) *
+                    (this.distribution[nodeIndex][i] -
+                        this.equilibriumDistribution[nodeIndex][i]);
             }
         }
     }
 
     private stream(): void {
-        //NORTH WEST AND NORTH - INDEX 8 AND 1
+        //North west and north - 8 and 1
         for (let y = this.height - 2; y > 0; y--) {
             for (let x = 1; x < this.width - 1; x++) {
-                //NORTH-WEST
+                //nw
                 this.distribution[this.index(x, y)][8] =
                     this.distribution[this.index(x + 1, y - 1)][8];
-                //NORTH
+                //n
                 this.distribution[this.index(x, y)][1] =
                     this.distribution[this.index(x, y - 1)][1];
             }
         }
 
-        //NORTH EAST AND EAST - INDEX 2 AND 3
+        //north east and east - 2 and 3
         for (let y = this.height - 2; y > 0; y--) {
             for (let x = this.width - 2; x > 0; x--) {
-                //NORTH EAST
+                //ne
                 this.distribution[this.index(x, y)][2] =
                     this.distribution[this.index(x - 1, y - 1)][2];
-                //EAST
+                //e
                 this.distribution[this.index(x, y)][3] =
                     this.distribution[this.index(x - 1, y)][3];
             }
         }
 
-        //SOUTH EAST AND SOUTH - INDEX 4 AND 5
+        //south east and south - 4 and 5
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = this.width - 2; x > 0; x--) {
-                //SOUTH EAST
+                //se
                 this.distribution[this.index(x, y)][4] =
                     this.distribution[this.index(x - 1, y + 1)][4];
-                //SOUTH
+                //s
                 this.distribution[this.index(x, y)][5] =
                     this.distribution[this.index(x, y + 1)][5];
             }
         }
 
-        //SOUTH WEST AND WEST
+        //south west and west
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
-                //SOUTH WEST
+                //sw
                 this.distribution[this.index(x, y)][6] =
                     this.distribution[this.index(x + 1, y + 1)][6];
-                //WEST
+                //w
                 this.distribution[this.index(x, y)][7] =
                     this.distribution[this.index(x + 1, y)][7];
             }
@@ -328,7 +306,7 @@ class Fluid {
                 } else {
                     //Different colouring modes and different graphing modes
                     //let velocityMagnitude = Math.sqrt(this.localUXs[this.index(x, y)] ** 2 + this.localUYs[this.index(x, y)] ** 2);
-                    let velocityMagnitude = absoluteVector(this.localU[this.index(x, y)])
+                    let velocityMagnitude = absoluteVector(this.localVelocity[this.index(x, y)])
 
                     colourIndex = Math.round(this.colourMap.NumColours * (velocityMagnitude * 4 * contrast));
                     colour = [this.colourMap.RedList[colourIndex], this.colourMap.GreenList[colourIndex], this.colourMap.BlueList[colourIndex], 255];
