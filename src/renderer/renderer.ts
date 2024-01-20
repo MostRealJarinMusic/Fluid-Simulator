@@ -36,7 +36,6 @@ fluidManager.initFluid();
 
 
 //#region Listener events
-//Airfoil designer listener events
 function updateAirfoilParameters(): void {
     airfoilDesigner.updateAirfoil();
     fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
@@ -50,6 +49,14 @@ function updateChosenShape(): void {
 function resetAirfoilParameters(): void {
     airfoilDesigner.resetAirfoil();
     fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
+}
+
+function updateAngleOfAttack(): void {
+
+}
+
+function updateFreeStreamVelocity(): void {
+
 }
 
 

@@ -11,10 +11,10 @@ class FluidManager {
     //#endregion
 
 
-
     constructor(canvas: HTMLCanvasElement, parameterInputContainer: HTMLDivElement) {
         this.fluidCanvas = canvas;
-        this.fluid = new Fluid(160, 80, 1, 2.5, 0.53, this.fluidCanvas);
+        //timestep is 0.53
+        this.fluid = new Fluid(160, 120, 1, 2.5, 0.7, this.fluidCanvas);
 
         this.parameterInputContainer = parameterInputContainer;
     }
@@ -33,10 +33,16 @@ class FluidManager {
     }
 
     public updateAirfoil(newGridPoints: Vector[]): void {
-        this.fluid.updateAirfoil(newGridPoints);
+        this.airfoilGridPoints = newGridPoints;
+        //this.applyRotationToAirfoil();
+        this.fluid.updateAirfoil(this.airfoilGridPoints);
     }
     //#endregion
 
+    private applyRotationToAirfoil(): void {
+        let tempTheta = - Math.PI / 4;
+        this.airfoilGridPoints = getFullShape(this.airfoilGridPoints.map((vector) => roundVector(rotateVector(vector, tempTheta))));
+    }
 
 
 

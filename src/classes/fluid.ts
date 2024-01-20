@@ -15,8 +15,10 @@ class Fluid {
     private distribution: number[][];
     private equilibriumDistribution: number[][];
     private localDensity: number[];
-    private localUXs: number[];
-    private localUYs: number[];
+    //private localUXs: number[];
+    //private localUYs: number[];
+    private localU: Vector[];
+
     private solid: boolean[];
 
     private canvas: HTMLCanvasElement;
@@ -77,8 +79,9 @@ class Fluid {
 
         //#region Local properties
         this.localDensity = new Array(this.numCells).fill(this.density);
-        this.localUXs = new Array(this.numCells).fill(0);
-        this.localUYs = new Array(this.numCells).fill(0);
+        //this.localUXs = new Array(this.numCells).fill(0);
+        //this.localUYs = new Array(this.numCells).fill(0);
+        this.localU = new Array(this.numCells).fill({ x: 0, y: 0 });
 
         //Solidity marker
         this.solid = new Array(this.numCells).fill(false);
@@ -163,8 +166,6 @@ class Fluid {
     private computeMoments(): void {
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
-                //console.log(this.#distribution[this.index(x, y)]);
-
                 //Functions
                 const summation = (arr: number[]) => arr.reduce((acc, val) => acc + val, 0);
                 const mapToLat = (arr: number[], lat: number[]) => arr.map((val, i) => val * lat[i]);
@@ -172,11 +173,16 @@ class Fluid {
                 let tempDistribution = this.distribution[this.index(x, y)];
                 let tempDensity = summation(tempDistribution);
 
-                this.localUXs[this.index(x, y)] =
-                    summation(mapToLat(tempDistribution, this.latticeXs)) / tempDensity;
+                //this.localUXs[this.index(x, y)] =
+                //summation(mapToLat(tempDistribution, this.latticeXs)) / tempDensity;
 
-                this.localUYs[this.index(x, y)] =
-                    summation(mapToLat(tempDistribution, this.latticeYs)) / tempDensity;
+                //this.localUYs[this.index(x, y)] =
+                //summation(mapToLat(tempDistribution, this.latticeYs)) / tempDensity;
+
+                this.localU[this.index(x, y)] = {
+                    x: summation(mapToLat(tempDistribution, this.latticeXs)) / tempDensity,
+                    y: summation(mapToLat(tempDistribution, this.latticeYs)) / tempDensity
+                }
 
                 this.localDensity[this.index(x, y)] = tempDensity;
 
@@ -197,8 +203,7 @@ class Fluid {
                     );
 
                     //Set velocity to 0
-                    this.localUXs[this.index(x, y)] = 0;
-                    this.localUYs[this.index(x, y)] = 0;
+                    this.localU[this.index(x, y)] = { x: 0, y: 0 };
                 }
             }
         }
@@ -218,14 +223,16 @@ class Fluid {
             for (let y = 0; y < this.height; y++) {
                 for (let i in this.latticeIndices) {
                     let localDensity = this.localDensity[this.index(x, y)];
-                    let localUX = this.localUXs[this.index(x, y)];
-                    let localUY = this.localUYs[this.index(x, y)];
+                    let localU: Vector = this.localU[this.index(x, y)];
                     let weight = this.latticeWeights[i];
 
-                    var latticeX = this.latticeXs[i];
-                    var latticeY = this.latticeYs[i];
+                    let latticeX = this.latticeXs[i];
+                    let latticeY = this.latticeYs[i];
 
-                    var latticeDotU = latticeX * localUX + latticeY * localUY; //Pre-calculations
+                    let latticeVector: Vector = { x: latticeX, y: latticeY };
+
+                    let latticeDotU = dotVectors(localU, latticeVector) //latticeX * localUX + latticeY * localUY; //Pre-calculations
+                    let uDotU = dotVectors(localU, localU);
 
                     this.equilibriumDistribution[this.index(x, y)][i] =
                         weight *
@@ -233,7 +240,7 @@ class Fluid {
                         (1 +
                             3 * latticeDotU +
                             (9 / 2) * latticeDotU ** 2 -
-                            (3 / 2) * (localUX ** 2 + localUY ** 2));
+                            (3 / 2) * uDotU);
 
                     //this.equilibriumDistribution[this.index(x, y)][i] = this.getEquilibrium(weight, localDensity, [localUX, localUY], parseInt(i));
                 }
@@ -320,7 +327,9 @@ class Fluid {
                     colour = [40, 42, 54, 255];
                 } else {
                     //Different colouring modes and different graphing modes
-                    let velocityMagnitude = Math.sqrt(this.localUXs[this.index(x, y)] ** 2 + this.localUYs[this.index(x, y)] ** 2);
+                    //let velocityMagnitude = Math.sqrt(this.localUXs[this.index(x, y)] ** 2 + this.localUYs[this.index(x, y)] ** 2);
+                    let velocityMagnitude = absoluteVector(this.localU[this.index(x, y)])
+
                     colourIndex = Math.round(this.colourMap.NumColours * (velocityMagnitude * 4 * contrast));
                     colour = [this.colourMap.RedList[colourIndex], this.colourMap.GreenList[colourIndex], this.colourMap.BlueList[colourIndex], 255];
                 }

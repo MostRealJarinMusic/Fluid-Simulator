@@ -15,8 +15,8 @@ class ColourMap {
     }
 
     private generateColourMap(): void {
-        for (var colourIndex = 0; colourIndex <= this.numColours; colourIndex++) {
-            var r, g, b;
+        for (let colourIndex = 0; colourIndex <= this.numColours; colourIndex++) {
+            let r, g, b;
             if (colourIndex < this.numColours / 8) {
                 r = 0;
                 g = 0;

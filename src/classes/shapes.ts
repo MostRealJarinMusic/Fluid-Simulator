@@ -152,10 +152,12 @@ class Line extends Shape {
         let pixelLength = Math.round(this.params.lineLength * scaleFactor);
         let tempGridPoints: Vector[] = [];
 
-        for (let i = 0; i < pixelLength; i++) {
-            tempGridPoints.push({
-                x: 0, y: Math.round(i - pixelLength / 2)
-            })
+        for (let x = 0; x <= 1; x++) {
+            for (let y = 0; y < pixelLength; y++) {
+                tempGridPoints.push({
+                    x: x, y: Math.round(y - pixelLength / 2)
+                })
+            }
         }
 
         this.gridPoints = tempGridPoints;
