@@ -142,16 +142,16 @@ class Fluid {
     public runMainLoop(): void {
         if (this.running) {
 
-            for (let steps = 0; steps < 3; steps++) {
-                this.stream();
-                //this.setInflow();
-                this.computeMoments();
-                this.applyBoundaryConditions();
-                this.computeEquilibrium();
-                this.collideLocally();
-                //this.showDebug();
-                console.log(steps)
-            }
+            //for (let steps = 0; steps < 3; steps++) {
+            this.stream();
+            //this.setInflow();
+            this.computeMoments();
+            this.applyBoundaryConditions();
+            this.computeEquilibrium();
+            this.collideLocally();
+            //this.showDebug();
+            //console.log(steps)
+            //}
         }
     }
 
@@ -294,7 +294,7 @@ class Fluid {
 
     //#region Drawing functions
 
-    drawFluid() {
+    drawFluid(simulationMode: SimulationMode) {
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
                 let colour = [255, 255, 255, 255];
@@ -306,13 +306,20 @@ class Fluid {
                     colour = [40, 42, 54, 255];
                 } else {
                     //Different colouring modes and different graphing modes
-                    //let velocityMagnitude = Math.sqrt(this.localUXs[this.index(x, y)] ** 2 + this.localUYs[this.index(x, y)] ** 2);
-                    let velocityMagnitude = absoluteVector(this.localVelocity[this.index(x, y)])
-
-                    let density = this.localDensity[this.index(x, y)];
-
-                    //colourIndex = Math.round(this.colourMap.NumColours * (velocityMagnitude * 4 * contrast));
-                    colourIndex = Math.round(this.colourMap.NumColours * ((density - 1) * 6 * contrast + 0.5));
+                    let mode = simulationMode.mode;
+                    switch (mode) {
+                        case 'velocity':
+                            let velocityMagnitude = absoluteVector(this.localVelocity[this.index(x, y)]);
+                            colourIndex = Math.round(this.colourMap.NumColours * (velocityMagnitude * 4 * contrast));
+                            break;
+                        case 'density':
+                            let density = this.localDensity[this.index(x, y)];
+                            colourIndex = Math.round(this.colourMap.NumColours * ((density - 1) * 6 * contrast + 0.5));
+                            break;
+                        default:
+                            console.log("something has gone wrong");
+                            break;
+                    }
                     colour = [this.colourMap.RedList[colourIndex], this.colourMap.GreenList[colourIndex], this.colourMap.BlueList[colourIndex], 255];
                 }
 

@@ -26,7 +26,7 @@
                     <p>Your browser doesn't support the canvas tag - please use one that does.</p>
                 </canvas>
 
-                <div id="airfoilDesignerGeneralControls">
+                <div class="generalControls" id="airfoilDesignerGeneralControls">
                     <select name="Airfoil Preset" id="airfoilTypeSelector" onchange="updateChosenShape()">
                         <option value="Airfoil" selected>4-digit NACA Airfoil</option>
                         <option value="Rectangle">Rectangle</option>
@@ -61,7 +61,15 @@
                     <p>Your browser doesn't support the canvas tag - please use one that does.</p>
                 </canvas>
 
+                <div class="generalControls" id="fluidSimulationGeneralControls">
+                    <select name="Simulation Mode" id="simulationModeSelector" onchange="updateSimulationMode()">
+                        <option value="velocity" selected>Plot Velocity</option>
+                        <option value="density">Plot Density</option>
+                    </select>
+                </div>
+
                 <div class="parameterContainer" id="fluidSimulationParameters">
+
                     <!--
                     <label for="mNACA">Max. Camber (%):</label>
                     <input type="number" id="mNACA" step="0.1" onchange="updateAirfoilParameters()"></input><br>

@@ -3,7 +3,7 @@ type Vector = { x: number; y: number; }
 type GridPoints = { points: Vector[]; }
 type GraphDataset = GridPoints & { label: string; colour: string; }
 type ShapeParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: number[]; }
-type SimulationMode = { mode: 'absVelocity' | 'density' | 'curl' }
+type SimulationMode = { mode: 'velocity' | 'density' | 'curl' | 'pressure' | string }
 type GraphMode = { mode: 'surfacePressure' | 'velocity' }
 //#endregion
 
