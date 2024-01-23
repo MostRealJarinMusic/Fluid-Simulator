@@ -64,6 +64,8 @@ function updateFreeStreamVelocity(): void {
 //#endregion
 
 //#region Updating
+
+
 function update(): void {
     fluidManager.runMainLoop();
     fluidManager.drawFluid();
@@ -71,6 +73,7 @@ function update(): void {
 }
 
 update();
+
 
 //#endregion
 

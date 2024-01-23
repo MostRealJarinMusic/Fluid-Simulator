@@ -106,16 +106,21 @@ class Fluid {
     }
 
     public initFluid(): void {
-        let velocityVector = [this.inVelocity, 0]
+        let velocityVector: Vector = { x: this.inVelocity, y: 0 };
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
                 for (let i = 0; i < this.discreteVelocities; i++) {
+
+                    /*
                     if (i === 3) {
                         this.distribution[this.index(x, y)][i] = this.inVelocity;//this.getEquilibrium(this.latticeWeights[3], this.density, velocityVector, 3);
                     } else {
                         this.distribution[this.index(x, y)][i] = 1//this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, parseInt(i));
                     }
                     this.equilibriumDistribution[this.index(x, y)][i] = 1;
+                    */
+                    this.distribution[this.index(x, y)][i] = this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, i);
+
                 }
 
                 //this.distribution[this.index(x, y)][2] = this.inVelocity;//this.getEquilibrium(this.latticeWeights[2], this.density, velocityVector, 2);
@@ -136,28 +141,22 @@ class Fluid {
 
     public runMainLoop(): void {
         if (this.running) {
-            this.stream();
-            //this.setInflow();
-            this.computeMoments();
-            this.applyBoundaryConditions();
-            this.computeEquilibrium();
-            this.collideLocally();
 
-            //this.showDebug();
-            //console.log(this.distribution)
+            for (let steps = 0; steps < 3; steps++) {
+                this.stream();
+                //this.setInflow();
+                this.computeMoments();
+                this.applyBoundaryConditions();
+                this.computeEquilibrium();
+                this.collideLocally();
+                //this.showDebug();
+                console.log(steps)
+            }
         }
     }
 
 
     //#region Main loop functions
-
-    private setInflow(): void {
-        for (let y = 0; y < this.height; y++) {
-            //this.distribution[this.index(0, y)][2] = this.getEquilibrium(1, this.density, [this.inVelocity, 0], 2);
-            this.distribution[this.index(0, y)][3] = this.getEquilibrium(1, this.density, [this.inVelocity, 0], 3);
-            //this.distribution[this.index(0, y)][4] = this.inVelocity;
-        }
-    }
 
     private computeMoments(): void {
         for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
@@ -198,12 +197,14 @@ class Fluid {
     }
 
 
-    private getEquilibrium(weight: number, rho: number, velocityVector: number[], latticeIndex: number): number {
-        let latticeDotU = this.latticeXs[latticeIndex] * velocityVector[0] + this.latticeYs[latticeIndex] * velocityVector[1];
+    private getEquilibrium(weight: number, rho: number, velocityVector: Vector, latticeIndex: number): number {
+        let latticeVector: Vector = { x: this.latticeXs[latticeIndex], y: this.latticeYs[latticeIndex] };
+        let latticeDotU = dotVectors(latticeVector, velocityVector);
+        let uDotU = dotVectors(velocityVector, velocityVector);
 
         return weight * rho * (1 + 3 * latticeDotU +
             (9 / 2) * latticeDotU ** 2 -
-            (3 / 2) * (velocityVector[0] ** 2 + velocityVector[1] ** 2));
+            (3 / 2) * uDotU);
     }
 
     private computeEquilibrium(): void {
@@ -308,7 +309,10 @@ class Fluid {
                     //let velocityMagnitude = Math.sqrt(this.localUXs[this.index(x, y)] ** 2 + this.localUYs[this.index(x, y)] ** 2);
                     let velocityMagnitude = absoluteVector(this.localVelocity[this.index(x, y)])
 
-                    colourIndex = Math.round(this.colourMap.NumColours * (velocityMagnitude * 4 * contrast));
+                    let density = this.localDensity[this.index(x, y)];
+
+                    //colourIndex = Math.round(this.colourMap.NumColours * (velocityMagnitude * 4 * contrast));
+                    colourIndex = Math.round(this.colourMap.NumColours * ((density - 1) * 6 * contrast + 0.5));
                     colour = [this.colourMap.RedList[colourIndex], this.colourMap.GreenList[colourIndex], this.colourMap.BlueList[colourIndex], 255];
                 }
 

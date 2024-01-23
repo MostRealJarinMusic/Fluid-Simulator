@@ -14,7 +14,7 @@ class FluidManager {
     constructor(canvas: HTMLCanvasElement, parameterInputContainer: HTMLDivElement) {
         this.fluidCanvas = canvas;
         //timestep is 0.53
-        this.fluid = new Fluid(160, 120, 1, 2.5, 0.7, this.fluidCanvas);
+        this.fluid = new Fluid(160, 120, 1, 0.12, 0.53, this.fluidCanvas);
 
         this.parameterInputContainer = parameterInputContainer;
     }
