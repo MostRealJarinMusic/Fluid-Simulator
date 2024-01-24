@@ -45,7 +45,7 @@
                 <div class="parameterContainer" id="airfoilDesignerParameters">
                 </div>
 
-                <div id="airfoilInfoContainer">
+                <div class="valuesContainer" id="airfoilInfoContainer">
                     <p id="airfoilProfileNum">This is a test.</p>
                 </div>
 
@@ -90,6 +90,17 @@
                     <p>Your browser doesn't support the canvas tag - please use one that does.</p>
                 </canvas>
 
+                <div class="generalControls" id="resultsManagerGeneralControls">
+                    <select name="Graphing Mode" id="resultsGraphModeSelector" onchange="updateResultsGraphingMode()">
+                        <option value="surfacePressure" selected>Plot Surface Pressure against X</option>
+                        <option value="velocity">Plot Velocity against X</option>
+                    </select>
+                </div>
+
+                <div class="valuesContainer" id="resultsValueContainer">
+
+                </div>
+
                 <p class="moduleText">This is a test.</p>
 
                 <div class="parameterContainer" id="dataGraphParameters">
@@ -110,7 +121,7 @@
 
     <script src="dist/classes/airfoilDesigner.js"></script>
     <script src="dist/classes/fluidManager.js"></script>
-
+    <script src="dist/classes/resultsManager.js"></script>
 
     <script src="dist/renderer/renderer.js" defer></script>
 </body>

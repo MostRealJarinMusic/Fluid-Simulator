@@ -29,7 +29,11 @@ fluidManager.initFluid();
 //#endregion
 
 //#region Data and Graphs
+let RMCanvas = document.getElementById("dataGraph") as HTMLCanvasElement;
+let RMValuesDisplay = document.getElementById("valuesDisplay") as HTMLDivElement;
+let RMGraphingModeSelector = document.getElementById("resultsGraphModeSelector") as HTMLSelectElement;
 
+const resultsManager = new ResultsManager(RMCanvas, RMGraphingModeSelector, RMValuesDisplay);
 
 //#endregion
 
@@ -62,7 +66,9 @@ function updateSimulationMode(): void {
     fluidManager.updateSimulationMode();
 }
 
-
+function updateResultsGraphingMode(): void {
+    resultsManager.updateGraphingMode();
+}
 
 //#endregion
 

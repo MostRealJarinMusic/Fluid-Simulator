@@ -27,20 +27,6 @@ class AirfoilDesigner {
 
     //#region Mapping
 
-    private mapDatasets(datasets: GraphDataset[]): Chart.ChartDataSets[] {
-        return datasets.map(dataset => ({
-            label: dataset.label,
-            data: dataset.points,
-            pointRadius: 0.5,
-            hoverRadius: 0.5,
-            showLine: false,
-            backgroundColor: dataset.colour,
-            borderColor: dataset.colour,
-            borderWidth: 2,
-            pointStyle: 'circle',
-        }));
-    }
-
     private mapParameter(parameterName: string, parameterInfo: ShapeParameterInfo): HTMLInputElement {
         let parameterElement = document.createElement("input");
         parameterElement.type = "number";
@@ -64,7 +50,7 @@ class AirfoilDesigner {
         this.graph = new Chart(this.context, {
             type: 'scatter',
             data: {
-                datasets: this.mapDatasets(datasets),
+                datasets: mapDatasets(datasets),
             },
             options: {
                 responsive: false,
@@ -134,7 +120,7 @@ class AirfoilDesigner {
 
     private updateGraph(): void {
         let datasets = this.shape.GraphDatasets;
-        this.graph.data.datasets = this.mapDatasets(datasets);
+        this.graph.data.datasets = mapDatasets(datasets);
         this.graph.update();
     }
 

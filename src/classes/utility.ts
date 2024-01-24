@@ -7,15 +7,37 @@ type ShapeParameterInfo = { name: string; labelText: string; defaultValue: numbe
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure'] as const;
 type SimulationMode = typeof validSimulationModes[number];
-type GraphMode = 'surfacePressure' | 'velocity';
+const validResultGraphModes = ['surfacePressure', 'velocity'] as const;
+type GraphingMode = typeof validResultGraphModes[number];
 //#endregion
 
-
+//#region Type Guards
 function isSimulationMode(testMode: unknown): testMode is SimulationMode {
     // @ts-expect-error
     return typeof testMode === 'string' && validSimulationModes.includes(testMode);
 }
 
+function isGraphingMode(testMode: unknown): testMode is GraphingMode {
+    // @ts-expect-error
+    return typeof testMode === 'string' && validResultGraphModes.includes(testMode);
+}
+
+
+//#endregion
+
+function mapDatasets(datasets: GraphDataset[]): Chart.ChartDataSets[] {
+    return datasets.map(dataset => ({
+        label: dataset.label,
+        data: dataset.points,
+        pointRadius: 0.5,
+        hoverRadius: 0.5,
+        showLine: false,
+        backgroundColor: dataset.colour,
+        borderColor: dataset.colour,
+        borderWidth: 2,
+        pointStyle: 'circle',
+    }));
+}
 
 
 function setupParameters(setupInformation: Record<string, ShapeParameterInfo>): Record<string, number> {
