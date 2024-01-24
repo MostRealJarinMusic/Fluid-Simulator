@@ -17,7 +17,7 @@ class FluidManager {
         this.fluidCanvas = canvas;
         //timestep is 0.53
         this.fluid = new Fluid(160, 120, 1, 0.12, 0.53, this.fluidCanvas);
-        this.simulationMode = { mode: 'velocity' };
+        this.simulationMode = 'velocity';
 
         this.parameterInputContainer = parameterInputContainer;
         this.simulationModeSelector = simulationModeSelector;
@@ -51,11 +51,11 @@ class FluidManager {
     //#region Fluid simulation settings
 
     public updateSimulationMode(): void {
-        let currentMode = this.simulationMode.mode;
+        let currentMode = this.simulationMode;
         let newMode = this.simulationModeSelector.value;
 
-        if (currentMode !== newMode) {
-            this.simulationMode.mode = newMode;
+        if (currentMode !== newMode && isSimulationMode(newMode)) {
+            this.simulationMode = newMode;
         } else {
             console.log("tee hee.")
         }

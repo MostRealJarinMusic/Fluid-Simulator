@@ -306,7 +306,7 @@ class Fluid {
                     colour = [40, 42, 54, 255];
                 } else {
                     //Different colouring modes and different graphing modes
-                    let mode = simulationMode.mode;
+                    let mode = simulationMode;
                     switch (mode) {
                         case 'velocity':
                             let velocityMagnitude = absoluteVector(this.localVelocity[this.index(x, y)]);

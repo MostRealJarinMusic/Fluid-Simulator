@@ -3,17 +3,26 @@ type Vector = { x: number; y: number; }
 type GridPoints = { points: Vector[]; }
 type GraphDataset = GridPoints & { label: string; colour: string; }
 type ShapeParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: number[]; }
-type SimulationMode = { mode: 'velocity' | 'density' | 'curl' | 'pressure' | string }
-type GraphMode = { mode: 'surfacePressure' | 'velocity' }
+
+
+const validSimulationModes = ['velocity', 'density', 'curl', 'pressure'] as const;
+type SimulationMode = typeof validSimulationModes[number];
+type GraphMode = 'surfacePressure' | 'velocity';
 //#endregion
+
+
+function isSimulationMode(testMode: unknown): testMode is SimulationMode {
+    // @ts-expect-error
+    return typeof testMode === 'string' && validSimulationModes.includes(testMode);
+}
+
+
 
 function setupParameters(setupInformation: Record<string, ShapeParameterInfo>): Record<string, number> {
     let temp: Record<string, number> = {};
-
     for (const [parameterName, parameterInfo] of Object.entries(setupInformation)) {
         temp[parameterName] = parameterInfo.defaultValue;
     }
-
     return temp;
 }
 

@@ -73,6 +73,7 @@ class AirfoilDesigner {
                     xAxes: [{
                         gridLines: {
                             color: '#f8f8f2',
+                            zeroLineColor: '#f8f8f2',
                         },
                         ticks: {
                             min: -0.2,
@@ -93,6 +94,7 @@ class AirfoilDesigner {
                     yAxes: [{
                         gridLines: {
                             color: '#f8f8f2',
+                            zeroLineColor: '#f8f8f2',
                         },
                         ticks: {
                             min: -0.4,

@@ -22,9 +22,7 @@ let FMSimulationModeSelector = document.getElementById("simulationModeSelector")
 //160, 80
 //const fluidSimulation = new Fluid(160, 80, 1, 2.5, 0.53, FMCanvas);
 const fluidManager = new FluidManager(FMCanvas, FMParameterInputContainer, FMSimulationModeSelector);
-
 //fluidSimulation.setupDefaultObstacle();
-
 fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 fluidManager.initFluid();
 
