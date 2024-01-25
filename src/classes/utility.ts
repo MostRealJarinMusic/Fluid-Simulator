@@ -3,7 +3,7 @@ type Vector = { x: number; y: number; }
 type GridPoints = { points: Vector[]; }
 type GraphDataset = GridPoints & { label: string; colour: string; }
 type ShapeParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: number[]; }
-
+type Colour = { red: number, green: number, blue: number, alpha: number };
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure'] as const;
 type SimulationMode = typeof validSimulationModes[number];
@@ -21,8 +21,6 @@ function isGraphingMode(testMode: unknown): testMode is GraphingMode {
     // @ts-expect-error
     return typeof testMode === 'string' && validResultGraphModes.includes(testMode);
 }
-
-
 //#endregion
 
 function mapDatasets(datasets: GraphDataset[]): Chart.ChartDataSets[] {
@@ -38,7 +36,6 @@ function mapDatasets(datasets: GraphDataset[]): Chart.ChartDataSets[] {
         pointStyle: 'circle',
     }));
 }
-
 
 function setupParameters(setupInformation: Record<string, ShapeParameterInfo>): Record<string, number> {
     let temp: Record<string, number> = {};
@@ -96,15 +93,9 @@ function absoluteVector(vector: Vector): number {
     return Math.sqrt(vector.x ** 2 + vector.y ** 2);
 }
 
-
-/**
- * Returns a vector with its components rounded to the nearest integer.
- * @param vector - The vector to be 'rounded'.
- */
 function roundVector(vector: Vector): Vector {
     return { x: Math.round(vector.x), y: Math.round(vector.y) };
 }
-
 
 /**
  * Filters an array of vectors for either the largest or smallest component.

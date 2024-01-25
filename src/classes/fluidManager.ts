@@ -10,18 +10,40 @@ class FluidManager {
     private freeStreamVelocity!: number;
     private parameterInputContainer!: HTMLDivElement;
     private simulationModeSelector: HTMLSelectElement;
+
+    //private showTracers: boolean;
+    //private showStreamlines: boolean;
     //#endregion
 
 
     constructor(canvas: HTMLCanvasElement, parameterInputContainer: HTMLDivElement, simulationModeSelector: HTMLSelectElement) {
         this.fluidCanvas = canvas;
         //timestep is 0.53
-        this.fluid = new Fluid(160, 120, 1, 0.12, 0.53, this.fluidCanvas);
+        this.fluid = new Fluid(160, 90, 1, 0.12, 0.53, this.fluidCanvas);
         this.simulationMode = 'velocity';
 
         this.parameterInputContainer = parameterInputContainer;
         this.simulationModeSelector = simulationModeSelector;
+
+        //this.showTracers = false;
+        //this.showStreamlines = false;
     }
+
+
+    //#region Setters
+    set ShowTracers(value: boolean) {
+        this.fluid.ShowTracers = value;
+    }
+
+    set ShowStreamlines(value: boolean) {
+        this.fluid.ShowStreamlines = value;
+    }
+
+    set FreeStreamVelocity(value: number) {
+        this.fluid.FreeStreamVelocity = value;
+    }
+
+    //#endregion
 
     //#region Exposing fluid functions
     public initFluid(): void {

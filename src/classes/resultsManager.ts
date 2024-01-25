@@ -38,7 +38,7 @@ class ResultsManager {
             throw new Error("Something has gone wrong");
         }
 
-        console.log(this.graphingMode);
+        //console.log(this.graphingMode);
     }
 
     private resetGraph(): void {
@@ -68,7 +68,6 @@ class ResultsManager {
     private calculateDragCoefficient() {
 
     }
-
     //#endregion
 
 }

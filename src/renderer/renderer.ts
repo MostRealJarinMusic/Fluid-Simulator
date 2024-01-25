@@ -26,6 +26,12 @@ const fluidManager = new FluidManager(FMCanvas, FMParameterInputContainer, FMSim
 fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 fluidManager.initFluid();
 
+
+let FMTracersCheck = document.getElementById("fluidTracers") as HTMLInputElement;
+let FMStreamlinesCheck = document.getElementById("fluidStreamlines") as HTMLInputElement;
+let FMFreeStreamVelocityInput = document.getElementById("freeStreamVelocity") as HTMLInputElement;
+let FMAngleOfAttackInput = document.getElementById("angleOfAttack") as HTMLInputElement;
+
 //#endregion
 
 //#region Data and Graphs
@@ -69,6 +75,20 @@ function updateSimulationMode(): void {
 function updateResultsGraphingMode(): void {
     resultsManager.updateGraphingMode();
 }
+
+FMTracersCheck.addEventListener('change', function () {
+    fluidManager.ShowTracers = this.checked;
+});
+
+FMStreamlinesCheck.addEventListener('change', function () {
+    fluidManager.ShowStreamlines = this.checked;
+});
+
+FMFreeStreamVelocityInput.addEventListener('change', function () {
+    //console.log(this.value);
+    fluidManager.FreeStreamVelocity = parseFloat(this.value);
+});
+
 
 //#endregion
 

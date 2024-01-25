@@ -27,6 +27,8 @@ class Fluid {
 
     private airfoilGridPoints!: Vector[];
     private running: boolean;
+    private showTracers: boolean;
+    private showStreamlines: boolean;
     //#endregion
 
     constructor(width: number, height: number, density: number, inVelocity: number, timescale: number, canvas: HTMLCanvasElement) {
@@ -91,6 +93,7 @@ class Fluid {
         this.image = this.context.createImageData(this.canvas.width, this.canvas.height);
 
         this.colourMap = new ColourMap();
+        //console.log(this.colourMap.Map)
         this.pxPerNode = 2;
         //#endregion
 
@@ -98,6 +101,11 @@ class Fluid {
         this.running = true;
         this.airfoilGridPoints = [];
 
+        //#endregion
+
+        //#region Tracers and streamlines
+        this.showTracers = false;
+        this.showStreamlines = false;
         //#endregion
     }
 
@@ -154,6 +162,25 @@ class Fluid {
             //}
         }
     }
+
+    //#region Setters
+    set ShowTracers(value: boolean) {
+        this.showTracers = value;
+        console.log(`Show Tracers: ${this.showTracers}`)
+    }
+    set ShowStreamlines(value: boolean) {
+        this.showStreamlines = value;
+        console.log(`Show Streamlines: ${this.showStreamlines}`)
+    }
+
+    set FreeStreamVelocity(value: number) {
+        //Set the free stream velocity
+        /*
+        this.inVelocity = value;
+        this.initFluid();
+        */
+    }
+    //#endregion
 
 
     //#region Main loop functions
@@ -297,13 +324,13 @@ class Fluid {
     drawFluid(simulationMode: SimulationMode) {
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
-                let colour = [255, 255, 255, 255];
+                let colour: Colour = { red: 255, green: 255, blue: 255, alpha: 255 };
                 let colourIndex = 0;
                 let contrast = Math.pow(1.2, 0.01);
 
                 if (this.solid[this.index(x, y)]) {
                     //Solid
-                    colour = [40, 42, 54, 255];
+                    colour = { red: 40, green: 42, blue: 54, alpha: 255 };
                 } else {
                     //Different colouring modes and different graphing modes
                     let mode = simulationMode;
@@ -320,24 +347,31 @@ class Fluid {
                             console.log("something has gone wrong");
                             break;
                     }
-                    colour = [this.colourMap.RedList[colourIndex], this.colourMap.GreenList[colourIndex], this.colourMap.BlueList[colourIndex], 255];
+                    colour = { red: this.colourMap.RedList[colourIndex], green: this.colourMap.GreenList[colourIndex], blue: this.colourMap.BlueList[colourIndex], alpha: 255 };
+                    //console.log(colourIndex);
+                    //colour = this.colourMap.Map[colourIndex];
+
                 }
 
-                let pxPerNd = this.pxPerNode
-                let tempY = this.height - y - 1;
-                for (let pixelY = tempY * pxPerNd; pixelY < (tempY + 1) * pxPerNd; pixelY++) {
-                    for (let pixelX = x * pxPerNd; pixelX < (x + 1) * pxPerNd; pixelX++) {
-                        let imageIndex = (pixelX + pixelY * this.image.width) * 4;
-                        this.image.data[imageIndex] = colour[0];
-                        this.image.data[imageIndex + 1] = colour[1];
-                        this.image.data[imageIndex + 2] = colour[2];
-                        this.image.data[imageIndex + 3] = 255;
-                    }
-                }
+                this.colourPixel(x, y, colour);
             }
         }
 
         this.context.putImageData(this.image, 0, 0);
+    }
+
+    private colourPixel(x: number, y: number, colour: Colour) {
+        let pxPerNd = this.pxPerNode
+        let tempY = this.height - y - 1;
+        for (let pixelY = tempY * pxPerNd; pixelY < (tempY + 1) * pxPerNd; pixelY++) {
+            for (let pixelX = x * pxPerNd; pixelX < (x + 1) * pxPerNd; pixelX++) {
+                let imageIndex = (pixelX + pixelY * this.image.width) * 4;
+                this.image.data[imageIndex] = colour.red;
+                this.image.data[imageIndex + 1] = colour.green;
+                this.image.data[imageIndex + 2] = colour.blue;
+                this.image.data[imageIndex + 3] = colour.alpha;
+            }
+        }
     }
 
     //#endregion
