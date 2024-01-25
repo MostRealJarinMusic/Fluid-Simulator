@@ -347,9 +347,12 @@ class Fluid {
                             console.log("something has gone wrong");
                             break;
                     }
-                    colour = { red: this.colourMap.RedList[colourIndex], green: this.colourMap.GreenList[colourIndex], blue: this.colourMap.BlueList[colourIndex], alpha: 255 };
+
+                    //Stop any out of bounds errors
+                    colourIndex = Math.min(colourIndex, this.colourMap.NumColours - 1);
+                    //colour = { red: this.colourMap.RedList[colourIndex], green: this.colourMap.GreenList[colourIndex], blue: this.colourMap.BlueList[colourIndex], alpha: 255 };
                     //console.log(colourIndex);
-                    //colour = this.colourMap.Map[colourIndex];
+                    colour = this.colourMap.Map[colourIndex];
 
                 }
 

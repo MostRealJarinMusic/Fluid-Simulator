@@ -43,6 +43,13 @@ class FluidManager {
         this.fluid.FreeStreamVelocity = value;
     }
 
+    set AngleOfAttack(angle: number) {
+        this.angleOfAttack = -angle;
+        //this.applyRotationToAirfoil();
+        let rotatedAirfoil = this.rotateAirfoil();
+        this.fluid.updateAirfoil(rotatedAirfoil);
+    }
+
     //#endregion
 
     //#region Exposing fluid functions
@@ -65,9 +72,8 @@ class FluidManager {
     }
     //#endregion
 
-    private applyRotationToAirfoil(): void {
-        let tempTheta = - Math.PI / 4;
-        this.airfoilGridPoints = getFullShape(this.airfoilGridPoints.map((vector) => roundVector(rotateVector(vector, tempTheta))));
+    private rotateAirfoil(): Vector[] {
+        return getFullShape(this.airfoilGridPoints.map((vector) => roundVector(rotateVector(vector, this.angleOfAttack))));
     }
 
     //#region Fluid simulation settings

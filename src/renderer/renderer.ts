@@ -89,6 +89,9 @@ FMFreeStreamVelocityInput.addEventListener('change', function () {
     fluidManager.FreeStreamVelocity = parseFloat(this.value);
 });
 
+FMAngleOfAttackInput.addEventListener('change', function () {
+    fluidManager.AngleOfAttack = parseFloat(this.value);
+})
 
 //#endregion
 
