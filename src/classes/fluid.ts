@@ -27,8 +27,14 @@ class Fluid {
 
     private airfoilGridPoints!: Vector[];
     private running: boolean;
+
+
     private showTracers: boolean;
+    private tracers: Tracer[];
     private showStreamlines: boolean;
+    private streamlines: StreamLine[];
+
+
     //#endregion
 
     constructor(width: number, height: number, density: number, inVelocity: number, timescale: number, canvas: HTMLCanvasElement) {
@@ -85,8 +91,6 @@ class Fluid {
         this.solid = new Array(this.numCells).fill(false);
         //#endregion
 
-        //console.log(this.distribution)
-
         //#region Image setup
         this.canvas = canvas;
         this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -106,6 +110,10 @@ class Fluid {
         //#region Tracers and streamlines
         this.showTracers = false;
         this.showStreamlines = false;
+
+        this.tracers = [];
+        this.streamlines = [];
+        this.initTracers();
         //#endregion
     }
 
@@ -152,6 +160,10 @@ class Fluid {
 
             //for (let steps = 0; steps < 3; steps++) {
             this.stream();
+
+            this.moveTracers();
+
+
             //this.setInflow();
             this.computeMoments();
             this.applyBoundaryConditions();
@@ -160,6 +172,7 @@ class Fluid {
             //this.showDebug();
             //console.log(steps)
             //}
+            if (this.showTracers) this.moveTracers();
         }
     }
 
@@ -181,7 +194,6 @@ class Fluid {
         */
     }
     //#endregion
-
 
     //#region Main loop functions
 
@@ -319,18 +331,63 @@ class Fluid {
     }
     //#endregion
 
-    //#region Drawing functions
+    //#region Tracers and streamlines
+    private initTracers(): void {
+        //let numTracers = 200;
+        let rows = 10;
+        let columns = 10;
+        let xOffset = Math.round(this.width / columns);
+        let yOffset = Math.round(this.height / rows);
+        let bounds: Bound = { lower: 0, upper: this.width };
 
-    drawFluid(simulationMode: SimulationMode) {
+        for (let x = 0; x < columns - 1; x++) {
+            for (let y = 0; y < rows - 1; y++) {
+                let position: Vector = { x: x * xOffset + xOffset / 2, y: y * yOffset + yOffset / 2 };
+                this.tracers.push(new Tracer(position, bounds));
+            }
+        }
+    }
+
+
+    private moveTracers(): void {
+        for (let tracer of this.tracers) {
+            let position = roundVector(tracer.Position);
+            if (position.x >= this.width) {
+                position.x = 0;
+            }
+
+            //console.log(`${position.x},${position.y}`);
+
+            if (this.solid[this.index(position.x, position.y)]) continue;
+            let positionIndex = this.index(position.x, position.y);
+            let velocity: Vector = this.localVelocity[positionIndex];
+            if (velocity.x === undefined) velocity.x = 0;
+            if (velocity.y === undefined) velocity.y = 0;
+
+            //console.log(`${position.x},${position.y} => NEW VELOCITY ${velocity.x},${velocity.y}`)
+            tracer.Velocity = velocity;
+            tracer.move();
+        }
+    }
+
+    //#endregion
+
+
+    //#region Drawing functions
+    private gridPosToImagePos(gridPosition: Vector): Vector {
+        return { x: gridPosition.x, y: this.height - gridPosition.y - 1 }
+    }
+
+    public drawFluid(simulationMode: SimulationMode) {
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
                 let colour: Colour = { red: 255, green: 255, blue: 255, alpha: 255 };
                 let colourIndex = 0;
-                let contrast = Math.pow(1.2, 0.01);
+                let contrast = Math.pow(1.2, 1);
 
                 if (this.solid[this.index(x, y)]) {
                     //Solid
-                    colour = { red: 40, green: 42, blue: 54, alpha: 255 };
+                    colour = { red: 98, green: 114, blue: 164, alpha: 255 };
                 } else {
                     //Different colouring modes and different graphing modes
                     let mode = simulationMode;
@@ -349,24 +406,39 @@ class Fluid {
                     }
 
                     //Stop any out of bounds errors
-                    colourIndex = Math.min(colourIndex, this.colourMap.NumColours - 1);
+                    colourIndex = Math.max(0, Math.min(colourIndex, this.colourMap.NumColours - 1));
                     //colour = { red: this.colourMap.RedList[colourIndex], green: this.colourMap.GreenList[colourIndex], blue: this.colourMap.BlueList[colourIndex], alpha: 255 };
                     //console.log(colourIndex);
                     colour = this.colourMap.Map[colourIndex];
 
                 }
+                let position = { x: x, y: y };
 
-                this.colourPixel(x, y, colour);
+                this.colourPixel(position, colour);
             }
         }
+        if (this.showTracers) this.drawTracers();
 
         this.context.putImageData(this.image, 0, 0);
+
+
     }
 
-    private colourPixel(x: number, y: number, colour: Colour) {
-        let pxPerNd = this.pxPerNode
-        let tempY = this.height - y - 1;
-        for (let pixelY = tempY * pxPerNd; pixelY < (tempY + 1) * pxPerNd; pixelY++) {
+    private drawTracers(): void {
+        for (let tracer of this.tracers) {
+            let colour: Colour = { red: 255, green: 121, blue: 198, alpha: 255 };
+            let position = roundVector(tracer.Position);
+            this.colourPixel(position, colour);
+        }
+    }
+
+    private colourPixel(position: Vector, colour: Colour) {
+        let pxPerNd = this.pxPerNode;
+        let imagePosition = this.gridPosToImagePos(position);
+        let x = imagePosition.x;
+        let y = imagePosition.y;
+
+        for (let pixelY = y * pxPerNd; pixelY < (y + 1) * pxPerNd; pixelY++) {
             for (let pixelX = x * pxPerNd; pixelX < (x + 1) * pxPerNd; pixelX++) {
                 let imageIndex = (pixelX + pixelY * this.image.width) * 4;
                 this.image.data[imageIndex] = colour.red;
@@ -376,6 +448,8 @@ class Fluid {
             }
         }
     }
+
+
 
     //#endregion
 
@@ -412,12 +486,6 @@ class Fluid {
         this.initFluid();
     }
 
-    /*
-    private distanceBetweenSqr(x1: number, y1: number, x2: number, y2: number): number {
-        return (x2 - x1) ** 2 + (y2 - y1) ** 2;
-    }
-    */
-
     public updateAirfoil(newGridPoints: Vector[]): void {
         this.airfoilGridPoints = newGridPoints;
         this.setupObstacle();
@@ -429,10 +497,12 @@ class Fluid {
 class Tracer {
     private position: Vector;
     private velocity: Vector;
+    private xBounds: Bound;
 
-    constructor(startPosition: Vector, startVelocity: Vector) {
+    constructor(startPosition: Vector, xBounds: Bound) {
         this.position = startPosition;
-        this.velocity = startVelocity;
+        this.velocity = { x: 0, y: 0 };
+        this.xBounds = xBounds;
     }
 
     set Velocity(newVelocity: Vector) {
@@ -445,8 +515,11 @@ class Tracer {
 
     move() {
         this.position = addVectors(this.position, this.velocity);
-        //this.position.x += this.velocity.x;
-        //this.position.y += this.velocity.y;
+
+        if (this.position.x >= this.xBounds.upper) {
+            //Tracer has gone outside the map
+            this.position.x = 0;
+        }
     }
 
 }
@@ -480,9 +553,4 @@ class StreamLine {
     get LinePoints(): Vector[] {
         return this.linePoints;
     }
-
-
-
-
-
 }

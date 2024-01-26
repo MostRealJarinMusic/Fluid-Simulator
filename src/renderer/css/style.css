@@ -43,7 +43,7 @@ button {
     margin: 10px auto 10px;
 }
 
-/* GENERAL TEXT */
+/* General text */
 .moduleContainer {
     border-radius: 10px;
     background-color: #44475a;
@@ -82,11 +82,30 @@ h1 {
 
 input {
     vertical-align: middle;
-    border-radius: 2px;
+    /*border-radius: 2px;*/
     margin: 0px 0px 0px;
     border-width: 1px;
     border-style: solid;
     border-color: #f8f8f2;
+}
+
+input[type="range"] {
+    appearance: none;
+    height: 12px;
+    background-color: #f8f8f2;
+    overflow: hidden;
+    border-radius: 16px;
+    border-style: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    height: 12px;
+    width: 12px;
+    background-color: #f8f8f2;
+    border-radius: 50%;
+    border: 2px solid #bd93f9;
+    box-shadow: -407px 0 0 400px #bd93f9;
 }
 
 input[type="number" i] {

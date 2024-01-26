@@ -33,8 +33,8 @@ class AirfoilDesigner {
         parameterElement.name = parameterName;
         parameterElement.id = parameterName;
         parameterElement.value = parameterInfo.defaultValue.toString();
-        parameterElement.min = parameterInfo.bounds[0].toString();
-        parameterElement.max = parameterInfo.bounds[1].toString();
+        parameterElement.min = parameterInfo.bounds.lower.toString();
+        parameterElement.max = parameterInfo.bounds.upper.toString();
         parameterElement.step = "0.01";
         parameterElement.onchange = updateAirfoilParameters;
         return parameterElement;

@@ -39,8 +39,8 @@ abstract class Shape {
 
 class Ellipse extends Shape {
     override parameterInfo: Record<string, ShapeParameterInfo> = {
-        'xRadius': { name: 'xRadius', labelText: 'X Radius', defaultValue: 0.1, bounds: [0.05, 0.25] },
-        'yRadius': { name: 'yRadius', labelText: 'Y Radius', defaultValue: 0.1, bounds: [0.05, 0.25] }
+        'xRadius': { name: 'xRadius', labelText: 'X Radius', defaultValue: 0.1, bounds: { lower: 0.05, upper: 0.25 } },
+        'yRadius': { name: 'yRadius', labelText: 'Y Radius', defaultValue: 0.1, bounds: { lower: 0.05, upper: 0.25 } }
     };
 
     constructor() {
@@ -86,8 +86,8 @@ class Ellipse extends Shape {
 
 class Rectangle extends Shape {
     override parameterInfo: Record<string, ShapeParameterInfo> = {
-        'width': { name: 'width', labelText: 'Width', defaultValue: 0.5, bounds: [0.05, 0.75] },
-        'height': { name: 'height', labelText: 'Height', defaultValue: 0.2, bounds: [0.05, 0.3] }
+        'width': { name: 'width', labelText: 'Width', defaultValue: 0.5, bounds: { lower: 0.05, upper: 0.75 } },
+        'height': { name: 'height', labelText: 'Height', defaultValue: 0.2, bounds: { lower: 0.05, upper: 0.3 } }
     }
 
     constructor() {
@@ -130,7 +130,7 @@ class Rectangle extends Shape {
 
 class Line extends Shape {
     override parameterInfo: Record<string, ShapeParameterInfo> = {
-        'lineLength': { name: 'lineLength', labelText: 'Length', defaultValue: 0.3, bounds: [0.1, 0.5] }
+        'lineLength': { name: 'lineLength', labelText: 'Length', defaultValue: 0.3, bounds: { lower: 0.1, upper: 0.5 } }
     }
     constructor() {
         super();
@@ -166,9 +166,9 @@ class Line extends Shape {
 
 class Airfoil extends Shape {
     override parameterInfo: Record<string, ShapeParameterInfo> = {
-        'm': { name: 'm', labelText: 'Max. Camber (%)', defaultValue: 0, bounds: [0, 9.5] },
-        'p': { name: 'p', labelText: 'Max. Camber Pos. (%)', defaultValue: 0, bounds: [0, 90] },
-        't': { name: 't', labelText: 'Thickness', defaultValue: 12, bounds: [1, 40] }
+        'm': { name: 'm', labelText: 'Max. Camber (%)', defaultValue: 0, bounds: { lower: 0, upper: 9.5 } },
+        'p': { name: 'p', labelText: 'Max. Camber Pos. (%)', defaultValue: 0, bounds: { lower: 0, upper: 90 } },
+        't': { name: 't', labelText: 'Thickness', defaultValue: 12, bounds: { lower: 1, upper: 40 } }
     }
 
     constructor() {

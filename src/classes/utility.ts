@@ -2,7 +2,8 @@
 type Vector = { x: number; y: number; }
 type GridPoints = { points: Vector[]; }
 type GraphDataset = GridPoints & { label: string; colour: string; }
-type ShapeParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: number[]; }
+type Bound = { lower: number, upper: number };
+type ShapeParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: Bound; }
 type Colour = { red: number, green: number, blue: number, alpha: number };
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure'] as const;
@@ -45,8 +46,8 @@ function setupParameters(setupInformation: Record<string, ShapeParameterInfo>): 
     return temp;
 }
 
-function enforceBounds(value: number, bounds: number[]): number {
-    return Math.max(Math.min(value, bounds[1]), bounds[0]);
+function enforceBounds(value: number, bounds: Bound): number {
+    return Math.max(Math.min(value, bounds.upper), bounds.lower);
 }
 
 function create2DArrayFill(rows: number, columns: number, fill: number): number[][] {
