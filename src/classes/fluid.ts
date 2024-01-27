@@ -340,8 +340,8 @@ class Fluid {
         let yOffset = Math.round(this.height / rows);
         let bounds: Bound = { lower: 0, upper: this.width };
 
-        for (let x = 0; x < columns - 1; x++) {
-            for (let y = 0; y < rows - 1; y++) {
+        for (let x = 0; x < columns; x++) {
+            for (let y = 0; y < rows; y++) {
                 let position: Vector = { x: x * xOffset + xOffset / 2, y: y * yOffset + yOffset / 2 };
                 this.tracers.push(new Tracer(position, bounds));
             }
@@ -351,18 +351,15 @@ class Fluid {
 
     private moveTracers(): void {
         for (let tracer of this.tracers) {
-            let position = roundVector(tracer.Position);
-            if (position.x >= this.width) {
-                position.x = 0;
+            let testPosition = roundVector(tracer.Position);
+            if (testPosition.x >= this.width || this.solid[this.index(testPosition.x, testPosition.y)]) {
+                tracer.resetPosition();
+                testPosition.x = 1;
             }
-
             //console.log(`${position.x},${position.y}`);
+            let positionIndex = this.index(testPosition.x, testPosition.y);
 
-            if (this.solid[this.index(position.x, position.y)]) continue;
-            let positionIndex = this.index(position.x, position.y);
             let velocity: Vector = this.localVelocity[positionIndex];
-            if (velocity.x === undefined) velocity.x = 0;
-            if (velocity.y === undefined) velocity.y = 0;
 
             //console.log(`${position.x},${position.y} => NEW VELOCITY ${velocity.x},${velocity.y}`)
             tracer.Velocity = velocity;
@@ -426,7 +423,7 @@ class Fluid {
 
     private drawTracers(): void {
         for (let tracer of this.tracers) {
-            let colour: Colour = { red: 255, green: 121, blue: 198, alpha: 255 };
+            let colour: Colour = { red: 40, green: 42, blue: 54, alpha: 255 };
             let position = roundVector(tracer.Position);
             this.colourPixel(position, colour);
         }
@@ -513,12 +510,16 @@ class Tracer {
         return this.position;
     }
 
+    public resetPosition(): void {
+        this.position.x = 1;
+    }
+
     move() {
         this.position = addVectors(this.position, this.velocity);
 
-        if (this.position.x >= this.xBounds.upper) {
+        if (Math.round(this.position.x) >= this.xBounds.upper - 1) {
             //Tracer has gone outside the map
-            this.position.x = 0;
+            this.resetPosition();
         }
     }
 
