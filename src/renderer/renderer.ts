@@ -32,6 +32,7 @@ let FMStreamlinesCheck = document.getElementById("fluidStreamlines") as HTMLInpu
 let FMFreeStreamVelocityInput = document.getElementById("freeStreamVelocity") as HTMLInputElement;
 let FMAngleOfAttackInput = document.getElementById("angleOfAttack") as HTMLInputElement;
 
+
 //#endregion
 
 //#region Data and Graphs
@@ -60,13 +61,6 @@ function resetAirfoilParameters(): void {
     fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 }
 
-function updateAngleOfAttack(): void {
-
-}
-
-function updateFreeStreamVelocity(): void {
-
-}
 
 function updateSimulationMode(): void {
     fluidManager.updateSimulationMode();

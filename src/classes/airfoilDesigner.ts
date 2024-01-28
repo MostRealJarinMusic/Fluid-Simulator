@@ -126,7 +126,7 @@ class AirfoilDesigner {
 
     private disableGraph(): void {
         //Change background colour
-        let datasets: Chart.ChartDataSets[] = this.graph.data.datasets || [];
+        let datasets: Chart.ChartDataSets[] = this.graph.data.datasets as Chart.ChartDataSets[];
 
         for (let i = 0; i < datasets.length; i++) {
             datasets[i].backgroundColor = 'rgba(192, 192, 192, 0.2)';
@@ -140,8 +140,6 @@ class AirfoilDesigner {
 
     //#region Airfoil functions
     public updateAirfoil(): void {
-        //Euler's number is allowed as it is considered a number - BUG
-
         let airfoilType = this.shape.constructor.name;
         let currentParameters = this.getParametersFromInput();
         //console.log(currentParameters)

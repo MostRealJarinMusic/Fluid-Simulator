@@ -159,16 +159,18 @@ class Fluid {
         if (this.running) {
 
             //for (let steps = 0; steps < 3; steps++) {
-            this.stream();
-
-            this.moveTracers();
-
-
-            //this.setInflow();
             this.computeMoments();
             this.applyBoundaryConditions();
             this.computeEquilibrium();
             this.collideLocally();
+
+
+            this.stream();
+
+            this.moveTracers();
+
+            //this.setInflow();
+
             //this.showDebug();
             //console.log(steps)
             //}
@@ -348,6 +350,11 @@ class Fluid {
         }
     }
 
+    private clearTracers(): void {
+        while (this.tracers.length) {
+            this.tracers.pop();
+        }
+    }
 
     private moveTracers(): void {
         for (let tracer of this.tracers) {
@@ -485,6 +492,9 @@ class Fluid {
 
     public updateAirfoil(newGridPoints: Vector[]): void {
         this.airfoilGridPoints = newGridPoints;
+        this.clearTracers();
+        this.initTracers();
+
         this.setupObstacle();
     }
 
