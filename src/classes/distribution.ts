@@ -1,13 +1,13 @@
 class Distribution {
-    public north!: number[];
-    public northEast!: number[];
-    public east!: number[];
-    public southEast!: number[];
-    public south!: number[];
-    public southWest!: number[];
-    public west!: number[];
-    public northWest!: number[];
-    public centre!: number[];
+    public north: number[];
+    public northEast: number[];
+    public east: number[];
+    public southEast: number[];
+    public south: number[];
+    public southWest: number[];
+    public west: number[];
+    public northWest: number[];
+    public centre: number[];
 
     constructor(size: number, initialValue: number) {
         this.north = new Array(size).fill(initialValue);
