@@ -7,7 +7,9 @@ class FluidManager {
     private airfoilGridPoints!: Vector[];
 
     private angleOfAttack!: number;
+    private angleOfAttackInfo: ShapeParameterInfo;
     private freeStreamVelocity!: number;
+    private angleOfAttackInput: HTMLInputElement;
     private parameterInputContainer!: HTMLDivElement;
     private simulationModeSelector: HTMLSelectElement;
 
@@ -16,7 +18,7 @@ class FluidManager {
     //#endregion
 
 
-    constructor(canvas: HTMLCanvasElement, parameterInputContainer: HTMLDivElement, simulationModeSelector: HTMLSelectElement) {
+    constructor(canvas: HTMLCanvasElement, parameterInputContainer: HTMLDivElement, simulationModeSelector: HTMLSelectElement, angleOfAttackInput: HTMLInputElement) {
         this.fluidCanvas = canvas;
         //timestep is 0.53
         this.fluid = new Fluid(160, 90, 1, 0.1, 0.53, this.fluidCanvas);
@@ -24,6 +26,8 @@ class FluidManager {
 
         this.parameterInputContainer = parameterInputContainer;
         this.simulationModeSelector = simulationModeSelector;
+        this.angleOfAttackInput = angleOfAttackInput;
+        this.angleOfAttackInfo = { name: "AOA", labelText: "n/a", defaultValue: 0, bounds: { lower: 0, upper: 0.7 } };
 
         //this.showTracers = false;
         //this.showStreamlines = false;
@@ -74,6 +78,14 @@ class FluidManager {
 
     private rotateAirfoil(): Vector[] {
         return getFullShape(this.airfoilGridPoints.map((vector) => roundVector(rotateVector(vector, this.angleOfAttack))));
+    }
+
+
+    public updateAngleOfAttack() {
+        this.angleOfAttack = parseFloat(this.angleOfAttackInput.value);
+    }
+    public resetAngleOfAttack() {
+
     }
 
     //#region Fluid simulation settings

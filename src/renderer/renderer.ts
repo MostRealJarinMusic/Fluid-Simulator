@@ -18,19 +18,20 @@ const airfoilDesigner = new AirfoilDesigner(airfoilGraphCanvas, ADTypeSelector, 
 let FMCanvas = document.getElementById("fluidSimulation") as HTMLCanvasElement;
 let FMParameterInputContainer = document.getElementById("fluidSimulationParameters") as HTMLDivElement;
 let FMSimulationModeSelector = document.getElementById("simulationModeSelector") as HTMLSelectElement;
+let FMTracersCheck = document.getElementById("fluidTracers") as HTMLInputElement;
+let FMStreamlinesCheck = document.getElementById("fluidStreamlines") as HTMLInputElement;
+let FMFreeStreamVelocityInput = document.getElementById("freeStreamVelocity") as HTMLInputElement;
+let FMAngleOfAttackInput = document.getElementById("angleOfAttack") as HTMLInputElement;
 
 //160, 80
 //const fluidSimulation = new Fluid(160, 80, 1, 2.5, 0.53, FMCanvas);
-const fluidManager = new FluidManager(FMCanvas, FMParameterInputContainer, FMSimulationModeSelector);
+const fluidManager = new FluidManager(FMCanvas, FMParameterInputContainer, FMSimulationModeSelector, FMAngleOfAttackInput);
 //fluidSimulation.setupDefaultObstacle();
 fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 fluidManager.initFluid();
 
 
-let FMTracersCheck = document.getElementById("fluidTracers") as HTMLInputElement;
-let FMStreamlinesCheck = document.getElementById("fluidStreamlines") as HTMLInputElement;
-let FMFreeStreamVelocityInput = document.getElementById("freeStreamVelocity") as HTMLInputElement;
-let FMAngleOfAttackInput = document.getElementById("angleOfAttack") as HTMLInputElement;
+
 
 
 //#endregion
@@ -83,9 +84,15 @@ FMFreeStreamVelocityInput.addEventListener('change', function () {
     fluidManager.FreeStreamVelocity = parseFloat(this.value);
 });
 
+/*
 FMAngleOfAttackInput.addEventListener('change', function () {
     fluidManager.AngleOfAttack = parseFloat(this.value);
 })
+*/
+function updateAngleOfAttack(): void {
+    fluidManager.updateAngleOfAttack;
+}
+
 
 //#endregion
 
