@@ -28,6 +28,7 @@ class FluidManager {
         this.simulationModeSelector = simulationModeSelector;
         this.angleOfAttackInput = angleOfAttackInput;
         this.angleOfAttackInfo = { name: "AOA", labelText: "n/a", defaultValue: 0, bounds: { lower: 0, upper: 0.7 } };
+        this.angleOfAttack = this.angleOfAttackInfo.defaultValue;
 
         //this.showTracers = false;
         //this.showStreamlines = false;
@@ -71,8 +72,9 @@ class FluidManager {
 
     public updateAirfoil(newGridPoints: Vector[]): void {
         this.airfoilGridPoints = newGridPoints;
+        let rotatedAirfoil = this.rotateAirfoil();
         //this.applyRotationToAirfoil();
-        this.fluid.updateAirfoil(this.airfoilGridPoints);
+        this.fluid.updateAirfoil(rotatedAirfoil);
     }
     //#endregion
 
@@ -82,10 +84,19 @@ class FluidManager {
 
 
     public updateAngleOfAttack() {
-        this.angleOfAttack = parseFloat(this.angleOfAttackInput.value);
+        this.angleOfAttack = -parseFloat(this.angleOfAttackInput.value);
+        //console.log(this.angleOfAttack)
+        let rotatedAirfoil = this.rotateAirfoil();
+        this.fluid.updateAirfoil(rotatedAirfoil);
+
     }
     public resetAngleOfAttack() {
+        this.angleOfAttack = 0;
+        this.publishParameters();
+    }
 
+    private publishParameters(): void {
+        this.angleOfAttackInput.value = this.angleOfAttack.toString();
     }
 
     //#region Fluid simulation settings

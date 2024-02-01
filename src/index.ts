@@ -11,7 +11,7 @@ function createMainWindow(): void {
     const mainWindow = new BrowserWindow({
         title: 'Fluid Simulator',
         width: isDev ? 1500 : 1000,
-        height: 800,
+        height: 650,
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: true,

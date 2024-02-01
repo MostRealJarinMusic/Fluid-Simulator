@@ -54,11 +54,13 @@ function updateAirfoilParameters(): void {
 
 function updateChosenShape(): void {
     airfoilDesigner.changeAirfoil();
+    fluidManager.resetAngleOfAttack();
     fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 }
 
 function resetAirfoilParameters(): void {
     airfoilDesigner.resetAirfoil();
+    fluidManager.resetAngleOfAttack();
     fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 }
 
@@ -90,7 +92,7 @@ FMAngleOfAttackInput.addEventListener('change', function () {
 })
 */
 function updateAngleOfAttack(): void {
-    fluidManager.updateAngleOfAttack;
+    fluidManager.updateAngleOfAttack();
 }
 
 
