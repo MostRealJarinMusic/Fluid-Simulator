@@ -22,10 +22,11 @@ let FMTracersCheck = document.getElementById("fluidTracers") as HTMLInputElement
 let FMStreamlinesCheck = document.getElementById("fluidStreamlines") as HTMLInputElement;
 let FMFreeStreamVelocityInput = document.getElementById("freeStreamVelocity") as HTMLInputElement;
 let FMAngleOfAttackInput = document.getElementById("angleOfAttack") as HTMLInputElement;
+let FMFSVelocityInput = document.getElementById("freeStreamVelocity") as HTMLInputElement;
 
 //160, 80
 //const fluidSimulation = new Fluid(160, 80, 1, 2.5, 0.53, FMCanvas);
-const fluidManager = new FluidManager(FMCanvas, FMParameterInputContainer, FMSimulationModeSelector, FMAngleOfAttackInput);
+const fluidManager = new FluidManager(FMCanvas, FMParameterInputContainer, FMSimulationModeSelector, FMAngleOfAttackInput, FMFSVelocityInput);
 //fluidSimulation.setupDefaultObstacle();
 fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 fluidManager.initFluid();

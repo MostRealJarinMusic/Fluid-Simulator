@@ -8,8 +8,10 @@ class FluidManager {
 
     private angleOfAttack!: number;
     private angleOfAttackInfo: ShapeParameterInfo;
-    private freeStreamVelocity!: number;
     private angleOfAttackInput: HTMLInputElement;
+    private freeStreamVelocity!: number;
+    private freeStreamVelocityInfo: ShapeParameterInfo;
+    private freeStreamVelocityInput: HTMLInputElement;
     private parameterInputContainer!: HTMLDivElement;
     private simulationModeSelector: HTMLSelectElement;
 
@@ -18,7 +20,7 @@ class FluidManager {
     //#endregion
 
 
-    constructor(canvas: HTMLCanvasElement, parameterInputContainer: HTMLDivElement, simulationModeSelector: HTMLSelectElement, angleOfAttackInput: HTMLInputElement) {
+    constructor(canvas: HTMLCanvasElement, parameterInputContainer: HTMLDivElement, simulationModeSelector: HTMLSelectElement, angleOfAttackInput: HTMLInputElement, fSVelocityInput: HTMLInputElement) {
         this.fluidCanvas = canvas;
         //timestep is 0.53
         this.fluid = new Fluid(160, 90, 1, 0.1, 0.53, this.fluidCanvas);
@@ -26,9 +28,15 @@ class FluidManager {
 
         this.parameterInputContainer = parameterInputContainer;
         this.simulationModeSelector = simulationModeSelector;
+
         this.angleOfAttackInput = angleOfAttackInput;
         this.angleOfAttackInfo = { name: "AOA", labelText: "n/a", defaultValue: 0, bounds: { lower: 0, upper: 0.7 } };
         this.angleOfAttack = this.angleOfAttackInfo.defaultValue;
+
+        this.freeStreamVelocityInput = fSVelocityInput;
+        this.freeStreamVelocityInfo = { name: "FSV", labelText: "N/A", defaultValue: 0.1, bounds: { lower: 0.1, upper: 0.8 } };
+        this.freeStreamVelocity = this.freeStreamVelocityInfo.defaultValue;
+
 
         //this.showTracers = false;
         //this.showStreamlines = false;
@@ -48,12 +56,6 @@ class FluidManager {
         this.fluid.FreeStreamVelocity = value;
     }
 
-    set AngleOfAttack(angle: number) {
-        this.angleOfAttack = -angle;
-        //this.applyRotationToAirfoil();
-        let rotatedAirfoil = this.rotateAirfoil();
-        this.fluid.updateAirfoil(rotatedAirfoil);
-    }
 
     //#endregion
 
@@ -83,6 +85,7 @@ class FluidManager {
     }
 
 
+    //#region Angle of Attack and Free Stream Velocity
     public updateAngleOfAttack() {
         this.angleOfAttack = -parseFloat(this.angleOfAttackInput.value);
         //console.log(this.angleOfAttack)
@@ -91,13 +94,15 @@ class FluidManager {
 
     }
     public resetAngleOfAttack() {
-        this.angleOfAttack = 0;
+        this.angleOfAttack = parseFloat(this.angleOfAttackInput.min);
         this.publishParameters();
     }
 
     private publishParameters(): void {
         this.angleOfAttackInput.value = this.angleOfAttack.toString();
     }
+
+    //#endregion
 
     //#region Fluid simulation settings
 

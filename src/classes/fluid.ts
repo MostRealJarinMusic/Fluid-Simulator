@@ -5,6 +5,7 @@ class Fluid {
     private numCells: number;
     private density: number;
     private inVelocity: number;
+    private freeStreamVelocity: number;
     private timescale: number;
     private discreteVelocities: number;
     private latticeIndices: number[];
@@ -16,6 +17,7 @@ class Fluid {
     private equilibriumDistribution: number[][];
     private localDensity: number[];
     private localVelocity: Vector[];
+    private localPressure: number[];
 
     private solid: boolean[];
 
@@ -44,6 +46,7 @@ class Fluid {
         this.numCells = this.width * this.height;
         this.density = density;
         this.inVelocity = inVelocity;
+        this.freeStreamVelocity = inVelocity;
         this.timescale = timescale;
         //#endregion
 
@@ -86,6 +89,7 @@ class Fluid {
         //#region Local properties
         this.localDensity = new Array(this.numCells).fill(this.density);
         this.localVelocity = new Array(this.numCells).fill({ x: 0, y: 0 });
+        this.localPressure = new Array(this.numCells).fill(0);
 
         //Solidity marker
         this.solid = new Array(this.numCells).fill(false);
@@ -148,7 +152,7 @@ class Fluid {
         //this.showDebug();
     }
 
-    public showDebug() {
+    public showDebug(): void {
         console.log("Distribution")
         console.log(this.distribution)
         console.log("Equilibrium Distribution")
@@ -190,6 +194,8 @@ class Fluid {
 
     set FreeStreamVelocity(value: number) {
         //Set the free stream velocity
+        this.freeStreamVelocity = value;
+        console.log(this.freeStreamVelocity);
         /*
         this.inVelocity = value;
         this.initFluid();
