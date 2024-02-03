@@ -27,7 +27,7 @@ class AirfoilDesigner {
 
     //#region Mapping
 
-    private mapParameter(parameterName: string, parameterInfo: ShapeParameterInfo): HTMLInputElement {
+    private mapParameter(parameterName: string, parameterInfo: ParameterInfo): HTMLInputElement {
         let parameterElement = document.createElement("input");
         parameterElement.type = "number";
         parameterElement.name = parameterName;

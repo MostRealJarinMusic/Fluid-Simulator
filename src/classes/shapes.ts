@@ -7,7 +7,7 @@ abstract class Shape {
     protected graphDatasets: GraphDataset[] = [];
     protected params: Record<string, number> = {};
 
-    abstract parameterInfo: Record<string, ShapeParameterInfo>;
+    abstract parameterInfo: Record<string, ParameterInfo>;
 
 
     abstract updateParameters(newParameters: Record<string, number>): void;
@@ -15,7 +15,7 @@ abstract class Shape {
     abstract get Area(): number;
 
     //#region Getters
-    get ParameterInfo(): Record<string, ShapeParameterInfo> {
+    get ParameterInfo(): Record<string, ParameterInfo> {
         return this.parameterInfo;
     }
 
@@ -38,7 +38,7 @@ abstract class Shape {
 //Shapes
 
 class Ellipse extends Shape {
-    override parameterInfo: Record<string, ShapeParameterInfo> = {
+    override parameterInfo: Record<string, ParameterInfo> = {
         'xRadius': { name: 'xRadius', labelText: 'X Radius', defaultValue: 0.1, bounds: { lower: 0.05, upper: 0.25 } },
         'yRadius': { name: 'yRadius', labelText: 'Y Radius', defaultValue: 0.1, bounds: { lower: 0.05, upper: 0.25 } }
     };
@@ -85,7 +85,7 @@ class Ellipse extends Shape {
 }
 
 class Rectangle extends Shape {
-    override parameterInfo: Record<string, ShapeParameterInfo> = {
+    override parameterInfo: Record<string, ParameterInfo> = {
         'width': { name: 'width', labelText: 'Width', defaultValue: 0.5, bounds: { lower: 0.05, upper: 0.75 } },
         'height': { name: 'height', labelText: 'Height', defaultValue: 0.2, bounds: { lower: 0.05, upper: 0.3 } }
     }
@@ -129,7 +129,7 @@ class Rectangle extends Shape {
 }
 
 class Line extends Shape {
-    override parameterInfo: Record<string, ShapeParameterInfo> = {
+    override parameterInfo: Record<string, ParameterInfo> = {
         'lineLength': { name: 'lineLength', labelText: 'Length', defaultValue: 0.3, bounds: { lower: 0.1, upper: 0.5 } }
     }
     constructor() {
@@ -165,7 +165,7 @@ class Line extends Shape {
 }
 
 class Airfoil extends Shape {
-    override parameterInfo: Record<string, ShapeParameterInfo> = {
+    override parameterInfo: Record<string, ParameterInfo> = {
         'm': { name: 'm', labelText: 'Max. Camber (%)', defaultValue: 0, bounds: { lower: 0, upper: 9.5 } },
         'p': { name: 'p', labelText: 'Max. Camber Pos. (%)', defaultValue: 0, bounds: { lower: 0, upper: 90 } },
         't': { name: 't', labelText: 'Thickness', defaultValue: 12, bounds: { lower: 1, upper: 40 } }

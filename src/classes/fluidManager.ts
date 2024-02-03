@@ -7,10 +7,10 @@ class FluidManager {
     private airfoilGridPoints!: Vector[];
 
     private angleOfAttack!: number;
-    private angleOfAttackInfo: ShapeParameterInfo;
+    private angleOfAttackInfo: ParameterInfo;
     private angleOfAttackInput: HTMLInputElement;
     private freeStreamVelocity!: number;
-    private freeStreamVelocityInfo: ShapeParameterInfo;
+    private freeStreamVelocityInfo: ParameterInfo;
     private freeStreamVelocityInput: HTMLInputElement;
     private parameterInputContainer!: HTMLDivElement;
     private simulationModeSelector: HTMLSelectElement;
@@ -86,20 +86,29 @@ class FluidManager {
 
 
     //#region Angle of Attack and Free Stream Velocity
-    public updateAngleOfAttack() {
+    public updateAngleOfAttack(): void {
         this.angleOfAttack = -parseFloat(this.angleOfAttackInput.value);
         //console.log(this.angleOfAttack)
         let rotatedAirfoil = this.rotateAirfoil();
         this.fluid.updateAirfoil(rotatedAirfoil);
 
     }
-    public resetAngleOfAttack() {
-        this.angleOfAttack = parseFloat(this.angleOfAttackInput.min);
+    public resetParameters(): void {
+        this.angleOfAttack = this.angleOfAttackInfo.defaultValue;
+
+        this.freeStreamVelocity = this.freeStreamVelocityInfo.defaultValue;
+        this.fluid.FreeStreamVelocity = this.freeStreamVelocity;
         this.publishParameters();
     }
 
     private publishParameters(): void {
         this.angleOfAttackInput.value = this.angleOfAttack.toString();
+        this.freeStreamVelocityInput.value = this.freeStreamVelocity.toString();
+    }
+
+    public updateFreeStreamVelocity(): void {
+        this.freeStreamVelocity = parseFloat(this.freeStreamVelocityInput.value);
+        this.fluid.FreeStreamVelocity = this.freeStreamVelocity;
     }
 
     //#endregion

@@ -55,13 +55,13 @@ function updateAirfoilParameters(): void {
 
 function updateChosenShape(): void {
     airfoilDesigner.changeAirfoil();
-    fluidManager.resetAngleOfAttack();
+    fluidManager.resetParameters();
     fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 }
 
 function resetAirfoilParameters(): void {
     airfoilDesigner.resetAirfoil();
-    fluidManager.resetAngleOfAttack();
+    fluidManager.resetParameters();
     fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 }
 
@@ -81,11 +81,15 @@ FMTracersCheck.addEventListener('change', function () {
 FMStreamlinesCheck.addEventListener('change', function () {
     fluidManager.ShowStreamlines = this.checked;
 });
-
+/*
 FMFreeStreamVelocityInput.addEventListener('change', function () {
     //console.log(this.value);
     fluidManager.FreeStreamVelocity = parseFloat(this.value);
 });
+*/
+function updateFreeStreamVelocity(): void {
+    fluidManager.updateFreeStreamVelocity();
+}
 
 /*
 FMAngleOfAttackInput.addEventListener('change', function () {

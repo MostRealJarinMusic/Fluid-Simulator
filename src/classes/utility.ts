@@ -3,7 +3,7 @@ type Vector = { x: number; y: number; }
 type GridPoints = { points: Vector[]; }
 type GraphDataset = GridPoints & { label: string; colour: string; }
 type Bound = { lower: number, upper: number };
-type ShapeParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: Bound; }
+type ParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: Bound; }
 type Colour = { red: number, green: number, blue: number, alpha: number };
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure'] as const;
@@ -38,7 +38,7 @@ function mapDatasets(datasets: GraphDataset[]): Chart.ChartDataSets[] {
     }));
 }
 
-function setupParameters(setupInformation: Record<string, ShapeParameterInfo>): Record<string, number> {
+function setupParameters(setupInformation: Record<string, ParameterInfo>): Record<string, number> {
     let temp: Record<string, number> = {};
     for (const [parameterName, parameterInfo] of Object.entries(setupInformation)) {
         temp[parameterName] = parameterInfo.defaultValue;
