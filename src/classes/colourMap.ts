@@ -51,18 +51,6 @@ class ColourMap {
     }
 
     //#region Getters
-    get RedList(): number[] {
-        return this.redList;
-    }
-
-    get GreenList(): number[] {
-        return this.greenList;
-    }
-
-    get BlueList(): number[] {
-        return this.blueList;
-    }
-
     get NumColours(): number {
         return this.numColours;
     }

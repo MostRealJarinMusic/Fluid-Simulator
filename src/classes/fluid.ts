@@ -214,12 +214,16 @@ class Fluid {
             let tempDistribution = this.distribution[nodeIndex];
             let tempDensity = summation(tempDistribution);
 
+            //Velocity
             this.localVelocity[nodeIndex] = {
                 x: summation(mapToLat(tempDistribution, this.latticeXs)) / tempDensity,
                 y: summation(mapToLat(tempDistribution, this.latticeYs)) / tempDensity
             }
 
+            //Density
             this.localDensity[nodeIndex] = tempDensity;
+
+            //Pressure
 
             //console.log(`Density: ${tempDensity}`);
             //console.log(`UX: ${this.#localUXs[this.index(x, y)]}`);

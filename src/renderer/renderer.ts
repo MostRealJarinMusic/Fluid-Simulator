@@ -16,7 +16,6 @@ const airfoilDesigner = new AirfoilDesigner(airfoilGraphCanvas, ADTypeSelector, 
 //#region Simulation
 //Simulation
 let FMCanvas = document.getElementById("fluidSimulation") as HTMLCanvasElement;
-let FMParameterInputContainer = document.getElementById("fluidSimulationParameters") as HTMLDivElement;
 let FMSimulationModeSelector = document.getElementById("simulationModeSelector") as HTMLSelectElement;
 let FMTracersCheck = document.getElementById("fluidTracers") as HTMLInputElement;
 let FMStreamlinesCheck = document.getElementById("fluidStreamlines") as HTMLInputElement;
@@ -26,13 +25,10 @@ let FMFSVelocityInput = document.getElementById("freeStreamVelocity") as HTMLInp
 
 //160, 80
 //const fluidSimulation = new Fluid(160, 80, 1, 2.5, 0.53, FMCanvas);
-const fluidManager = new FluidManager(FMCanvas, FMParameterInputContainer, FMSimulationModeSelector, FMAngleOfAttackInput, FMFSVelocityInput);
+const fluidManager = new FluidManager(FMCanvas, FMSimulationModeSelector, FMAngleOfAttackInput, FMFSVelocityInput);
 //fluidSimulation.setupDefaultObstacle();
 fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 fluidManager.initFluid();
-
-
-
 
 
 //#endregion

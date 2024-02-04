@@ -12,7 +12,6 @@ class FluidManager {
     private freeStreamVelocity!: number;
     private freeStreamVelocityInfo: ParameterInfo;
     private freeStreamVelocityInput: HTMLInputElement;
-    private parameterInputContainer!: HTMLDivElement;
     private simulationModeSelector: HTMLSelectElement;
 
     //private showTracers: boolean;
@@ -20,13 +19,12 @@ class FluidManager {
     //#endregion
 
 
-    constructor(canvas: HTMLCanvasElement, parameterInputContainer: HTMLDivElement, simulationModeSelector: HTMLSelectElement, angleOfAttackInput: HTMLInputElement, fSVelocityInput: HTMLInputElement) {
+    constructor(canvas: HTMLCanvasElement, simulationModeSelector: HTMLSelectElement, angleOfAttackInput: HTMLInputElement, fSVelocityInput: HTMLInputElement) {
         this.fluidCanvas = canvas;
         //timestep is 0.53
         this.fluid = new Fluid(160, 90, 1, 0.1, 0.53, this.fluidCanvas);
         this.simulationMode = 'velocity';
 
-        this.parameterInputContainer = parameterInputContainer;
         this.simulationModeSelector = simulationModeSelector;
 
         this.angleOfAttackInput = angleOfAttackInput;
