@@ -160,6 +160,8 @@ class AirfoilDesigner {
 
         this.publishParameters(this.shape.Parameters);
         this.updateProfileNumber(this.shape.Parameters);
+
+        console.log(this.shape.Area);
     }
 
     public resetAirfoil(): void {
@@ -215,6 +217,8 @@ class AirfoilDesigner {
                 this.updateProfileNumber(this.shape.Parameters);
             }
         }
+
+        console.log(this.shape.Area);
     }
 
     private switchAirfoil(newType: string): void {

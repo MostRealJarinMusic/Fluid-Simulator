@@ -195,7 +195,7 @@ class Fluid {
     set FreeStreamVelocity(value: number) {
         //Set the free stream velocity
         this.freeStreamVelocity = value;
-        console.log(this.freeStreamVelocity);
+        //console.log(this.freeStreamVelocity);
         /*
         this.inVelocity = value;
         this.initFluid();

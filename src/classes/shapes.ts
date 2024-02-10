@@ -8,8 +8,6 @@ abstract class Shape {
     protected params: Record<string, number> = {};
 
     abstract parameterInfo: Record<string, ParameterInfo>;
-
-
     abstract updateParameters(newParameters: Record<string, number>): void;
     abstract updateGridPoints(): void;
     abstract get Area(): number;
@@ -81,11 +79,7 @@ class Ellipse extends Shape {
         tempGridPoints = getFullShape(tempGridPoints);
 
         this.gridPoints = tempGridPoints;
-
-
-        //throw new Error("Method not implemented.");
     }
-
 }
 
 class Rectangle extends Shape {
@@ -127,8 +121,6 @@ class Rectangle extends Shape {
         }
 
         this.gridPoints = tempGridPoints;
-
-        //throw new Error("Method not implemented.");
     }
 }
 
@@ -184,7 +176,36 @@ class Airfoil extends Shape {
     }
 
     override get Area(): number {
-        return 1;   //Simpson's Rule?
+        //Simpson's rule for the area of an airfoil - numerical integration
+        let upperArea = 0;
+        let lowerArea = 0;
+        let samples = 100;
+        let spacing = 1 / samples;
+
+        for (let i = 0; i <= samples; i += 1) {
+            let sampleX = i / samples;
+            let upperPoint = this.getUpperPoint(sampleX);
+            let lowerPoint = this.getLowerPoint(sampleX);
+
+            if (i === 0 || i === samples) {
+                upperArea += upperPoint.y;
+                lowerArea += lowerPoint.y;
+            } else if (i % 2 === 0) {
+                upperArea += 4 * upperPoint.y;
+                lowerArea += 4 * lowerPoint.y;
+            } else {
+                upperArea += 2 * upperPoint.y;
+                lowerArea += 2 * lowerPoint.y;
+            }
+        }
+
+        upperArea *= (spacing / 3);
+        lowerArea *= -(spacing / 3);
+
+        console.log("Upper area: " + upperArea.toString());
+        console.log("Lower area: " + lowerArea.toString());
+
+        return upperArea + lowerArea;
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
