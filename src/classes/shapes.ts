@@ -51,9 +51,8 @@ class Ellipse extends Shape {
     override get Area(): number {
         let xRadius = this.params.xRadius;
         let yRadius = this.params.yRadius;
-        let lengthScaleFactor = yRadius / xRadius;
-        let areaScaleFactor = lengthScaleFactor ** 2;
-        return Math.PI * (xRadius ** 2) * areaScaleFactor;
+
+        return Math.PI * (xRadius * yRadius);
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
@@ -135,7 +134,7 @@ class Line extends Shape {
     }
 
     override get Area(): number {
-        return 1;
+        return (1 / 60) * this.params.lineLength;
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
