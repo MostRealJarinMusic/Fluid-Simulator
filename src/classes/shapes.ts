@@ -177,8 +177,7 @@ class Airfoil extends Shape {
 
     override get Area(): number {
         //Simpson's rule for the area of an airfoil - numerical integration
-        let upperArea = 0;
-        let lowerArea = 0;
+        let totalArea = 0;
         let samples = 100;
         let spacing = 1 / samples;
 
@@ -188,24 +187,16 @@ class Airfoil extends Shape {
             let lowerPoint = this.getLowerPoint(sampleX);
 
             if (i === 0 || i === samples) {
-                upperArea += upperPoint.y;
-                lowerArea += lowerPoint.y;
+                totalArea += upperPoint.y - lowerPoint.y;
             } else if (i % 2 === 0) {
-                upperArea += 4 * upperPoint.y;
-                lowerArea += 4 * lowerPoint.y;
+                totalArea += 4 * (upperPoint.y - lowerPoint.y);
             } else {
-                upperArea += 2 * upperPoint.y;
-                lowerArea += 2 * lowerPoint.y;
+                totalArea += 2 * (upperPoint.y - lowerPoint.y);
             }
         }
 
-        upperArea *= (spacing / 3);
-        lowerArea *= -(spacing / 3);
-
-        console.log("Upper area: " + upperArea.toString());
-        console.log("Lower area: " + lowerArea.toString());
-
-        return upperArea + lowerArea;
+        totalArea *= (spacing / 3);
+        return totalArea;
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
