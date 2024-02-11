@@ -118,6 +118,7 @@ class Fluid {
         this.tracers = [];
         this.streamlines = [];
         this.initTracers();
+        this.initStreamlines();
         //#endregion
     }
 
@@ -360,9 +361,29 @@ class Fluid {
         }
     }
 
+    private initStreamlines(): void {
+        let rows = 8;
+        let columns = 8;
+        let xOffset = Math.round(this.width / columns);
+        let yOffset = Math.round(this.height / rows);
+
+        for (let x = 0; x < columns; x++) {
+            for (let y = 0; y < rows; y++) {
+                let position: Vector = { x: x * xOffset + xOffset / 2, y: y * yOffset + yOffset / 2 };
+                this.streamlines.push(new StreamLine(position, 0.01));
+            }
+        }
+    }
+
     private clearTracers(): void {
         while (this.tracers.length) {
             this.tracers.pop();
+        }
+    }
+
+    private clearStreamlines(): void {
+        while (this.streamlines.length) {
+            this.streamlines.pop();
         }
     }
 
@@ -383,6 +404,48 @@ class Fluid {
             tracer.move();
         }
     }
+
+    private sampleVelocity(samplePosition: Vector): Vector {
+        //Bilinear interpolation
+        let x = samplePosition.x;
+        let y = samplePosition.y;
+
+        //Find the 4 surrounding points
+        let x1 = Math.floor(x);
+        let x2 = Math.ceil(x);
+        let y1 = Math.floor(y);
+        let y2 = Math.ceil(y);
+
+        //Avoid divide by 0 errors when x and y are integers
+        if (x1 === x2) x2++;
+        if (y1 === y2) y2++;
+
+        //Get fractional distances
+        let dx = (x - x1) / (x2 - x1);
+        let dy = (y - y1) / (y2 - y1);
+
+        //Get Velocities
+        let topLeft = this.localVelocity[this.index(x1, y1)];
+        let topRight = this.localVelocity[this.index(x2, y1)];
+        let bottomLeft = this.localVelocity[this.index(x1, y2)];
+        let bottomRight = this.localVelocity[this.index(x2, y2)];
+
+        //Interpolate
+        let xVelocity =
+            ((1 - dx) * (1 - dy) * topLeft.x) +
+            (dx * (1 - dy) * topRight.x) +
+            ((1 - dx) * dy * bottomLeft.x) +
+            (dx * dy * bottomRight.x);
+
+        let yVelocity =
+            ((1 - dx) * (1 - dy) * topLeft.y) +
+            (dx * (1 - dy) * topRight.y) +
+            ((1 - dx) * dy * bottomLeft.y) +
+            (dx * dy * bottomRight.y);
+
+        return { x: xVelocity, y: yVelocity };
+    }
+
 
     //#endregion
 
@@ -435,12 +498,40 @@ class Fluid {
 
         this.context.putImageData(this.image, 0, 0);
 
+        if (this.showStreamlines) this.drawStreamlines();
+    }
 
+    private drawStreamlines(): void {
+        this.context.strokeStyle = "#FFFFFF";
+        this.context.lineWidth = 1;
+
+        for (let streamline of this.streamlines) {
+            this.context.beginPath();
+
+            let currentPosition = streamline.Position;
+            let imagePosition = this.gridPosToImagePos(currentPosition);
+
+            this.context.moveTo(2 * imagePosition.x, 2 * imagePosition.y);
+
+            for (let n = 0; n < streamline.MaxSteps; n++) {
+                let velocityVector = scaleVector(this.sampleVelocity(currentPosition), 15)
+                currentPosition = addVectors(currentPosition, velocityVector);
+
+                imagePosition = this.gridPosToImagePos(currentPosition);
+
+                if (imagePosition.x >= this.width - 5 || imagePosition.x <= 0 || imagePosition.y >= this.height - 5 || imagePosition.y <= 0) break;
+
+                this.context.lineTo(2 * imagePosition.x, 2 * imagePosition.y);
+            }
+
+            this.context.stroke();
+            this.context.closePath();
+        }
     }
 
     private drawTracers(): void {
+        let colour: Colour = { red: 40, green: 42, blue: 54, alpha: 255 };
         for (let tracer of this.tracers) {
-            let colour: Colour = { red: 40, green: 42, blue: 54, alpha: 255 };
             let position = roundVector(tracer.Position);
             this.colourPixel(position, colour);
         }
@@ -505,6 +596,9 @@ class Fluid {
         this.clearTracers();
         this.initTracers();
 
+        this.clearStreamlines();
+        this.initStreamlines();
+
         this.setupObstacle();
     }
 
@@ -549,29 +643,22 @@ class StreamLine {
     private startPosition: Vector;
     private stepSize: number;
     private maxSteps: number;
-    private linePoints: Vector[];
 
     constructor(startPosition: Vector, stepSize: number) {
         this.startPosition = startPosition;
         this.stepSize = stepSize;
-        this.maxSteps = 5;
-        this.linePoints = [this.startPosition];
+        this.maxSteps = 10;
     }
 
-    calculateLinePoints() {
-        let tempPosition: Vector = this.startPosition;
-        for (let n = 0; n < this.maxSteps; n++) {
-            /*
-            let velocity = //some sampling function here
-            tempPosition.x += velocity.x * this.stepSize;
-            tempPosition.y += velocity.y * this.stepSize;
-
-            this.linePoints.push(tempPosition)
-            */
-        }
+    get Position(): Vector {
+        return this.startPosition;
     }
 
-    get LinePoints(): Vector[] {
-        return this.linePoints;
+    get StepSize(): number {
+        return this.stepSize;
+    }
+
+    get MaxSteps(): number {
+        return this.maxSteps;
     }
 }
