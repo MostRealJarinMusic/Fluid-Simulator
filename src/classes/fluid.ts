@@ -30,13 +30,10 @@ class Fluid {
     private airfoilGridPoints!: Vector[];
     private running: boolean;
 
-
     private showTracers: boolean;
     private tracers: Tracer[];
     private showStreamlines: boolean;
     private streamlines: StreamLine[];
-
-
     //#endregion
 
     constructor(width: number, height: number, density: number, inVelocity: number, timescale: number, canvas: HTMLCanvasElement) {
@@ -346,9 +343,8 @@ class Fluid {
 
     //#region Tracers and streamlines
     private initTracers(): void {
-        //let numTracers = 200;
-        let rows = 10;
-        let columns = 10;
+        let rows = 8;
+        let columns = 8;
         let xOffset = Math.round(this.width / columns);
         let yOffset = Math.round(this.height / rows);
         let bounds: Bound = { lower: 0, upper: this.width };
@@ -508,13 +504,13 @@ class Fluid {
         for (let streamline of this.streamlines) {
             this.context.beginPath();
 
-            let currentPosition = streamline.Position;
+            let currentPosition = streamline.position;
             let imagePosition = this.gridPosToImagePos(currentPosition);
 
             this.context.moveTo(2 * imagePosition.x, 2 * imagePosition.y);
 
-            for (let n = 0; n < streamline.MaxSteps; n++) {
-                let velocityVector = scaleVector(this.sampleVelocity(currentPosition), 15)
+            for (let n = 0; n < streamline.maxSteps; n++) {
+                let velocityVector = scaleVector(this.sampleVelocity(currentPosition), 30)
                 currentPosition = addVectors(currentPosition, velocityVector);
 
                 imagePosition = this.gridPosToImagePos(currentPosition);
@@ -640,25 +636,13 @@ class Tracer {
 }
 
 class StreamLine {
-    private startPosition: Vector;
-    private stepSize: number;
-    private maxSteps: number;
+    public readonly position: Vector;
+    public readonly stepSize: number;
+    public readonly maxSteps: number;
 
     constructor(startPosition: Vector, stepSize: number) {
-        this.startPosition = startPosition;
+        this.position = startPosition;
         this.stepSize = stepSize;
         this.maxSteps = 10;
-    }
-
-    get Position(): Vector {
-        return this.startPosition;
-    }
-
-    get StepSize(): number {
-        return this.stepSize;
-    }
-
-    get MaxSteps(): number {
-        return this.maxSteps;
     }
 }
