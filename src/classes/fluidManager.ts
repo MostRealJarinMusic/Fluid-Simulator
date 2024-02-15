@@ -35,7 +35,6 @@ class FluidManager {
         this.freeStreamVelocityInfo = { name: "FSV", labelText: "N/A", defaultValue: 0.1, bounds: { lower: 0.1, upper: 0.8 } };
         this.freeStreamVelocity = this.freeStreamVelocityInfo.defaultValue;
 
-
         //this.showTracers = false;
         //this.showStreamlines = false;
     }
@@ -53,8 +52,6 @@ class FluidManager {
     set FreeStreamVelocity(value: number) {
         this.fluid.FreeStreamVelocity = value;
     }
-
-
     //#endregion
 
     //#region Exposing fluid functions
@@ -120,12 +117,8 @@ class FluidManager {
         if (currentMode !== newMode && isSimulationMode(newMode)) {
             this.simulationMode = newMode;
         } else {
-            console.log("tee hee.")
+            console.log("Error")
         }
     }
-
-
     //#endregion
-
-
 }

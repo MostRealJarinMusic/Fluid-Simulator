@@ -245,7 +245,6 @@ class Fluid {
         }
     }
 
-
     private getEquilibrium(weight: number, rho: number, velocityVector: Vector, latticeIndex: number): number {
         let latticeVector: Vector = { x: this.latticeXs[latticeIndex], y: this.latticeYs[latticeIndex] };
         let latticeDotU = dotVectors(latticeVector, velocityVector);
@@ -358,14 +357,15 @@ class Fluid {
     }
 
     private initStreamlines(): void {
-        let rows = 8;
-        let columns = 8;
-        let xOffset = Math.round(this.width / columns);
-        let yOffset = Math.round(this.height / rows);
+        let rows = 10;
+        let columns = 6;
+        let xOffset = this.width / columns;
+        let yOffset = this.height / rows;
 
-        for (let x = 0; x < columns; x++) {
+        for (let x = 0; x < columns - 1; x++) {
             for (let y = 0; y < rows; y++) {
                 let position: Vector = { x: x * xOffset + xOffset / 2, y: y * yOffset + yOffset / 2 };
+                //console.log(`${position.x},${position.y}`)
                 this.streamlines.push(new StreamLine(position, 0.01));
             }
         }
@@ -490,6 +490,8 @@ class Fluid {
                 this.colourPixel(position, colour);
             }
         }
+
+        //Drawing order
         if (this.showTracers) this.drawTracers();
 
         this.context.putImageData(this.image, 0, 0);
@@ -498,7 +500,9 @@ class Fluid {
     }
 
     private drawStreamlines(): void {
-        this.context.strokeStyle = "#FFFFFF";
+        let velocityScale = 30;
+        let simulationScale = 2;
+        this.context.strokeStyle = "#000000";
         this.context.lineWidth = 1;
 
         for (let streamline of this.streamlines) {
@@ -507,17 +511,17 @@ class Fluid {
             let currentPosition = streamline.position;
             let imagePosition = this.gridPosToImagePos(currentPosition);
 
-            this.context.moveTo(2 * imagePosition.x, 2 * imagePosition.y);
+            this.context.moveTo(simulationScale * imagePosition.x, simulationScale * imagePosition.y);
 
             for (let n = 0; n < streamline.maxSteps; n++) {
-                let velocityVector = scaleVector(this.sampleVelocity(currentPosition), 30)
+                let velocityVector = scaleVector(this.sampleVelocity(currentPosition), velocityScale);
                 currentPosition = addVectors(currentPosition, velocityVector);
 
                 imagePosition = this.gridPosToImagePos(currentPosition);
 
-                if (imagePosition.x >= this.width - 5 || imagePosition.x <= 0 || imagePosition.y >= this.height - 5 || imagePosition.y <= 0) break;
+                if (imagePosition.x >= this.width - 1 || imagePosition.x <= 0 || imagePosition.y >= this.height || imagePosition.y <= 0) break;
 
-                this.context.lineTo(2 * imagePosition.x, 2 * imagePosition.y);
+                this.context.lineTo(simulationScale * imagePosition.x, simulationScale * imagePosition.y);
             }
 
             this.context.stroke();
