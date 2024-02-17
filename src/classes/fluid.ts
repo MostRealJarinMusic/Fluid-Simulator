@@ -14,6 +14,22 @@ class Fluid {
     private oppositeIndices: number[];
     private latticeWeights: number[];
     private distribution: number[][];
+
+
+    private dCentre!: number[];
+    private dNorth!: number[];
+    private dNorthEast!: number[];
+    private dEast!: number[];
+    private dSouthEast!: number[];
+    private dSouth!: number[];
+    private dSouthWest!: number[];
+    private dWest!: number[];
+    private dNorthWest!: number[];
+
+
+
+
+
     private equilibriumDistribution: number[][];
     private localDensity: number[];
     private localVelocity: Vector[];
@@ -140,13 +156,19 @@ class Fluid {
                     this.distribution[this.index(x, y)][i] = this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, i);
 
                 }
-
-                //this.distribution[this.index(x, y)][2] = this.inVelocity;//this.getEquilibrium(this.latticeWeights[2], this.density, velocityVector, 2);
-                //this.distribution[this.index(x, y)][3] = this.inVelocity;//this.getEquilibrium(this.latticeWeights[3], this.density, velocityVector, 3);
-                //this.distribution[this.index(x, y)][4] = this.inVelocity//this.getEquilibrium(this.latticeWeights[4], this.density, [this.inVelocity, 0], 4);
+                /*
+                this.dCentre[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[0], this.density, velocityVector, 0);
+                this.dNorth[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[1], this.density, velocityVector, 1);
+                this.dNorthEast[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[2], this.density, velocityVector, 2);
+                this.dEast[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[3], this.density, velocityVector, 3);
+                this.dSouthEast[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[4], this.density, velocityVector, 4);
+                this.dSouth[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[5], this.density, velocityVector, 5);
+                this.dSouthWest[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[6], this.density, velocityVector, 6);
+                this.dWest[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[7], this.density, velocityVector, 7);
+                this.dNorthWest[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[8], this.density, velocityVector, 8);
+                */
             }
         }
-        //this.computeEquilibrium();
         //this.showDebug();
     }
 
@@ -296,9 +318,14 @@ class Fluid {
                 //nw
                 this.distribution[this.index(x, y)][8] =
                     this.distribution[this.index(x + 1, y - 1)][8];
+
+
+                this.dNorthWest[this.index(x, y)] = this.dNorthWest[this.index(x + 1, y - 1)]
                 //n
                 this.distribution[this.index(x, y)][1] =
                     this.distribution[this.index(x, y - 1)][1];
+
+                this.dNorth[this.index(x, y)] = this.dNorth[this.index(x, y - 1)]
             }
         }
 
@@ -308,9 +335,13 @@ class Fluid {
                 //ne
                 this.distribution[this.index(x, y)][2] =
                     this.distribution[this.index(x - 1, y - 1)][2];
+
+                this.dNorthEast[this.index(x, y)] = this.dNorthEast[this.index(x - 1, y - 1)]
                 //e
                 this.distribution[this.index(x, y)][3] =
                     this.distribution[this.index(x - 1, y)][3];
+
+                this.dEast[this.index(x, y)] = this.dEast[this.index(x - 1, y)];
             }
         }
 
@@ -320,9 +351,15 @@ class Fluid {
                 //se
                 this.distribution[this.index(x, y)][4] =
                     this.distribution[this.index(x - 1, y + 1)][4];
+
+                this.dSouthEast[this.index(x, y)] = this.dSouthEast[this.index(x - 1, y + 1)];
+
                 //s
                 this.distribution[this.index(x, y)][5] =
                     this.distribution[this.index(x, y + 1)][5];
+
+                this.dSouth[this.index(x, y)] = this.dSouth[this.index(x, y + 1)];
+
             }
         }
 
@@ -332,9 +369,14 @@ class Fluid {
                 //sw
                 this.distribution[this.index(x, y)][6] =
                     this.distribution[this.index(x + 1, y + 1)][6];
+
+                this.dSouthWest[this.index(x, y)] = this.dSouthWest[this.index(x + 1, y + 1)];
+
                 //w
                 this.distribution[this.index(x, y)][7] =
                     this.distribution[this.index(x + 1, y)][7];
+
+                this.dWest[this.index(x, y)] = this.dWest[this.index(x + 1, y)]
             }
         }
     }
@@ -441,8 +483,6 @@ class Fluid {
 
         return { x: xVelocity, y: yVelocity };
     }
-
-
     //#endregion
 
 

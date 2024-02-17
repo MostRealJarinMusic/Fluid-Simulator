@@ -1,7 +1,4 @@
-
-
 //#region Shape parent class
-
 abstract class Shape {
     protected gridPoints: Vector[] = [];
     protected graphDatasets: GraphDataset[] = [];
@@ -30,11 +27,9 @@ abstract class Shape {
     }
     //#endregion
 }
-
 //#endregion
 
 //Shapes
-
 class Ellipse extends Shape {
     override parameterInfo: Record<string, ParameterInfo> = {
         'xRadius': { name: 'xRadius', labelText: 'X Radius', defaultValue: 0.1, bounds: { lower: 0.05, upper: 0.25 } },
@@ -44,7 +39,6 @@ class Ellipse extends Shape {
     constructor() {
         super();
         this.params = setupParameters(this.parameterInfo);
-        //console.log(this.params);
         this.updateGridPoints();
     }
 
@@ -63,7 +57,7 @@ class Ellipse extends Shape {
     }
 
     override updateGridPoints(): void {
-        let scaleFactor = 60;
+        let scaleFactor = nodesPerMeter;
         let xRadius = Math.round(this.params.xRadius * scaleFactor);
         let yRadius = Math.round(this.params.yRadius * scaleFactor);
         let tempGridPoints: Vector[] = [];
@@ -90,7 +84,6 @@ class Rectangle extends Shape {
     constructor() {
         super();
         this.params = setupParameters(this.parameterInfo);
-
         this.updateGridPoints();
     }
 
@@ -106,7 +99,7 @@ class Rectangle extends Shape {
     }
 
     override updateGridPoints(): void {
-        let scaleFactor = 60;
+        let scaleFactor = nodesPerMeter;
         let width = Math.round(this.params.width * scaleFactor);
         let height = Math.round(this.params.height * scaleFactor);
         let tempGridPoints: Vector[] = [];
@@ -134,7 +127,7 @@ class Line extends Shape {
     }
 
     override get Area(): number {
-        return (1 / 60) * this.params.lineLength;
+        return (nodeDistance) * this.params.lineLength;
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
@@ -143,7 +136,7 @@ class Line extends Shape {
     }
 
     override updateGridPoints(): void {
-        let scaleFactor = 60;
+        let scaleFactor = nodesPerMeter;
         let pixelLength = Math.round(this.params.lineLength * scaleFactor);
         let tempGridPoints: Vector[] = [];
 
@@ -249,7 +242,7 @@ class Airfoil extends Shape {
         this.gridPoints = [];
         let tempGridPoints: Vector[] = [];
         //Magic number here - 
-        let scaleFactor = 60;   //Chord length - this can be used for scaling the airfoil 
+        let scaleFactor = nodesPerMeter;   //Chord length - this can be used for scaling the airfoil 
         let translation: Vector = { x: -Math.round(scaleFactor / 2), y: 0 };
 
         //Outline

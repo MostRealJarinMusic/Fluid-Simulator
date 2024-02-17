@@ -1,4 +1,12 @@
 //Front end
+//#region Defined SI constants for the simulation
+const nodesPerMeter = 60;
+const nodeDistance = 1 / nodesPerMeter; //Defined 60 nodes as 1m
+
+
+//#endregion
+
+
 
 //#region Airfoil designer
 
