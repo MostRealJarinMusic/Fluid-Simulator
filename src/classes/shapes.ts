@@ -241,8 +241,7 @@ class Airfoil extends Shape {
     override updateGridPoints(): void {
         this.gridPoints = [];
         let tempGridPoints: Vector[] = [];
-        //Magic number here - 
-        let scaleFactor = nodesPerMeter;   //Chord length - this can be used for scaling the airfoil 
+        let scaleFactor = nodesPerMeter;
         let translation: Vector = { x: -Math.round(scaleFactor / 2), y: 0 };
 
         //Outline
@@ -260,8 +259,6 @@ class Airfoil extends Shape {
         }
 
         tempGridPoints = getFullShape(tempGridPoints);
-        //tempGridPoints.sort((vector1, vector2) => vector1.x - vector2.x);
-        //console.log(tempGridPoints);
 
         this.gridPoints = tempGridPoints;
     }

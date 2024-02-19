@@ -7,11 +7,9 @@ class ColourMap {
 
     constructor() {
         this.numColours = 400;
-
         this.redList = new Array(this.numColours + 2).fill(0);
         this.greenList = new Array(this.numColours + 2).fill(0);
         this.blueList = new Array(this.numColours + 2).fill(0);
-
         this.colourMap = new Array(this.numColours + 2);
 
         this.generateColourMap();

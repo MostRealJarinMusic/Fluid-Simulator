@@ -21,12 +21,12 @@ class AirfoilDesigner {
         this.changeAirfoil();
     }
 
+
     get ShapeGridPoints(): Vector[] {
         return this.shape.GridPoints;
     }
 
     //#region Mapping
-
     private mapParameter(parameterName: string, parameterInfo: ParameterInfo): HTMLInputElement {
         let parameterElement = document.createElement("input");
         parameterElement.type = "number";
@@ -39,11 +39,9 @@ class AirfoilDesigner {
         parameterElement.onchange = updateAirfoilParameters;
         return parameterElement;
     }
-
     //#endregion
 
     //#region Graphs
-
     private setupGraph(): void {
         let datasets = this.shape.GraphDatasets;
 
@@ -133,14 +131,12 @@ class AirfoilDesigner {
 
         this.graph.update();
     }
-
     //#endregion
 
     //#region Airfoil functions
     public updateAirfoil(): void {
         let airfoilType = this.shape.constructor.name;
         let currentParameters = this.getParametersFromInput();
-        //console.log(currentParameters)
 
         switch (airfoilType) {
             case "Airfoil":
@@ -154,14 +150,14 @@ class AirfoilDesigner {
                 this.shape.updateParameters(currentParameters);
                 break;
             default:
-                console.log("Something has gone terribly wrong...");
+                console.log("Error");
                 break;
         }
 
         this.publishParameters(this.shape.Parameters);
         this.updateProfileNumber(this.shape.Parameters);
 
-        console.log(this.shape.Area);
+        //console.log(this.shape.Area);
     }
 
     public resetAirfoil(): void {
@@ -210,15 +206,12 @@ class AirfoilDesigner {
                     this.updateGraph();
                 } else {
                     //Disable the graph - changing colours
-                    //console.log("Disabling the graph");
                     this.disableGraph();
                 }
 
                 this.updateProfileNumber(this.shape.Parameters);
             }
         }
-
-        console.log(this.shape.Area);
     }
 
     private switchAirfoil(newType: string): void {
@@ -236,7 +229,7 @@ class AirfoilDesigner {
                 this.shape = new Line();
                 break;
             default:
-                console.log("Either someone has gone horribly wrong or the class hasn't been implemented yet.");
+                console.log("Error");
                 break;
         }
     }
@@ -265,7 +258,7 @@ class AirfoilDesigner {
                 numString = "";
                 break;
             default:
-                console.log("Something has gone terribly wrong...");
+                console.log("Error");
                 break;
         }
 
@@ -292,8 +285,6 @@ class AirfoilDesigner {
             reference.value = currentParameters[ID].toString();
         }
         this.parameterCache = currentParameters;
-
-        //console.log(this.parameterCache);
     }
 
     //Dynamically generate parameter inputs for each shape with labels
@@ -324,8 +315,6 @@ class AirfoilDesigner {
             let element = document.getElementById(parameterName) as HTMLInputElement;
             this.parameterInputIDs[`${parameterName}`] = element;
             this.parameterCache[`${parameterName}`] = parseFloat(element.value);
-
-            //console.log(this.parameterCache)
         }
     }
     //#endregion

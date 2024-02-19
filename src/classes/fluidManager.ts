@@ -12,10 +12,8 @@ class FluidManager {
     private freeStreamVelocity!: number;
     private freeStreamVelocityInfo: ParameterInfo;
     private freeStreamVelocityInput: HTMLInputElement;
-    private simulationModeSelector: HTMLSelectElement;
 
-    //private showTracers: boolean;
-    //private showStreamlines: boolean;
+    private simulationModeSelector: HTMLSelectElement;
     //#endregion
 
 
@@ -34,9 +32,6 @@ class FluidManager {
         this.freeStreamVelocityInput = fSVelocityInput;
         this.freeStreamVelocityInfo = { name: "FSV", labelText: "N/A", defaultValue: 0.1, bounds: { lower: 0.1, upper: 0.8 } };
         this.freeStreamVelocity = this.freeStreamVelocityInfo.defaultValue;
-
-        //this.showTracers = false;
-        //this.showStreamlines = false;
     }
 
 
@@ -108,7 +103,6 @@ class FluidManager {
     //#endregion
 
     //#region Fluid simulation settings
-
     public updateSimulationMode(): void {
         let currentMode = this.simulationMode;
         let newMode = this.simulationModeSelector.value;
