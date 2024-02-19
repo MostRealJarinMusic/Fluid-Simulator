@@ -137,7 +137,7 @@ button {
     border-color: #f8f8f2;
 }
 
-#airfoilDesignerResetButton:hover {
+.resetButton:hover {
     background-color: #6272a4;
     cursor: pointer;
 }

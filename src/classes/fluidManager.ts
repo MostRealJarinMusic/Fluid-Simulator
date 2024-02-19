@@ -79,7 +79,6 @@ class FluidManager {
         return getFullShape(this.airfoilGridPoints.map((vector) => roundVector(rotateVector(vector, this.angleOfAttack))));
     }
 
-
     //#region Angle of Attack and Free Stream Velocity
     public updateAngleOfAttack(): void {
         this.angleOfAttack = -parseFloat(this.angleOfAttackInput.value);

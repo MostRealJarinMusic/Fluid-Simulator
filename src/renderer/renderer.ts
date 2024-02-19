@@ -69,6 +69,11 @@ function resetAirfoilParameters(): void {
     fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
 }
 
+function resetFluidParameters(): void {
+    fluidManager.resetParameters();
+    fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
+}
+
 
 function updateSimulationMode(): void {
     fluidManager.updateSimulationMode();

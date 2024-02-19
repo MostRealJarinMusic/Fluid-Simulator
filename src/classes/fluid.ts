@@ -27,9 +27,6 @@ class Fluid {
     private dNorthWest!: number[];
 
 
-
-
-
     private equilibriumDistribution: number[][];
     private localDensity: number[];
     private localVelocity: Vector[];
@@ -114,7 +111,6 @@ class Fluid {
         this.image = this.context.createImageData(this.canvas.width, this.canvas.height);
 
         this.colourMap = new ColourMap();
-        //console.log(this.colourMap.Map)
         this.pxPerNode = 2;
         //#endregion
 
@@ -187,17 +183,9 @@ class Fluid {
             this.applyBoundaryConditions();
             this.computeEquilibrium();
             this.collideLocally();
-
-
             this.stream();
 
-            this.moveTracers();
 
-            //this.setInflow();
-
-            //this.showDebug();
-            //console.log(steps)
-            //}
             if (this.showTracers) this.moveTracers();
         }
     }
@@ -225,29 +213,56 @@ class Fluid {
 
     //#region Main loop functions
 
+    private newCollide(): void {
+        let viscosity = 0.1;
+        let omega = 1 / (3 * viscosity + 0.5);
+
+        for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
+            let nodeDensity = this.localDensity[nodeIndex];
+            let nodeVelocity = this.localVelocity[nodeIndex];
+
+
+        }
+
+    }
+
+    private newStream(): void {
+
+    }
+
+
+
     private computeMoments(): void {
         for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
             //Functions
             const summation = (arr: number[]) => arr.reduce((acc, val) => acc + val, 0);
             const mapToLat = (arr: number[], lat: number[]) => arr.map((val, i) => val * lat[i]);
 
-            let tempDistribution = this.distribution[nodeIndex];
-            let tempDensity = summation(tempDistribution);
+            let nodeDist = this.distribution[nodeIndex];
+            let nodeDensity = nodeDist[0] + nodeDist[1] + nodeDist[2] + nodeDist[3]
+                + nodeDist[4] + nodeDist[5] + nodeDist[6] + nodeDist[7]
+                + nodeDist[8];
+            //summation(nodeDist);
 
             //Velocity
+            /*
             this.localVelocity[nodeIndex] = {
-                x: summation(mapToLat(tempDistribution, this.latticeXs)) / tempDensity,
-                y: summation(mapToLat(tempDistribution, this.latticeYs)) / tempDensity
+                x: summation(mapToLat(nodeDist, this.latticeXs)) / nodeDensity,
+                y: summation(mapToLat(nodeDist, this.latticeYs)) / nodeDensity
+            }
+            */
+
+            this.localVelocity[nodeIndex] = {
+                x: (nodeDist[2] + nodeDist[3] + nodeDist[4] - nodeDist[6]
+                    - nodeDist[7] - nodeDist[8]) / nodeDensity,
+                y: (nodeDist[1] + nodeDist[2] + nodeDist[8] - nodeDist[4]
+                    - nodeDist[5] - nodeDist[6]) / nodeDensity
             }
 
             //Density
-            this.localDensity[nodeIndex] = tempDensity;
+            this.localDensity[nodeIndex] = nodeDensity;
 
-            //Pressure
-
-            //console.log(`Density: ${tempDensity}`);
-            //console.log(`UX: ${this.#localUXs[this.index(x, y)]}`);
-            //console.log(`UY: ${this.#localUYs[this.index(x, y)]}`);
+            //Pressure????
         }
     }
 
@@ -320,12 +335,12 @@ class Fluid {
                     this.distribution[this.index(x + 1, y - 1)][8];
 
 
-                this.dNorthWest[this.index(x, y)] = this.dNorthWest[this.index(x + 1, y - 1)]
+                //this.dNorthWest[this.index(x, y)] = this.dNorthWest[this.index(x + 1, y - 1)]
                 //n
                 this.distribution[this.index(x, y)][1] =
                     this.distribution[this.index(x, y - 1)][1];
 
-                this.dNorth[this.index(x, y)] = this.dNorth[this.index(x, y - 1)]
+                //this.dNorth[this.index(x, y)] = this.dNorth[this.index(x, y - 1)]
             }
         }
 
@@ -336,12 +351,12 @@ class Fluid {
                 this.distribution[this.index(x, y)][2] =
                     this.distribution[this.index(x - 1, y - 1)][2];
 
-                this.dNorthEast[this.index(x, y)] = this.dNorthEast[this.index(x - 1, y - 1)]
+                //this.dNorthEast[this.index(x, y)] = this.dNorthEast[this.index(x - 1, y - 1)]
                 //e
                 this.distribution[this.index(x, y)][3] =
                     this.distribution[this.index(x - 1, y)][3];
 
-                this.dEast[this.index(x, y)] = this.dEast[this.index(x - 1, y)];
+                //this.dEast[this.index(x, y)] = this.dEast[this.index(x - 1, y)];
             }
         }
 
@@ -352,13 +367,13 @@ class Fluid {
                 this.distribution[this.index(x, y)][4] =
                     this.distribution[this.index(x - 1, y + 1)][4];
 
-                this.dSouthEast[this.index(x, y)] = this.dSouthEast[this.index(x - 1, y + 1)];
+                //this.dSouthEast[this.index(x, y)] = this.dSouthEast[this.index(x - 1, y + 1)];
 
                 //s
                 this.distribution[this.index(x, y)][5] =
                     this.distribution[this.index(x, y + 1)][5];
 
-                this.dSouth[this.index(x, y)] = this.dSouth[this.index(x, y + 1)];
+                //this.dSouth[this.index(x, y)] = this.dSouth[this.index(x, y + 1)];
 
             }
         }
@@ -370,13 +385,13 @@ class Fluid {
                 this.distribution[this.index(x, y)][6] =
                     this.distribution[this.index(x + 1, y + 1)][6];
 
-                this.dSouthWest[this.index(x, y)] = this.dSouthWest[this.index(x + 1, y + 1)];
+                //this.dSouthWest[this.index(x, y)] = this.dSouthWest[this.index(x + 1, y + 1)];
 
                 //w
                 this.distribution[this.index(x, y)][7] =
                     this.distribution[this.index(x + 1, y)][7];
 
-                this.dWest[this.index(x, y)] = this.dWest[this.index(x + 1, y)]
+                //this.dWest[this.index(x, y)] = this.dWest[this.index(x + 1, y)];
             }
         }
     }
@@ -484,7 +499,6 @@ class Fluid {
         return { x: xVelocity, y: yVelocity };
     }
     //#endregion
-
 
     //#region Drawing functions
     private gridPosToImagePos(gridPosition: Vector): Vector {
