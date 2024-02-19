@@ -27,6 +27,12 @@ class AirfoilDesigner {
     }
 
     //#region Mapping
+
+    /**
+     * Maps a parameter to a HTML element
+     * @param parameterName The name of the parameter
+     * @param parameterInfo The information of the parameter required for setup
+     */
     private mapParameter(parameterName: string, parameterInfo: ParameterInfo): HTMLInputElement {
         let parameterElement = document.createElement("input");
         parameterElement.type = "number";
@@ -42,6 +48,10 @@ class AirfoilDesigner {
     //#endregion
 
     //#region Graphs
+
+    /**
+     * Sets up the graph
+     */
     private setupGraph(): void {
         let datasets = this.shape.GraphDatasets;
 
@@ -114,12 +124,18 @@ class AirfoilDesigner {
         });
     }
 
+    /**
+     * Updates the graph, with a new graph dataset
+     */
     private updateGraph(): void {
         let datasets = this.shape.GraphDatasets;
         this.graph.data.datasets = mapDatasets(datasets);
         this.graph.update();
     }
 
+    /**
+     * 'Disables' the graph by changing the background colour
+     */
     private disableGraph(): void {
         //Change background colour
         let datasets: Chart.ChartDataSets[] = this.graph.data.datasets as Chart.ChartDataSets[];
@@ -134,6 +150,10 @@ class AirfoilDesigner {
     //#endregion
 
     //#region Airfoil functions
+    /**
+     * Takes any update to the airfoil parameters and updates the shape.
+     * It then publishes any corrected parameter inputs and if necessary, adds a profile number
+     */
     public updateAirfoil(): void {
         let airfoilType = this.shape.constructor.name;
         let currentParameters = this.getParametersFromInput();
@@ -160,6 +180,9 @@ class AirfoilDesigner {
         //console.log(this.shape.Area);
     }
 
+    /**
+     * Resets all parameters to their default values
+     */
     public resetAirfoil(): void {
         let parameters: Record<string, number> = {};
         //Obtain default parameters
@@ -178,7 +201,9 @@ class AirfoilDesigner {
         this.updateProfileNumber(parameters);
     }
 
-    //Disable displaying the chart unless the selected preset is Airfoil
+    /**
+     * Changes the airfoil type and if necessary, disables the graph
+     */
     public changeAirfoil(): void {
         if (this.shape === undefined) {
             this.shape = new Airfoil();
@@ -214,6 +239,10 @@ class AirfoilDesigner {
         }
     }
 
+    /**
+     * Switches the airfoil type
+     * @param newType The type to be switched to
+     */
     private switchAirfoil(newType: string): void {
         switch (newType) {
             case "Airfoil":
@@ -234,6 +263,10 @@ class AirfoilDesigner {
         }
     }
 
+    /**
+     * Updates the profile number
+     * @param currentParameters The parameters of the shape, used to generate the profile number
+     */
     private updateProfileNumber(currentParameters: Record<string, number>): void {
         let shapeType = this.shape.constructor.name;
         let numString = "";
@@ -267,6 +300,9 @@ class AirfoilDesigner {
     //#endregion
 
     //#region Parameter setup and handling functions
+    /**
+     * Takes the list of HTMLInputElements and gets the current values
+     */
     private getParametersFromInput(): Record<string, number> {
         let parameters: Record<string, number> = {};
         for (const [ID, reference] of Object.entries(this.parameterInputIDs)) {
@@ -280,6 +316,10 @@ class AirfoilDesigner {
         return parameters;
     }
 
+    /**
+     * Publishes the correct parameter values to the HTMLInputElements
+     * @param currentParameters The set of corrected values
+     */
     private publishParameters(currentParameters: Record<string, number>): void {
         for (const [ID, reference] of Object.entries(this.parameterInputIDs)) {
             reference.value = currentParameters[ID].toString();
@@ -287,8 +327,10 @@ class AirfoilDesigner {
         this.parameterCache = currentParameters;
     }
 
-    //Dynamically generate parameter inputs for each shape with labels
-    //Credit: https://stackoverflow.com/questions/14853779/dynamically-creating-a-specific-number-of-input-form-elements
+    /**
+     * Dynamically generates HTMLInputElements for a shape's parameters with labels
+     * Credit: https://stackoverflow.com/questions/14853779/dynamically-creating-a-specific-number-of-input-form-elements
+     */
     private setupParameterInputs(): void {
         let shape = this.shape;
         let container = this.parameterInputContainer;
