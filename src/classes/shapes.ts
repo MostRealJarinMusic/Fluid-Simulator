@@ -5,8 +5,19 @@ abstract class Shape {
     protected params: Record<string, number> = {};
 
     abstract parameterInfo: Record<string, ParameterInfo>;
+    /**
+     * Takes a set of parameters and sets them to the shape's parameters.
+     * Shapes can also enforce restrictions on the given parameters
+     * @param newParameters The new parameters for the shape
+     */
     abstract updateParameters(newParameters: Record<string, number>): void;
+    /**
+     * Updates the set of position vectors representing the shape
+     */
     abstract updateGridPoints(): void;
+    /**
+     * Returns the approximate area of the shape - implemented differently from shape to shape
+     */
     abstract get Area(): number;
 
     //#region Getters
