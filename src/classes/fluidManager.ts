@@ -71,6 +71,7 @@ class FluidManager {
     //#endregion
 
     private rotateAirfoil(): Vector[] {
+        //return this.airfoilGridPoints.map((vector) => roundVector(rotateVector(vector, this.angleOfAttack)));
         return getFullShape(this.airfoilGridPoints.map((vector) => roundVector(rotateVector(vector, this.angleOfAttack))));
     }
 

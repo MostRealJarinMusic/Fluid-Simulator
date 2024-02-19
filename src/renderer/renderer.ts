@@ -2,7 +2,7 @@
 //#region Defined SI constants for the simulation
 const nodesPerMeter = 60;
 const nodeDistance = 1 / nodesPerMeter; //Defined 60 nodes as 1m
-
+const stepsPerFrame = 7;
 
 //#endregion
 
@@ -114,7 +114,9 @@ function updateAngleOfAttack(): void {
 
 //#region Updating
 function update(): void {
-    fluidManager.runMainLoop();
+    for (let i = 0; i < stepsPerFrame; i++) {
+        fluidManager.runMainLoop();
+    }
     fluidManager.drawFluid();
     requestAnimationFrame(update);
 }

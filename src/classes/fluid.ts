@@ -31,7 +31,6 @@ class Fluid {
     private localDensity: number[];
     private localVelocity: Vector[];
     private localPressure: number[];
-
     private solid: boolean[];
 
     private canvas: HTMLCanvasElement;
@@ -94,6 +93,17 @@ class Fluid {
             this.discreteVelocities,
             1,
         );
+
+        this.dCentre = new Array(this.numCells);
+        this.dNorth = new Array(this.numCells);
+        this.dNorthEast = new Array(this.numCells);
+        this.dEast = new Array(this.numCells);
+        this.dSouthEast = new Array(this.numCells);
+        this.dSouth = new Array(this.numCells);
+        this.dSouthWest = new Array(this.numCells);
+        this.dWest = new Array(this.numCells);
+        this.dNorthWest = new Array(this.numCells);
+
         //#endregion
 
         //#region Local properties
@@ -139,20 +149,27 @@ class Fluid {
         let velocityVector: Vector = { x: this.inVelocity, y: 0 };
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
-                for (let i = 0; i < this.discreteVelocities; i++) {
 
-                    /*
-                    if (i === 3) {
-                        this.distribution[this.index(x, y)][i] = this.inVelocity;//this.getEquilibrium(this.latticeWeights[3], this.density, velocityVector, 3);
-                    } else {
-                        this.distribution[this.index(x, y)][i] = 1//this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, parseInt(i));
-                    }
-                    this.equilibriumDistribution[this.index(x, y)][i] = 1;
-                    */
-                    this.distribution[this.index(x, y)][i] = this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, i);
+                //for (let i = 0; i < this.discreteVelocities; i++) {
 
-                }
                 /*
+                if (i === 3) {
+                    this.distribution[this.index(x, y)][i] = this.inVelocity;//this.getEquilibrium(this.latticeWeights[3], this.density, velocityVector, 3);
+                } else {
+                    this.distribution[this.index(x, y)][i] = 1//this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, parseInt(i));
+                }
+                this.equilibriumDistribution[this.index(x, y)][i] = 1;
+                */
+                //this.distribution[this.index(x, y)][i] = this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, i);
+                //}
+
+                /*
+                for (let i = 0; i < this.discreteVelocities; i++) {
+                    this.distribution[this.index(x, y)][i] = this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, i);
+                }
+                */
+
+
                 this.dCentre[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[0], this.density, velocityVector, 0);
                 this.dNorth[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[1], this.density, velocityVector, 1);
                 this.dNorthEast[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[2], this.density, velocityVector, 2);
@@ -162,10 +179,9 @@ class Fluid {
                 this.dSouthWest[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[6], this.density, velocityVector, 6);
                 this.dWest[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[7], this.density, velocityVector, 7);
                 this.dNorthWest[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[8], this.density, velocityVector, 8);
-                */
+
             }
         }
-        //this.showDebug();
     }
 
     public showDebug(): void {
@@ -176,18 +192,21 @@ class Fluid {
     }
 
     public runMainLoop(): void {
-        if (this.running) {
+        //if (this.running) {
 
-            //for (let steps = 0; steps < 3; steps++) {
-            this.computeMoments();
-            this.applyBoundaryConditions();
-            this.computeEquilibrium();
-            this.collideLocally();
-            this.stream();
+        //for (let steps = 0; steps < 3; steps++) {
+        //this.computeMoments();
+        //this.applyBoundaryConditions();
+        //this.computeEquilibrium();
+        //this.collideLocally();
+        //this.stream();
 
+        this.newComputeMoments();
+        this.newCollide();
+        this.newStream();
 
-            if (this.showTracers) this.moveTracers();
-        }
+        if (this.showTracers) this.moveTracers();
+        //}
     }
 
     //#region Setters
@@ -214,23 +233,118 @@ class Fluid {
     //#region Main loop functions
 
     private newCollide(): void {
-        let viscosity = 0.1;
+        let viscosity = 0.01;
         let omega = 1 / (3 * viscosity + 0.5);
 
+        //for (let y = 1; y < this.height - 1; y++) {
+        //for (let x = 1; x < this.width - 1; x++) {
         for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
+            //let nodeIndex = this.index(x, y);
             let nodeDensity = this.localDensity[nodeIndex];
             let nodeVelocity = this.localVelocity[nodeIndex];
 
-
+            this.dCentre[nodeIndex] += omega * (this.getEquilibrium(this.latticeWeights[0], nodeDensity, nodeVelocity, 0) - this.dCentre[nodeIndex]);
+            this.dNorth[nodeIndex] += omega * (this.getEquilibrium(this.latticeWeights[1], nodeDensity, nodeVelocity, 1) - this.dNorth[nodeIndex]);
+            this.dNorthEast[nodeIndex] += omega * (this.getEquilibrium(this.latticeWeights[2], nodeDensity, nodeVelocity, 2) - this.dNorthEast[nodeIndex]);
+            this.dEast[nodeIndex] += omega * (this.getEquilibrium(this.latticeWeights[3], nodeDensity, nodeVelocity, 3) - this.dEast[nodeIndex]);
+            this.dSouthEast[nodeIndex] += omega * (this.getEquilibrium(this.latticeWeights[4], nodeDensity, nodeVelocity, 4) - this.dSouthEast[nodeIndex]);
+            this.dSouth[nodeIndex] += omega * (this.getEquilibrium(this.latticeWeights[5], nodeDensity, nodeVelocity, 5) - this.dSouth[nodeIndex]);
+            this.dSouthWest[nodeIndex] += omega * (this.getEquilibrium(this.latticeWeights[6], nodeDensity, nodeVelocity, 6) - this.dSouthWest[nodeIndex]);
+            this.dWest[nodeIndex] += omega * (this.getEquilibrium(this.latticeWeights[7], nodeDensity, nodeVelocity, 7) - this.dWest[nodeIndex]);
+            this.dNorthWest[nodeIndex] += omega * (this.getEquilibrium(this.latticeWeights[8], nodeDensity, nodeVelocity, 8) - this.dNorthWest[nodeIndex]);
         }
-
+        //}
     }
 
     private newStream(): void {
+        //North west and north - 8 and 1
+        for (let y = this.height - 2; y > 0; y--) {
+            for (let x = 1; x < this.width - 1; x++) {
+                //nw
+                this.dNorthWest[this.index(x, y)] = this.dNorthWest[this.index(x + 1, y - 1)]
+                //n
+                this.dNorth[this.index(x, y)] = this.dNorth[this.index(x, y - 1)]
+            }
+        }
 
+        //north east and east - 2 and 3
+        for (let y = this.height - 2; y > 0; y--) {
+            for (let x = this.width - 2; x > 0; x--) {
+                //ne
+                this.dNorthEast[this.index(x, y)] = this.dNorthEast[this.index(x - 1, y - 1)]
+                //e
+                this.dEast[this.index(x, y)] = this.dEast[this.index(x - 1, y)];
+            }
+        }
+
+        //south east and south - 4 and 5
+        for (let y = 1; y < this.height - 1; y++) {
+            for (let x = this.width - 2; x > 0; x--) {
+                //se
+                this.dSouthEast[this.index(x, y)] = this.dSouthEast[this.index(x - 1, y + 1)];
+
+                //s
+                this.dSouth[this.index(x, y)] = this.dSouth[this.index(x, y + 1)];
+
+            }
+        }
+
+        //south west and west
+        for (let y = 1; y < this.height - 1; y++) {
+            for (let x = 1; x < this.width - 1; x++) {
+                //sw
+                this.dSouthWest[this.index(x, y)] = this.dSouthWest[this.index(x + 1, y + 1)];
+
+                //w
+                this.dWest[this.index(x, y)] = this.dWest[this.index(x + 1, y)];
+            }
+        }
+        for (let y = 1; y < this.height - 1; y++) {
+            for (let x = 1; x < this.width - 1; x++) {
+                let nodeIndex = this.index(x, y);
+                if (this.solid[nodeIndex]) {
+                    this.dNorth[this.index(x, y + 1)] = this.dSouth[nodeIndex];
+                    this.dNorthEast[this.index(x + 1, y + 1)] = this.dSouthWest[nodeIndex];
+                    this.dEast[this.index(x + 1, y)] = this.dWest[nodeIndex];
+                    this.dSouthEast[this.index(x + 1, y - 1)] = this.dNorthWest[nodeIndex];
+                    this.dSouth[this.index(x, y - 1)] = this.dNorth[nodeIndex];
+                    this.dSouthWest[this.index(x - 1, y - 1)] = this.dNorthEast[nodeIndex];
+                    this.dWest[this.index(x - 1, y)] = this.dEast[nodeIndex];
+                    this.dNorthWest[this.index(x - 1, y + 1)] = this.dSouthEast[nodeIndex];
+
+                    this.localVelocity[nodeIndex] = { x: 0, y: 0 };
+                }
+            }
+        }
     }
 
+    private newComputeMoments(): void {
+        for (let i = 0; i < this.numCells; i++) {
+            let nodeDensity =
+                this.dCentre[i] + this.dNorth[i] + this.dNorthEast[i] +
+                this.dEast[i] + this.dSouthEast[i] + this.dSouth[i] +
+                this.dSouthWest[i] + this.dWest[i] + this.dNorthWest[i];
 
+            this.localVelocity[i] = {
+                x: (this.dNorthEast[i] + this.dEast[i] + this.dSouthEast[i] -
+                    this.dSouthWest[i] - this.dWest[i] - this.dNorthWest[i]) / nodeDensity,
+                y: (this.dNorth[i] + this.dNorthEast[i] + this.dNorthWest[i] -
+                    this.dSouthEast[i] - this.dSouth[i] - this.dSouthWest[i]) / nodeDensity
+            }
+
+            this.localDensity[i] = nodeDensity;
+        }
+    }
+
+    private getEquilibrium(weight: number, rho: number, velocityVector: Vector, latticeIndex: number): number {
+        let latticeVector: Vector = { x: this.latticeXs[latticeIndex], y: this.latticeYs[latticeIndex] };
+        let latticeDotU = dotVectors(latticeVector, velocityVector);
+        let uDotU = dotVectors(velocityVector, velocityVector);
+
+        return weight * rho * (1 + 3 * latticeDotU +
+            (9 / 2) * latticeDotU ** 2 -
+            (3 / 2) * uDotU);
+    }
 
     private computeMoments(): void {
         for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
@@ -280,16 +394,6 @@ class Fluid {
                 }
             }
         }
-    }
-
-    private getEquilibrium(weight: number, rho: number, velocityVector: Vector, latticeIndex: number): number {
-        let latticeVector: Vector = { x: this.latticeXs[latticeIndex], y: this.latticeYs[latticeIndex] };
-        let latticeDotU = dotVectors(latticeVector, velocityVector);
-        let uDotU = dotVectors(velocityVector, velocityVector);
-
-        return weight * rho * (1 + 3 * latticeDotU +
-            (9 / 2) * latticeDotU ** 2 -
-            (3 / 2) * uDotU);
     }
 
     private computeEquilibrium(): void {
@@ -442,15 +546,16 @@ class Fluid {
 
     private moveTracers(): void {
         for (let tracer of this.tracers) {
-            let testPosition = roundVector(tracer.Position);
-            if (testPosition.x >= this.width || this.solid[this.index(testPosition.x, testPosition.y)]) {
+            let testPosition = tracer.Position;
+            let roundedPos = roundVector(testPosition)
+            if (testPosition.x >= this.width || this.solid[this.index(roundedPos.x, roundedPos.y)]) {
                 tracer.resetPosition();
                 testPosition.x = 1;
             }
             //console.log(`${position.x},${position.y}`);
-            let positionIndex = this.index(testPosition.x, testPosition.y);
+            //let positionIndex = this.index(testPosition.x, testPosition.y);
 
-            let velocity: Vector = this.localVelocity[positionIndex];
+            let velocity: Vector = this.sampleVelocity(testPosition);//this.localVelocity[positionIndex];
 
             //console.log(`${position.x},${position.y} => NEW VELOCITY ${velocity.x},${velocity.y}`)
             tracer.Velocity = velocity;
@@ -534,8 +639,6 @@ class Fluid {
 
                     //Stop any out of bounds errors
                     colourIndex = Math.max(0, Math.min(colourIndex, this.colourMap.NumColours - 1));
-                    //colour = { red: this.colourMap.RedList[colourIndex], green: this.colourMap.GreenList[colourIndex], blue: this.colourMap.BlueList[colourIndex], alpha: 255 };
-                    //console.log(colourIndex);
                     colour = this.colourMap.Map[colourIndex];
 
                 }
@@ -546,15 +649,15 @@ class Fluid {
         }
 
         //Drawing order
-        if (this.showTracers) this.drawTracers();
+
 
         this.context.putImageData(this.image, 0, 0);
-
+        if (this.showTracers) this.drawTracers();
         if (this.showStreamlines) this.drawStreamlines();
     }
 
     private drawStreamlines(): void {
-        let velocityScale = 30;
+        let velocityScale = 10;
         let simulationScale = 2;
         this.context.strokeStyle = "#000000";
         this.context.lineWidth = 1;
@@ -584,10 +687,11 @@ class Fluid {
     }
 
     private drawTracers(): void {
-        let colour: Colour = { red: 40, green: 42, blue: 54, alpha: 255 };
+        let simulationScale = 2;
+        this.context.fillStyle = "rgb(40,42,54)";
         for (let tracer of this.tracers) {
-            let position = roundVector(tracer.Position);
-            this.colourPixel(position, colour);
+            let position = this.gridPosToImagePos(tracer.Position);
+            this.context.fillRect(simulationScale * position.x, simulationScale * position.y, this.pxPerNode, this.pxPerNode);
         }
     }
 
@@ -607,9 +711,6 @@ class Fluid {
             }
         }
     }
-
-
-
     //#endregion
 
     //#region Airfoil functions
@@ -633,7 +734,7 @@ class Fluid {
     private setupObstacle(): void {
         //Reset solid
         this.solid = new Array(this.numCells).fill(false);
-        let originX = Math.round(this.width / 3 + this.width / 9);
+        let originX = Math.round(this.width / 3);
         let originY = Math.round(this.height / 2);
 
         for (let i = 0; i < this.airfoilGridPoints.length; i++) {
@@ -655,10 +756,10 @@ class Fluid {
 
         this.setupObstacle();
     }
-
     //#endregion
 }
 
+//#region Tracer and Streamline
 class Tracer {
     private position: Vector;
     private velocity: Vector;
@@ -704,3 +805,4 @@ class StreamLine {
         this.maxSteps = 10;
     }
 }
+//#endregion
