@@ -138,7 +138,7 @@ class Line extends Shape {
     }
 
     override get Area(): number {
-        return (nodeDistance) * this.params.lineLength;
+        return 2 * (nodeDistance) * this.params.lineLength;
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
@@ -151,7 +151,7 @@ class Line extends Shape {
         let pixelLength = Math.round(this.params.lineLength * scaleFactor);
         let tempGridPoints: Vector[] = [];
 
-        for (let x = 0; x <= 1; x++) {
+        for (let x = 0; x <= 2; x++) {
             for (let y = 0; y < pixelLength; y++) {
                 tempGridPoints.push({
                     x: x, y: Math.round(y - pixelLength / 2)

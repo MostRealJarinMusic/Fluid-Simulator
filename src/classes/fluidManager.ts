@@ -30,7 +30,7 @@ class FluidManager {
         this.angleOfAttack = this.angleOfAttackInfo.defaultValue;
 
         this.freeStreamVelocityInput = fSVelocityInput;
-        this.freeStreamVelocityInfo = { name: "FSV", labelText: "N/A", defaultValue: 0.1, bounds: { lower: 0.1, upper: 0.8 } };
+        this.freeStreamVelocityInfo = { name: "FSV", labelText: "N/A", defaultValue: 0.1, bounds: { lower: 0.05, upper: 0.15 } };
         this.freeStreamVelocity = this.freeStreamVelocityInfo.defaultValue;
     }
 

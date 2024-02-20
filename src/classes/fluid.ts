@@ -221,19 +221,19 @@ class Fluid {
 
     set FreeStreamVelocity(value: number) {
         //Set the free stream velocity
-        this.freeStreamVelocity = value;
+        //this.freeStreamVelocity = value;
         //console.log(this.freeStreamVelocity);
-        /*
+
         this.inVelocity = value;
         this.initFluid();
-        */
+
     }
     //#endregion
 
     //#region Main loop functions
 
     private newCollide(): void {
-        let viscosity = 0.01;
+        let viscosity = 0.005;
         let omega = 1 / (3 * viscosity + 0.5);
 
         //for (let y = 1; y < this.height - 1; y++) {
@@ -531,7 +531,7 @@ class Fluid {
 
     private initStreamlines(): void {
         let rows = 10;
-        let columns = 6;
+        let columns = 10;
         let xOffset = this.width / columns;
         let yOffset = this.height / rows;
 
@@ -651,7 +651,7 @@ class Fluid {
                             colourIndex = Math.round(this.colourMap.NumColours * (curl * 5 * contrast + 0.5));
                             break;
                         default:
-                            console.log("something has gone wrong");
+                            console.log("Error");
                             break;
                     }
 
@@ -667,15 +667,13 @@ class Fluid {
         }
 
         //Drawing order
-
-
         this.context.putImageData(this.image, 0, 0);
         if (this.showTracers) this.drawTracers();
         if (this.showStreamlines) this.drawStreamlines();
     }
 
     private drawStreamlines(): void {
-        let velocityScale = 30;
+        let velocityScale = 10;
         let simulationScale = 2;
         this.context.strokeStyle = "#000000";
         this.context.lineWidth = 1;
