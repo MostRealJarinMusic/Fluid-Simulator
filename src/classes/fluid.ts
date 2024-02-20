@@ -15,7 +15,6 @@ class Fluid {
     private latticeWeights: number[];
     private distribution: number[][];
 
-
     private dCentre!: number[];
     private dNorth!: number[];
     private dNorthEast!: number[];
@@ -26,11 +25,11 @@ class Fluid {
     private dWest!: number[];
     private dNorthWest!: number[];
 
-
     private equilibriumDistribution: number[][];
     private localDensity: number[];
     private localVelocity: Vector[];
     private localPressure: number[];
+    private localCurl: number[];
     private solid: boolean[];
 
     private canvas: HTMLCanvasElement;
@@ -110,6 +109,7 @@ class Fluid {
         this.localDensity = new Array(this.numCells).fill(this.density);
         this.localVelocity = new Array(this.numCells).fill({ x: 0, y: 0 });
         this.localPressure = new Array(this.numCells).fill(0);
+        this.localCurl = new Array(this.numCells).fill(0);
 
         //Solidity marker
         this.solid = new Array(this.numCells).fill(false);
@@ -346,6 +346,18 @@ class Fluid {
             (3 / 2) * uDotU);
     }
 
+    private computeCurl(): void {
+        //Finite differences method
+        for (let y = 1; y < this.height - 1; y++) {
+            for (let x = 1; x < this.width - 1; x++) {
+                let dYVelocityOverDx: number = this.localVelocity[this.index(x + 1, y)].y - this.localVelocity[this.index(x - 1, y)].y
+                let dXVelocityOverDy: number = this.localVelocity[this.index(x, y + 1)].x - this.localVelocity[this.index(x, y - 1)].x;
+
+                this.localCurl[this.index(x, y)] = dYVelocityOverDx - dXVelocityOverDy;
+            }
+        }
+    }
+
     private computeMoments(): void {
         for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
             //Functions
@@ -526,7 +538,6 @@ class Fluid {
         for (let x = 0; x < columns - 1; x++) {
             for (let y = 0; y < rows; y++) {
                 let position: Vector = { x: x * xOffset + xOffset / 2, y: y * yOffset + yOffset / 2 };
-                //console.log(`${position.x},${position.y}`)
                 this.streamlines.push(new StreamLine(position, 0.01));
             }
         }
@@ -611,13 +622,16 @@ class Fluid {
     }
 
     public drawFluid(simulationMode: SimulationMode) {
+        if (simulationMode === 'curl') this.computeCurl();
+
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
+                let index = this.index(x, y);
                 let colour: Colour = { red: 255, green: 255, blue: 255, alpha: 255 };
                 let colourIndex = 0;
                 let contrast = Math.pow(1.2, 1);
 
-                if (this.solid[this.index(x, y)]) {
+                if (this.solid[index]) {
                     //Solid
                     colour = { red: 98, green: 114, blue: 164, alpha: 255 };
                 } else {
@@ -625,12 +639,16 @@ class Fluid {
                     let mode = simulationMode;
                     switch (mode) {
                         case 'velocity':
-                            let velocityMagnitude = absoluteVector(this.localVelocity[this.index(x, y)]);
+                            let velocityMagnitude = absoluteVector(this.localVelocity[index]);
                             colourIndex = Math.round(this.colourMap.NumColours * (velocityMagnitude * 4 * contrast));
                             break;
                         case 'density':
-                            let density = this.localDensity[this.index(x, y)];
+                            let density = this.localDensity[index];
                             colourIndex = Math.round(this.colourMap.NumColours * ((density - 1) * 6 * contrast + 0.5));
+                            break;
+                        case 'curl':
+                            let curl = this.localCurl[index];
+                            colourIndex = Math.round(this.colourMap.NumColours * (curl * 5 * contrast + 0.5));
                             break;
                         default:
                             console.log("something has gone wrong");
@@ -657,7 +675,7 @@ class Fluid {
     }
 
     private drawStreamlines(): void {
-        let velocityScale = 10;
+        let velocityScale = 30;
         let simulationScale = 2;
         this.context.strokeStyle = "#000000";
         this.context.lineWidth = 1;

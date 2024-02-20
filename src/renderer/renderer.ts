@@ -3,7 +3,6 @@
 const nodesPerMeter = 60;
 const nodeDistance = 1 / nodesPerMeter; //Defined 60 nodes as 1m
 const stepsPerFrame = 7;
-
 //#endregion
 
 
@@ -108,13 +107,11 @@ FMAngleOfAttackInput.addEventListener('change', function () {
 function updateAngleOfAttack(): void {
     fluidManager.updateAngleOfAttack();
 }
-
-
 //#endregion
 
 //#region Updating
 function update(): void {
-    for (let i = 0; i < stepsPerFrame; i++) {
+    for (let _ = 0; _ < stepsPerFrame; _++) {
         fluidManager.runMainLoop();
     }
     fluidManager.drawFluid();
@@ -123,4 +120,3 @@ function update(): void {
 
 update();
 //#endregion
-
