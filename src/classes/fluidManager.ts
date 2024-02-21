@@ -20,7 +20,7 @@ class FluidManager {
     constructor(canvas: HTMLCanvasElement, simulationModeSelector: HTMLSelectElement, angleOfAttackInput: HTMLInputElement, fSVelocityInput: HTMLInputElement) {
         this.fluidCanvas = canvas;
         //timestep is 0.53
-        this.fluid = new Fluid(160, 90, 1, 0.1, 0.53, this.fluidCanvas);
+        this.fluid = new Fluid(160, 90, 1, 0.1, 0.01, this.fluidCanvas);
         this.simulationMode = 'velocity';
 
         this.simulationModeSelector = simulationModeSelector;

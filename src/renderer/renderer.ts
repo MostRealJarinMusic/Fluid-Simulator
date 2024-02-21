@@ -1,8 +1,9 @@
 //Front end
 //#region Defined SI constants for the simulation
-const nodesPerMeter = 60;
-const nodeDistance = 1 / nodesPerMeter; //Defined 60 nodes as 1m
-const stepsPerFrame = 10;
+const nodesPerMeter: number = 60;
+const nodeDistance: number = 1 / nodesPerMeter; //Defined 60 nodes as 1m
+const stepsPerFrame: number = 10;
+const latticeSpeedOfSound: number = 1 / Math.sqrt(3);
 //#endregion
 
 

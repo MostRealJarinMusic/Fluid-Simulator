@@ -5,8 +5,8 @@ class Fluid {
     private numCells: number;
     private density: number;
     private freeStreamVelocity: number;
+    private viscosity: number;
     private timescale: number;
-    private latticeSpeedOfSound!: number;
 
     private discreteVelocities: number;
     private latticeIndices: number[];
@@ -50,14 +50,15 @@ class Fluid {
     private streamlines: StreamLine[];
     //#endregion
 
-    constructor(width: number, height: number, density: number, freeStreamVelocity: number, timescale: number, canvas: HTMLCanvasElement) {
+    constructor(width: number, height: number, density: number, freeStreamVelocity: number, viscosity: number, canvas: HTMLCanvasElement) {
         //#region Basic variables
         this.width = width;
         this.height = height;
         this.numCells = this.width * this.height;
         this.density = density;
         this.freeStreamVelocity = freeStreamVelocity;
-        this.timescale = timescale;
+        this.viscosity = viscosity;
+        this.timescale = (viscosity / (latticeSpeedOfSound ** 2)) + 0.5;
         //#endregion
 
         //#region Lattice variables
@@ -238,8 +239,7 @@ class Fluid {
     //#region Main loop functions
 
     private newCollide(): void {
-        let viscosity = 0.005;
-        let tauReciprocal = 1 / (3 * viscosity + 0.5);
+        let tauReciprocal = 1 / this.timescale;
 
         for (let i = 0; i < this.numCells; i++) {
             //let i = this.index(x, y);
@@ -355,8 +355,8 @@ class Fluid {
             //Density
             this.localDensity[i] = nodeDensity;
 
-            //Pressure????
-            this.localPressure[i] = 12;
+            //Pressure
+            this.localPressure[i] = (latticeSpeedOfSound ** 2) * nodeDensity;
         }
     }
 
@@ -673,6 +673,11 @@ class Fluid {
                         case 'curl':
                             let curl = this.localCurl[index];
                             colourIndex = Math.round(this.colourMap.NumColours * (curl * 5 * contrast + 0.5));
+                            break;
+                        case 'pressure':
+                            //Since pressure is directly proportional to density
+                            let pressure = this.localDensity[index];
+                            colourIndex = Math.round(this.colourMap.NumColours * ((pressure - 1) * 6 * contrast + 0.5));
                             break;
                         default:
                             console.log("Error");
