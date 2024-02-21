@@ -256,14 +256,14 @@ class Fluid {
             this.dWest[i] += tauReciprocal * (this.getEquilibrium(this.latticeWeights[7], density, velocity, 7) - this.dWest[i]);
             this.dNorthWest[i] += tauReciprocal * (this.getEquilibrium(this.latticeWeights[8], density, velocity, 8) - this.dNorthWest[i]);
 
-            //Amazingly, this somehow slows down the simulation
+            //Amazingly, this somehow slows down the simulation by a significant amount
             /*
             for (let dir = 0; dir < Object.keys(Directions).length / 2; dir++) {
                 let latticeWeight = this.latticeWeights[dir];
                 let direction = Directions[dir]
                 let field = `d${direction}` as DistributionField;
                 // @ts-expect-error
-                this[field][i] += tauReciprocal * (this.getEquilibrium(latticeWeight, nodeDensity, nodeVelocity, dir) - this[field][i]);
+                this[field][i] += tauReciprocal * (this.getEquilibrium(latticeWeight, density, velocity, dir) - this[field][i]);
             }
             */
         }

@@ -2,7 +2,7 @@
 //#region Defined SI constants for the simulation
 const nodesPerMeter = 60;
 const nodeDistance = 1 / nodesPerMeter; //Defined 60 nodes as 1m
-const stepsPerFrame = 7;
+const stepsPerFrame = 10;
 //#endregion
 
 
@@ -70,6 +70,16 @@ function resetAirfoilParameters(): void {
 function resetFluidParameters(): void {
     fluidManager.resetParameters();
     fluidManager.updateAirfoil(airfoilDesigner.ShapeGridPoints);
+
+    resetGeneralFluidControls();
+}
+
+function resetGeneralFluidControls(): void {
+    fluidManager.ShowTracers = false;
+    fluidManager.ShowStreamlines = false;
+
+    FMTracersCheck.checked = false;
+    FMStreamlinesCheck.checked = false;
 }
 
 
