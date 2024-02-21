@@ -1,3 +1,7 @@
+/*
+    Utility functions and some declarations for types and enums
+*/
+
 //#region Types
 type Vector = { x: number; y: number; }
 type GridPoints = { points: Vector[]; }
@@ -5,6 +9,7 @@ type GraphDataset = GridPoints & { label: string; colour: string; }
 type Bound = { lower: number, upper: number };
 type ParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: Bound; }
 type Colour = { red: number, green: number, blue: number, alpha: number };
+type DistributionField = keyof Fluid;
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure'] as const;
 type SimulationMode = typeof validSimulationModes[number];
@@ -30,6 +35,32 @@ function isGraphingMode(testMode: unknown): testMode is GraphingMode {
     // @ts-expect-error
     return typeof testMode === 'string' && validResultGraphModes.includes(testMode);
 }
+//#endregion
+
+//#region Enums
+enum Directions {
+    Centre,
+    North,
+    NorthEast,
+    East,
+    SouthEast,
+    South,
+    SouthWest,
+    West,
+    NorthWest
+}
+enum OppositeDirections {
+    Centre,
+    South,
+    SouthWest,
+    West,
+    NorthWest,
+    North,
+    NorthEast,
+    East,
+    SouthEast
+}
+
 //#endregion
 
 /**

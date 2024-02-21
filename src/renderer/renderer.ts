@@ -6,7 +6,6 @@ const stepsPerFrame = 7;
 //#endregion
 
 
-
 //#region Airfoil designer
 
 //Airfoil graph
@@ -89,12 +88,7 @@ FMTracersCheck.addEventListener('change', function () {
 FMStreamlinesCheck.addEventListener('change', function () {
     fluidManager.ShowStreamlines = this.checked;
 });
-/*
-FMFreeStreamVelocityInput.addEventListener('change', function () {
-    //console.log(this.value);
-    fluidManager.FreeStreamVelocity = parseFloat(this.value);
-});
-*/
+
 function updateFreeStreamVelocity(): void {
     fluidManager.updateFreeStreamVelocity();
 }
