@@ -676,8 +676,8 @@ class Fluid {
                             break;
                         case 'pressure':
                             //Since pressure is directly proportional to density
-                            let pressure = this.localDensity[index];
-                            colourIndex = Math.round(this.colourMap.NumColours * ((pressure - 1) * 6 * contrast + 0.5));
+                            let pressure = this.localPressure[index];
+                            colourIndex = Math.round(this.colourMap.NumColours * ((2.9 * pressure - 1) * 6 * contrast + 0.5));
                             break;
                         default:
                             console.log("Error");
