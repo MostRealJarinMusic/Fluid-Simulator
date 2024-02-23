@@ -21,12 +21,7 @@ class Fluid {
     private distribution: number[][];
     private equilibriumDistribution: number[][];
 
-    private localDensity: number[];
-    private localVelocity: Vector[];
-    private localPressure: number[];
-    private pressureGradient: Vector[];
-    private localCurl: number[];
-    private solid: boolean[];
+    private properties: FluidProperties;
 
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
@@ -79,15 +74,7 @@ class Fluid {
         //#endregion
 
         //#region Local properties
-
-
-        this.localDensity = new Array(this.numCells).fill(this.density);
-        this.localVelocity = new Array(this.numCells).fill({ x: 0, y: 0 });
-        this.localPressure = new Array(this.numCells).fill(0);
-        this.localCurl = new Array(this.numCells).fill(0);
-        this.pressureGradient = new Array(this.numCells).fill({ x: 0, y: 0 });
-        //Solidity marker
-        this.solid = new Array(this.numCells).fill(false);
+        this.properties = new FluidProperties(this.numCells, this.density);
         //#endregion
 
         //#region Image setup
@@ -211,8 +198,8 @@ class Fluid {
         let tauRecip = 1 / this.timescale;
 
         for (let i = 0; i < this.numCells; i++) {
-            let density = this.localDensity[i];
-            let velocity = this.localVelocity[i];
+            let density = this.properties.localDensity[i];
+            let velocity = this.properties.localVelocity[i];
 
             this.dCentre[i] += tauRecip * (this.getEquilibrium(latticeWeights[0], density, velocity, 0) - this.dCentre[i]);
             this.dNorth[i] += tauRecip * (this.getEquilibrium(latticeWeights[1], density, velocity, 1) - this.dNorth[i]);
@@ -285,7 +272,7 @@ class Fluid {
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
                 let i = this.index(x, y);
-                if (this.solid[i]) {
+                if (this.properties.solid[i]) {
                     //Refactor???
 
                     //Bounce back
@@ -298,7 +285,7 @@ class Fluid {
                     this.dWest[this.index(x - 1, y)] = this.dEast[i];
                     this.dNorthWest[this.index(x - 1, y + 1)] = this.dSouthEast[i];
 
-                    this.localVelocity[i] = { x: 0, y: 0 };
+                    this.properties.localVelocity[i] = { x: 0, y: 0 };
                 }
             }
         }
@@ -312,7 +299,7 @@ class Fluid {
                 this.dSouthWest[i] + this.dWest[i] + this.dNorthWest[i];
 
             //Velocity
-            this.localVelocity[i] = {
+            this.properties.localVelocity[i] = {
                 x: (this.dNorthEast[i] + this.dEast[i] + this.dSouthEast[i] -
                     this.dSouthWest[i] - this.dWest[i] - this.dNorthWest[i]) / nodeDensity,
                 y: (this.dNorth[i] + this.dNorthEast[i] + this.dNorthWest[i] -
@@ -320,10 +307,10 @@ class Fluid {
             }
 
             //Density
-            this.localDensity[i] = nodeDensity;
+            this.properties.localDensity[i] = nodeDensity;
 
             //Pressure
-            this.localPressure[i] = (latticeSpeedOfSound ** 2) * nodeDensity;
+            this.properties.localPressure[i] = (latticeSpeedOfSound ** 2) * nodeDensity;
         }
     }
 
@@ -342,10 +329,10 @@ class Fluid {
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
                 //Partial derivatives
-                let dYVelocityOverDx: number = this.localVelocity[this.index(x + 1, y)].y - this.localVelocity[this.index(x - 1, y)].y
-                let dXVelocityOverDy: number = this.localVelocity[this.index(x, y + 1)].x - this.localVelocity[this.index(x, y - 1)].x;
+                let dYVelocityOverDx: number = this.properties.localVelocity[this.index(x + 1, y)].y - this.properties.localVelocity[this.index(x - 1, y)].y
+                let dXVelocityOverDy: number = this.properties.localVelocity[this.index(x, y + 1)].x - this.properties.localVelocity[this.index(x, y - 1)].x;
 
-                this.localCurl[this.index(x, y)] = dYVelocityOverDx - dXVelocityOverDy;
+                this.properties.localCurl[this.index(x, y)] = dYVelocityOverDx - dXVelocityOverDy;
             }
         }
     }
@@ -355,10 +342,10 @@ class Fluid {
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
                 //Partial derivatives
-                let dPressureOverDx: number = this.localPressure[this.index(x + 1, y)] - this.localPressure[this.index(x - 1, y)]
-                let dPressureOverDy: number = this.localPressure[this.index(x, y + 1)] - this.localPressure[this.index(x, y - 1)];
+                let dPressureOverDx: number = this.properties.localPressure[this.index(x + 1, y)] - this.properties.localPressure[this.index(x - 1, y)]
+                let dPressureOverDy: number = this.properties.localPressure[this.index(x, y + 1)] - this.properties.localPressure[this.index(x, y - 1)];
 
-                this.pressureGradient[this.index(x, y)] = { x: dPressureOverDx / 2, y: dPressureOverDy / 2 };
+                this.properties.pressureGradient[this.index(x, y)] = { x: dPressureOverDx / 2, y: dPressureOverDy / 2 };
             }
         }
     }
@@ -377,13 +364,13 @@ class Fluid {
 
             //Velocity
             /*
-            this.localVelocity[i] = {
+            this.properties.localVelocity[i] = {
                 x: summation(mapToLat(nodeDist, this.latticeXs)) / nodeDensity,
                 y: summation(mapToLat(nodeDist, this.latticeYs)) / nodeDensity
             }
             */
 
-            this.localVelocity[i] = {
+            this.properties.localVelocity[i] = {
                 x: (nodeDist[2] + nodeDist[3] + nodeDist[4] - nodeDist[6]
                     - nodeDist[7] - nodeDist[8]) / nodeDensity,
                 y: (nodeDist[1] + nodeDist[2] + nodeDist[8] - nodeDist[4]
@@ -391,7 +378,7 @@ class Fluid {
             }
 
             //Density
-            this.localDensity[i] = nodeDensity;
+            this.properties.localDensity[i] = nodeDensity;
 
             //Pressure????
         }
@@ -400,14 +387,14 @@ class Fluid {
     private applyBoundaryConditions(): void {
         for (let x = 0; x < this.width - 2; x++) {
             for (let y = 0; y < this.height - 2; y++) {
-                if (this.solid[this.index(x, y)]) {
+                if (this.properties.solid[this.index(x, y)]) {
                     //Reflect fluid distribution
                     this.distribution[this.index(x, y)] = oppositeIndices.map(
                         (index) => this.distribution[this.index(x, y)][index],
                     );
 
                     //Set velocity to 0
-                    this.localVelocity[this.index(x, y)] = { x: 0, y: 0 };
+                    this.properties.localVelocity[this.index(x, y)] = { x: 0, y: 0 };
                 }
             }
         }
@@ -416,8 +403,8 @@ class Fluid {
     private computeEquilibrium(): void {
         for (let i = 0; i < this.numCells; i++) {
             for (let i in latticeIndices) {
-                let localDensity = this.localDensity[i];
-                let localVelocity: Vector = this.localVelocity[i];
+                let localDensity = this.properties.localDensity[i];
+                let localVelocity: Vector = this.properties.localVelocity[i];
                 let weight = latticeWeights[i];
                 let latticeVector: Vector = { x: latticeXs[i], y: latticeYs[i] };
                 let latticeDotU = dotVectors(localVelocity, latticeVector) //Pre-calculations
@@ -564,7 +551,7 @@ class Fluid {
         for (let tracer of this.tracers) {
             let testPosition = tracer.Position;
             let roundedPos = roundVector(testPosition)
-            if (testPosition.x >= this.width || this.solid[this.index(roundedPos.x, roundedPos.y)]) {
+            if (testPosition.x >= this.width || this.properties.solid[this.index(roundedPos.x, roundedPos.y)]) {
                 tracer.resetPosition();
                 testPosition.x = 1;
             }
@@ -594,10 +581,10 @@ class Fluid {
         let dy = (y - y1) / (y2 - y1);
 
         //Get Velocities
-        let topLeft = this.localVelocity[this.index(x1, y1)];
-        let topRight = this.localVelocity[this.index(x2, y1)];
-        let bottomLeft = this.localVelocity[this.index(x1, y2)];
-        let bottomRight = this.localVelocity[this.index(x2, y2)];
+        let topLeft = this.properties.localVelocity[this.index(x1, y1)];
+        let topRight = this.properties.localVelocity[this.index(x2, y1)];
+        let bottomLeft = this.properties.localVelocity[this.index(x1, y2)];
+        let bottomRight = this.properties.localVelocity[this.index(x2, y2)];
 
         //Interpolate
         let xVelocity =
@@ -633,7 +620,7 @@ class Fluid {
                 let colourIndex = 0;
                 let contrast = Math.pow(1.2, 1);
 
-                if (this.solid[index]) {
+                if (this.properties.solid[index]) {
                     //Solid
                     colour = { red: 98, green: 114, blue: 164, alpha: 255 };
                 } else {
@@ -641,24 +628,24 @@ class Fluid {
                     let mode = simulationMode;
                     switch (mode) {
                         case 'velocity':
-                            let velocityMagnitude = absoluteVector(this.localVelocity[index]);
+                            let velocityMagnitude = absoluteVector(this.properties.localVelocity[index]);
                             colourIndex = Math.round(this.colourMap.NumColours * (velocityMagnitude * 4 * contrast));
                             break;
                         case 'density':
-                            let density = this.localDensity[index];
+                            let density = this.properties.localDensity[index];
                             colourIndex = Math.round(this.colourMap.NumColours * ((density - 1) * 6 * contrast + 0.5));
                             break;
                         case 'curl':
-                            let curl = this.localCurl[index];
+                            let curl = this.properties.localCurl[index];
                             colourIndex = Math.round(this.colourMap.NumColours * (curl * 5 * contrast + 0.5));
                             break;
                         case 'pressure':
                             //Since pressure is directly proportional to density
-                            let pressure = this.localPressure[index];
+                            let pressure = this.properties.localPressure[index];
                             colourIndex = Math.round(this.colourMap.NumColours * ((2.9 * pressure - 1) * 5 * contrast + 0.5));
                             break;
                         case 'pressureGradient':
-                            let pressureGradient = absoluteVector(this.pressureGradient[index]);
+                            let pressureGradient = absoluteVector(this.properties.pressureGradient[index]);
                             colourIndex = Math.round(this.colourMap.NumColours * ((10 * pressureGradient) * 3 * contrast + 0.3));
                             break;
                         default:
@@ -749,9 +736,9 @@ class Fluid {
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 if (this.distanceBetweenSqr(obstacleX, obstacleY, x, y) < radiusSqr) {
-                    this.solid[this.index(x, y)] = true;
+                    this.properties.solid[this.index(x, y)] = true;
                 } else {
-                    this.solid[this.index(x, y)] = false;
+                    this.properties.solid[this.index(x, y)] = false;
                 }
             }
         }
@@ -760,14 +747,14 @@ class Fluid {
 
     private setupObstacle(): void {
         //Reset solid
-        this.solid = new Array(this.numCells).fill(false);
+        this.properties.solid = new Array(this.numCells).fill(false);
         let originX = Math.round(this.width / 3);
         let originY = Math.round(this.height / 2);
 
         for (let i = 0; i < this.airfoilGridPoints.length; i++) {
             let point = this.airfoilGridPoints[i];
             let index = this.index(originX + point.x, originY + point.y);
-            this.solid[index] = true;
+            this.properties.solid[index] = true;
         }
 
         this.initFluid();
