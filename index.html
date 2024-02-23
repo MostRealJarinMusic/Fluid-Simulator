@@ -29,7 +29,7 @@
                 <div class="separator"></div>
 
                 <div class="generalControls" id="airfoilDesignerGeneralControls">
-                    <select name="Airfoil Preset" id="airfoilTypeSelector" onchange="updateChosenShape()">
+                    <select name="Airfoil Preset" id="airfoilTypeSelector">
                         <option value="Airfoil" selected>4-digit NACA Airfoil</option>
                         <option value="Rectangle">Rectangle</option>
                         <option value="Ellipse">Ellipse</option>
@@ -66,7 +66,7 @@
 
                 <p class="moduleText">Fluid Settings: </p>
                 <div class="generalControls" id="fluidSimulationGeneralControls">
-                    <select name="Simulation Mode" id="simulationModeSelector" onchange="updateSimulationMode()">
+                    <select name="Simulation Mode" id="simulationModeSelector">
                         <option value="velocity" selected>Plot Velocity</option>
                         <option value="density">Plot Density</option>
                         <option value="pressure">Plot Pressure</option>
@@ -87,11 +87,10 @@
                 <p class="moduleText">Fluid Parameters: </p>
                 <div class="parameterContainer" id="fluidSimulationParameters">
                     <label for="freeStreamVelocity">Free Stream Velocity:</label>
-                    <input type="range" id="freeStreamVelocity" min="0.05" max="0.15" value="0.1" step="0.005"
-                        onchange="updateFreeStreamVelocity()"></input><br>
-                    <label for="angleOfAttack">Angle of Attack:</label>
-                    <input type="range" id="angleOfAttack" min="0" max="0.5" value="0" step="0.025"
-                        oninput="updateAngleOfAttack()"></input><br>
+                    <input type="range" id="freeStreamVelocity" min="0.05" max="0.15" value="0.1"
+                        step="0.005"></input><br>
+                    <label for=" angleOfAttack">Angle of Attack:</label>
+                    <input type="range" id="angleOfAttack" min="0" max="0.5" value="0" step="0.025"></input><br>
                 </div>
 
             </div>
@@ -108,7 +107,7 @@
                 <div class="separator"></div>
 
                 <div class="generalControls" id="resultsManagerGeneralControls">
-                    <select name="Graphing Mode" id="resultsGraphModeSelector" onchange="updateResultsGraphingMode()">
+                    <select name="Graphing Mode" id="resultsGraphModeSelector">
                         <option value="surfacePressure" selected>Plot Surface Pressure against X</option>
                         <option value="velocity">Plot Velocity against X</option>
                     </select>
@@ -130,7 +129,7 @@
     </div>
 
 
-
+    <script src="dist/classes/applicationManager.js"></script>
     <script src="dist/classes/colourMap.js"></script>
     <script src="dist/classes/utility.js"></script>
     <script src="dist/classes/shapes.js"></script>
