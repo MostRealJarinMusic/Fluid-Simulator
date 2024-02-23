@@ -60,17 +60,7 @@ class Fluid {
             discreteVelocities,
             1,
         );
-
-        this.dCentre = new Array(this.numCells);
-        this.dNorth = new Array(this.numCells);
-        this.dNorthEast = new Array(this.numCells);
-        this.dEast = new Array(this.numCells);
-        this.dSouthEast = new Array(this.numCells);
-        this.dSouth = new Array(this.numCells);
-        this.dSouthWest = new Array(this.numCells);
-        this.dWest = new Array(this.numCells);
-        this.dNorthWest = new Array(this.numCells);
-
+        this.setupDistribution();
         //#endregion
 
         //#region Local properties
@@ -104,45 +94,27 @@ class Fluid {
         return i * this.height + j;
     }
 
+    private setupDistribution(): void {
+        for (let dir = 0; dir < Object.keys(Directions).length / 2; dir++) {
+            let field = `d${Directions[dir]}` as DistributionDir;
+            // @ts-expect-error
+            this[field] = new Array(this.numCells);
+        }
+    }
+
     public initFluid(): void {
         let velocityVector: Vector = { x: this.freeStreamVelocity, y: 0 };
         for (let i = 0; i < this.numCells; i++) {
-
-            //for (let i = 0; i < this.discreteVelocities; i++) {
-
-            /*
-            if (i === 3) {
-                this.distribution[this.index(x, y)][i] = this.freeStreamVelocity;//this.getEquilibrium(this.latticeWeights[3], this.density, velocityVector, 3);
-            } else {
-                this.distribution[this.index(x, y)][i] = 1//this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, parseInt(i));
-            }
-            this.equilibriumDistribution[this.index(x, y)][i] = 1;
-            */
-            //this.distribution[this.index(x, y)][i] = this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, i);
-            //}
-
             /*
             for (let i = 0; i < this.discreteVelocities; i++) {
                 this.distribution[this.index(x, y)][i] = this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, i);
             }
             */
 
-            /*
-            this.dCentre[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[0], this.density, velocityVector, 0);
-            this.dNorth[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[1], this.density, velocityVector, 1);
-            this.dNorthEast[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[2], this.density, velocityVector, 2);
-            this.dEast[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[3], this.density, velocityVector, 3);
-            this.dSouthEast[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[4], this.density, velocityVector, 4);
-            this.dSouth[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[5], this.density, velocityVector, 5);
-            this.dSouthWest[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[6], this.density, velocityVector, 6);
-            this.dWest[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[7], this.density, velocityVector, 7);
-            this.dNorthWest[this.index(x, y)] = this.getEquilibrium(this.latticeWeights[8], this.density, velocityVector, 8);
-            */
-
             for (let dir = 0; dir < Object.keys(Directions).length / 2; dir++) {
                 let latticeWeight = latticeWeights[dir];
                 let direction = Directions[dir]
-                let field = `d${direction}` as DistributionField;
+                let field = `d${direction}` as DistributionDir;
                 // @ts-expect-error
                 this[field][i] = this.getEquilibrium(latticeWeight, this.density, velocityVector, dir);
             }
@@ -216,7 +188,7 @@ class Fluid {
             for (let dir = 0; dir < Object.keys(Directions).length / 2; dir++) {
                 let latticeWeight = latticeWeights[dir];
                 let direction = Directions[dir]
-                let field = `d${direction}` as DistributionField;
+                let field = `d${direction}` as DistributionDir;
                 // @ts-expect-error
                 this[field][i] += tauRecip * (this.getEquilibrium(latticeWeight, density, velocity, dir) - this[field][i]);
             }
@@ -401,16 +373,16 @@ class Fluid {
     }
 
     private computeEquilibrium(): void {
-        for (let i = 0; i < this.numCells; i++) {
+        for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
             for (let i in latticeIndices) {
-                let localDensity = this.properties.localDensity[i];
-                let localVelocity: Vector = this.properties.localVelocity[i];
+                let localDensity = this.properties.localDensity[nodeIndex];
+                let localVelocity: Vector = this.properties.localVelocity[nodeIndex];
                 let weight = latticeWeights[i];
                 let latticeVector: Vector = { x: latticeXs[i], y: latticeYs[i] };
                 let latticeDotU = dotVectors(localVelocity, latticeVector) //Pre-calculations
                 let uDotU = dotVectors(localVelocity, localVelocity);
 
-                this.equilibriumDistribution[i][i] =
+                this.equilibriumDistribution[nodeIndex][i] =
                     weight * localDensity *
                     (1 +
                         3 * latticeDotU +
@@ -424,6 +396,7 @@ class Fluid {
 
     private collideLocally(): void {
         for (let index = 0; index < this.numCells; index++) {
+            //Slows down computation???
             for (let i in latticeIndices) {
                 this.distribution[index][i] =
                     this.distribution[index][i] -

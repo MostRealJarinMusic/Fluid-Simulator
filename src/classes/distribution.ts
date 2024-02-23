@@ -1,38 +1,39 @@
 class Distribution {
-    public north: number[];
-    public northEast: number[];
-    public east: number[];
-    public southEast: number[];
-    public south: number[];
-    public southWest: number[];
-    public west: number[];
-    public northWest: number[];
-    public centre: number[];
+    public dNorth: number[];
+    public dNorthEast: number[];
+    public dEast: number[];
+    public dSouthEast: number[];
+    public dSouth: number[];
+    public dSouthWest: number[];
+    public dWest: number[];
+    public dNorthWest: number[];
+    public dCentre: number[];
 
     constructor(size: number, initialValue: number) {
-        this.north = new Array(size).fill(initialValue);
-        this.northEast = new Array(size).fill(initialValue);
-        this.east = new Array(size).fill(initialValue);
-        this.southEast = new Array(size).fill(initialValue);
-        this.south = new Array(size).fill(initialValue);
-        this.southWest = new Array(size).fill(initialValue);
-        this.west = new Array(size).fill(initialValue);
-        this.northWest = new Array(size).fill(initialValue);
-        this.centre = new Array(size).fill(initialValue);
+        this.dNorth = new Array(size).fill(initialValue);
+        this.dNorthEast = new Array(size).fill(initialValue);
+        this.dEast = new Array(size).fill(initialValue);
+        this.dSouthEast = new Array(size).fill(initialValue);
+        this.dSouth = new Array(size).fill(initialValue);
+        this.dSouthWest = new Array(size).fill(initialValue);
+        this.dWest = new Array(size).fill(initialValue);
+        this.dNorthWest = new Array(size).fill(initialValue);
+        this.dCentre = new Array(size).fill(initialValue);
     }
 
+    /*
     public getDistribution(index: number): number[] {
         return [
-            this.centre[index],
-            this.north[index],
-            this.northEast[index],
-            this.east[index],
-            this.southEast[index],
-            this.south[index],
-            this.southWest[index],
-            this.west[index],
-            this.northWest[index]
+            this.dCentre[index],
+            this.dNorth[index],
+            this.dNorthEast[index],
+            this.dEast[index],
+            this.dSouthEast[index],
+            this.dSouth[index],
+            this.dSouthWest[index],
+            this.dWest[index],
+            this.dNorthWest[index]
         ];
     }
-
+    */
 }

@@ -9,7 +9,7 @@ type GraphDataset = GridPoints & { label: string; colour: string; }
 type Bound = { lower: number, upper: number };
 type ParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: Bound; }
 type Colour = { red: number, green: number, blue: number, alpha: number };
-type DistributionField = keyof Fluid;
+type DistributionDir = keyof Fluid;
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure', 'pressureGradient'] as const;
 type SimulationMode = typeof validSimulationModes[number];
