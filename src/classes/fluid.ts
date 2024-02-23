@@ -8,16 +8,6 @@ class Fluid {
     private viscosity: number;
     private timescale: number;
 
-    private discreteVelocities: number;
-    private latticeIndices: number[];
-    private latticeXs: number[];
-    private latticeYs: number[];
-    private oppositeIndices: number[];
-    private latticeWeights: number[];
-
-
-    private distribution: number[][];
-
     private dCentre!: number[];
     private dNorth!: number[];
     private dNorthEast!: number[];
@@ -28,7 +18,9 @@ class Fluid {
     private dWest!: number[];
     private dNorthWest!: number[];
 
+    private distribution: number[][];
     private equilibriumDistribution: number[][];
+
     private localDensity: number[];
     private localVelocity: Vector[];
     private localPressure: number[];
@@ -62,38 +54,15 @@ class Fluid {
         this.timescale = (viscosity / (latticeSpeedOfSound ** 2)) + 0.5;
         //#endregion
 
-        //#region Lattice variables
-        this.discreteVelocities = 9;
-        this.latticeIndices = Array.from(
-            { length: this.discreteVelocities },
-            (_, index) => index,
-        );
-
-        this.latticeXs = [0, 0, 1, 1, 1, 0, -1, -1, -1];
-        this.latticeYs = [0, 1, 1, 0, -1, -1, -1, 0, 1];
-        this.oppositeIndices = [0, 5, 6, 7, 8, 1, 2, 3, 4];
-        this.latticeWeights = [
-            4 / 9,
-            1 / 9,
-            1 / 36,
-            1 / 9,
-            1 / 36,
-            1 / 9,
-            1 / 36,
-            1 / 9,
-            1 / 36,
-        ];
-        //#endregion
-
         //#region Distribution function
         this.distribution = create2DArrayFill(
             this.numCells,
-            this.discreteVelocities,
+            discreteVelocities,
             1,
         );
         this.equilibriumDistribution = create2DArrayFill(
             this.numCells,
-            this.discreteVelocities,
+            discreteVelocities,
             1,
         );
 
@@ -110,12 +79,13 @@ class Fluid {
         //#endregion
 
         //#region Local properties
+
+
         this.localDensity = new Array(this.numCells).fill(this.density);
         this.localVelocity = new Array(this.numCells).fill({ x: 0, y: 0 });
         this.localPressure = new Array(this.numCells).fill(0);
         this.localCurl = new Array(this.numCells).fill(0);
         this.pressureGradient = new Array(this.numCells).fill({ x: 0, y: 0 });
-
         //Solidity marker
         this.solid = new Array(this.numCells).fill(false);
         //#endregion
@@ -124,7 +94,6 @@ class Fluid {
         this.canvas = canvas;
         this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
         this.image = this.context.createImageData(this.canvas.width, this.canvas.height);
-
         this.colourMap = new ColourMap();
         this.pxPerNode = 2;
         //#endregion
@@ -132,13 +101,11 @@ class Fluid {
         //#region Airfoil setup
         this.running = true;
         this.airfoilGridPoints = [];
-
         //#endregion
 
         //#region Tracers and streamlines
         this.showTracers = false;
         this.showStreamlines = false;
-
         this.tracers = [];
         this.streamlines = [];
         this.initTracers();
@@ -186,7 +153,7 @@ class Fluid {
             */
 
             for (let dir = 0; dir < Object.keys(Directions).length / 2; dir++) {
-                let latticeWeight = this.latticeWeights[dir];
+                let latticeWeight = latticeWeights[dir];
                 let direction = Directions[dir]
                 let field = `d${direction}` as DistributionField;
                 // @ts-expect-error
@@ -215,7 +182,7 @@ class Fluid {
             this.newCollide();
             this.newStream();
             this.newApplyBoundaryConditions();
-
+            this.computePressureGradient();
 
             if (this.showTracers) this.moveTracers();
         }
@@ -239,38 +206,36 @@ class Fluid {
     //#endregion
 
     //#region Main loop functions
-
     private newCollide(): void {
-        let tauReciprocal = 1 / this.timescale;
+        //Reciprocal of timescale
+        let tauRecip = 1 / this.timescale;
 
         for (let i = 0; i < this.numCells; i++) {
-            //let i = this.index(x, y);
             let density = this.localDensity[i];
             let velocity = this.localVelocity[i];
 
-            this.dCentre[i] += tauReciprocal * (this.getEquilibrium(this.latticeWeights[0], density, velocity, 0) - this.dCentre[i]);
-            this.dNorth[i] += tauReciprocal * (this.getEquilibrium(this.latticeWeights[1], density, velocity, 1) - this.dNorth[i]);
-            this.dNorthEast[i] += tauReciprocal * (this.getEquilibrium(this.latticeWeights[2], density, velocity, 2) - this.dNorthEast[i]);
-            this.dEast[i] += tauReciprocal * (this.getEquilibrium(this.latticeWeights[3], density, velocity, 3) - this.dEast[i]);
-            this.dSouthEast[i] += tauReciprocal * (this.getEquilibrium(this.latticeWeights[4], density, velocity, 4) - this.dSouthEast[i]);
-            this.dSouth[i] += tauReciprocal * (this.getEquilibrium(this.latticeWeights[5], density, velocity, 5) - this.dSouth[i]);
-            this.dSouthWest[i] += tauReciprocal * (this.getEquilibrium(this.latticeWeights[6], density, velocity, 6) - this.dSouthWest[i]);
-            this.dWest[i] += tauReciprocal * (this.getEquilibrium(this.latticeWeights[7], density, velocity, 7) - this.dWest[i]);
-            this.dNorthWest[i] += tauReciprocal * (this.getEquilibrium(this.latticeWeights[8], density, velocity, 8) - this.dNorthWest[i]);
+            this.dCentre[i] += tauRecip * (this.getEquilibrium(latticeWeights[0], density, velocity, 0) - this.dCentre[i]);
+            this.dNorth[i] += tauRecip * (this.getEquilibrium(latticeWeights[1], density, velocity, 1) - this.dNorth[i]);
+            this.dNorthEast[i] += tauRecip * (this.getEquilibrium(latticeWeights[2], density, velocity, 2) - this.dNorthEast[i]);
+            this.dEast[i] += tauRecip * (this.getEquilibrium(latticeWeights[3], density, velocity, 3) - this.dEast[i]);
+            this.dSouthEast[i] += tauRecip * (this.getEquilibrium(latticeWeights[4], density, velocity, 4) - this.dSouthEast[i]);
+            this.dSouth[i] += tauRecip * (this.getEquilibrium(latticeWeights[5], density, velocity, 5) - this.dSouth[i]);
+            this.dSouthWest[i] += tauRecip * (this.getEquilibrium(latticeWeights[6], density, velocity, 6) - this.dSouthWest[i]);
+            this.dWest[i] += tauRecip * (this.getEquilibrium(latticeWeights[7], density, velocity, 7) - this.dWest[i]);
+            this.dNorthWest[i] += tauRecip * (this.getEquilibrium(latticeWeights[8], density, velocity, 8) - this.dNorthWest[i]);
 
             //Amazingly, this somehow slows down the simulation by a significant amount
             /*
             for (let dir = 0; dir < Object.keys(Directions).length / 2; dir++) {
-                let latticeWeight = this.latticeWeights[dir];
+                let latticeWeight = latticeWeights[dir];
                 let direction = Directions[dir]
                 let field = `d${direction}` as DistributionField;
                 // @ts-expect-error
-                this[field][i] += tauReciprocal * (this.getEquilibrium(latticeWeight, density, velocity, dir) - this[field][i]);
+                this[field][i] += tauRecip * (this.getEquilibrium(latticeWeight, density, velocity, dir) - this[field][i]);
             }
             */
         }
     }
-
 
     //Credit???
     private newStream(): void {
@@ -317,8 +282,6 @@ class Fluid {
     }
 
     private newApplyBoundaryConditions() {
-        let totalForce = 0;
-
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
                 let i = this.index(x, y);
@@ -336,10 +299,6 @@ class Fluid {
                     this.dNorthWest[this.index(x - 1, y + 1)] = this.dSouthEast[i];
 
                     this.localVelocity[i] = { x: 0, y: 0 };
-
-
-                    //Temporary force code
-
                 }
             }
         }
@@ -369,7 +328,7 @@ class Fluid {
     }
 
     private getEquilibrium(weight: number, rho: number, velocityVector: Vector, latticeIndex: number): number {
-        let latticeVector: Vector = { x: this.latticeXs[latticeIndex], y: this.latticeYs[latticeIndex] };
+        let latticeVector: Vector = { x: latticeXs[latticeIndex], y: latticeYs[latticeIndex] };
         let latticeDotU = dotVectors(latticeVector, velocityVector);
         let uDotU = dotVectors(velocityVector, velocityVector);
 
@@ -382,6 +341,7 @@ class Fluid {
         //Finite differences method
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
+                //Partial derivatives
                 let dYVelocityOverDx: number = this.localVelocity[this.index(x + 1, y)].y - this.localVelocity[this.index(x - 1, y)].y
                 let dXVelocityOverDy: number = this.localVelocity[this.index(x, y + 1)].x - this.localVelocity[this.index(x, y - 1)].x;
 
@@ -394,6 +354,7 @@ class Fluid {
         //Finite differences method - same as curl
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
+                //Partial derivatives
                 let dPressureOverDx: number = this.localPressure[this.index(x + 1, y)] - this.localPressure[this.index(x - 1, y)]
                 let dPressureOverDy: number = this.localPressure[this.index(x, y + 1)] - this.localPressure[this.index(x, y - 1)];
 
@@ -441,7 +402,7 @@ class Fluid {
             for (let y = 0; y < this.height - 2; y++) {
                 if (this.solid[this.index(x, y)]) {
                     //Reflect fluid distribution
-                    this.distribution[this.index(x, y)] = this.oppositeIndices.map(
+                    this.distribution[this.index(x, y)] = oppositeIndices.map(
                         (index) => this.distribution[this.index(x, y)][index],
                     );
 
@@ -454,11 +415,11 @@ class Fluid {
 
     private computeEquilibrium(): void {
         for (let i = 0; i < this.numCells; i++) {
-            for (let i in this.latticeIndices) {
+            for (let i in latticeIndices) {
                 let localDensity = this.localDensity[i];
                 let localVelocity: Vector = this.localVelocity[i];
-                let weight = this.latticeWeights[i];
-                let latticeVector: Vector = { x: this.latticeXs[i], y: this.latticeYs[i] };
+                let weight = latticeWeights[i];
+                let latticeVector: Vector = { x: latticeXs[i], y: latticeYs[i] };
                 let latticeDotU = dotVectors(localVelocity, latticeVector) //Pre-calculations
                 let uDotU = dotVectors(localVelocity, localVelocity);
 
@@ -476,7 +437,7 @@ class Fluid {
 
     private collideLocally(): void {
         for (let index = 0; index < this.numCells; index++) {
-            for (let i in this.latticeIndices) {
+            for (let i in latticeIndices) {
                 this.distribution[index][i] =
                     this.distribution[index][i] -
                     (1 / this.timescale) *
@@ -662,7 +623,7 @@ class Fluid {
 
     public drawFluid(simulationMode: SimulationMode) {
         if (simulationMode === 'curl') this.computeCurl();
-        if (simulationMode === 'pressureGradient') this.computePressureGradient();
+        //if (simulationMode === 'pressureGradient') this.computePressureGradient();
 
 
         for (let y = 1; y < this.height - 1; y++) {
@@ -694,12 +655,11 @@ class Fluid {
                         case 'pressure':
                             //Since pressure is directly proportional to density
                             let pressure = this.localPressure[index];
-                            colourIndex = Math.round(this.colourMap.NumColours * ((2.9 * pressure - 1) * 6 * contrast + 0.5));
+                            colourIndex = Math.round(this.colourMap.NumColours * ((2.9 * pressure - 1) * 5 * contrast + 0.5));
                             break;
                         case 'pressureGradient':
-                            //Since pressure is directly proportional to density
                             let pressureGradient = absoluteVector(this.pressureGradient[index]);
-                            colourIndex = Math.round(this.colourMap.NumColours * ((100 * pressureGradient) * 6 * contrast + 0.5));
+                            colourIndex = Math.round(this.colourMap.NumColours * ((10 * pressureGradient) * 3 * contrast + 0.3));
                             break;
                         default:
                             console.log("Error");
