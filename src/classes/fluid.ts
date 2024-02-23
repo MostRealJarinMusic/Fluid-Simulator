@@ -32,6 +32,7 @@ class Fluid {
     private localDensity: number[];
     private localVelocity: Vector[];
     private localPressure: number[];
+    private pressureGradient: Vector[];
     private localCurl: number[];
     private solid: boolean[];
 
@@ -113,6 +114,7 @@ class Fluid {
         this.localVelocity = new Array(this.numCells).fill({ x: 0, y: 0 });
         this.localPressure = new Array(this.numCells).fill(0);
         this.localCurl = new Array(this.numCells).fill(0);
+        this.pressureGradient = new Array(this.numCells).fill({ x: 0, y: 0 });
 
         //Solidity marker
         this.solid = new Array(this.numCells).fill(false);
@@ -315,13 +317,15 @@ class Fluid {
     }
 
     private newApplyBoundaryConditions() {
+        let totalForce = 0;
+
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
                 let i = this.index(x, y);
                 if (this.solid[i]) {
                     //Refactor???
 
-
+                    //Bounce back
                     this.dNorth[this.index(x, y + 1)] = this.dSouth[i];
                     this.dNorthEast[this.index(x + 1, y + 1)] = this.dSouthWest[i];
                     this.dEast[this.index(x + 1, y)] = this.dWest[i];
@@ -332,6 +336,10 @@ class Fluid {
                     this.dNorthWest[this.index(x - 1, y + 1)] = this.dSouthEast[i];
 
                     this.localVelocity[i] = { x: 0, y: 0 };
+
+
+                    //Temporary force code
+
                 }
             }
         }
@@ -378,6 +386,18 @@ class Fluid {
                 let dXVelocityOverDy: number = this.localVelocity[this.index(x, y + 1)].x - this.localVelocity[this.index(x, y - 1)].x;
 
                 this.localCurl[this.index(x, y)] = dYVelocityOverDx - dXVelocityOverDy;
+            }
+        }
+    }
+
+    private computePressureGradient(): void {
+        //Finite differences method - same as curl
+        for (let y = 1; y < this.height - 1; y++) {
+            for (let x = 1; x < this.width - 1; x++) {
+                let dPressureOverDx: number = this.localPressure[this.index(x + 1, y)] - this.localPressure[this.index(x - 1, y)]
+                let dPressureOverDy: number = this.localPressure[this.index(x, y + 1)] - this.localPressure[this.index(x, y - 1)];
+
+                this.pressureGradient[this.index(x, y)] = { x: dPressureOverDx / 2, y: dPressureOverDy / 2 };
             }
         }
     }
@@ -587,12 +607,7 @@ class Fluid {
                 tracer.resetPosition();
                 testPosition.x = 1;
             }
-            //console.log(`${position.x},${position.y}`);
-            //let positionIndex = this.index(testPosition.x, testPosition.y);
-
-            let velocity: Vector = this.sampleVelocity(testPosition);//this.localVelocity[positionIndex];
-
-            //console.log(`${position.x},${position.y} => NEW VELOCITY ${velocity.x},${velocity.y}`)
+            let velocity: Vector = this.sampleVelocity(testPosition);
             tracer.Velocity = velocity;
             tracer.move();
         }
@@ -647,6 +662,8 @@ class Fluid {
 
     public drawFluid(simulationMode: SimulationMode) {
         if (simulationMode === 'curl') this.computeCurl();
+        if (simulationMode === 'pressureGradient') this.computePressureGradient();
+
 
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
@@ -678,6 +695,11 @@ class Fluid {
                             //Since pressure is directly proportional to density
                             let pressure = this.localPressure[index];
                             colourIndex = Math.round(this.colourMap.NumColours * ((2.9 * pressure - 1) * 6 * contrast + 0.5));
+                            break;
+                        case 'pressureGradient':
+                            //Since pressure is directly proportional to density
+                            let pressureGradient = absoluteVector(this.pressureGradient[index]);
+                            colourIndex = Math.round(this.colourMap.NumColours * ((100 * pressureGradient) * 6 * contrast + 0.5));
                             break;
                         default:
                             console.log("Error");

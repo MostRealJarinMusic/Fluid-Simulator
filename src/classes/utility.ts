@@ -11,7 +11,7 @@ type ParameterInfo = { name: string; labelText: string; defaultValue: number; bo
 type Colour = { red: number, green: number, blue: number, alpha: number };
 type DistributionField = keyof Fluid;
 
-const validSimulationModes = ['velocity', 'density', 'curl', 'pressure'] as const;
+const validSimulationModes = ['velocity', 'density', 'curl', 'pressure', 'pressureGradient'] as const;
 type SimulationMode = typeof validSimulationModes[number];
 const validResultGraphModes = ['surfacePressure', 'velocity'] as const;
 type GraphingMode = typeof validResultGraphModes[number];

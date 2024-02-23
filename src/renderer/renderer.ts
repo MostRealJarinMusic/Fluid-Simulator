@@ -39,4 +39,10 @@ function update(): void {
 }
 
 update();
+
+//applicationManager.update();
+//applicationManager.update();
+//applicationManager.update();
+//applicationManager.update();
+
 //#endregion

@@ -37,8 +37,6 @@ class ResultsManager {
         } else {
             throw new Error("Something has gone wrong");
         }
-
-        //console.log(this.graphingMode);
     }
 
     private resetGraph(): void {
@@ -57,7 +55,7 @@ class ResultsManager {
 
     }
 
-    private calculateLTDRatio() {
+    private calculateLDRatio() {
 
     }
 
@@ -69,5 +67,4 @@ class ResultsManager {
 
     }
     //#endregion
-
 }
