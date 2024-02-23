@@ -116,13 +116,6 @@ class Fluid {
             }
             */
 
-            /*
-            for (let i = 0; i < discreteVelocities; i++) {
-                let tempIndex = (this.width * this.height) * i + nodeIndex
-                this.totalDistribution[tempIndex] = this.getEquilibrium(latticeWeights[i], this.density, velocityVector, i);
-            }
-            */
-
             for (let dir = 0; dir < Object.keys(Directions).length / 2; dir++) {
                 let latticeWeight = latticeWeights[dir];
                 let direction = Directions[dir]
@@ -207,62 +200,12 @@ class Fluid {
                 this[field][i] += tauRecip * (this.getEquilibrium(latticeWeight, density, velocity, dir) - this[field][i]);
             }
             */
-            /*
-            for (let d = 0; d < discreteVelocities; d++) {
-                let tempIndex = (this.width * this.height) * d + i
-                this.totalDistribution[tempIndex] += tauRecip *
-                    (this.getEquilibrium(latticeWeights[d], density, velocity, d) - this.totalDistribution[tempIndex]);
-            }
-            */
-
-            /*
-            this.totalDistribution[(this.width * this.height * 0) + i] +=
-                tauRecip * (this.getEquilibrium(latticeWeights[0], density, velocity, 0)
-                    - this.totalDistribution[((this.width * this.height * 0) + i)]);
-
-            this.totalDistribution[(this.width * this.height * 1) + i] +=
-                tauRecip * (this.getEquilibrium(latticeWeights[1], density, velocity, 1)
-                    - this.totalDistribution[((this.width * this.height * 1) + i)]);
-
-            this.totalDistribution[(this.width * this.height * 2) + i] +=
-                tauRecip * (this.getEquilibrium(latticeWeights[2], density, velocity, 2)
-                    - this.totalDistribution[((this.width * this.height * 2) + i)]);
-
-            this.totalDistribution[(this.width * this.height * 3) + i] +=
-                tauRecip * (this.getEquilibrium(latticeWeights[3], density, velocity, 3)
-                    - this.totalDistribution[((this.width * this.height * 3) + i)]);
-
-            this.totalDistribution[(this.width * this.height * 4) + i] +=
-                tauRecip * (this.getEquilibrium(latticeWeights[4], density, velocity, 4)
-                    - this.totalDistribution[((this.width * this.height * 4) + i)]);
-
-            this.totalDistribution[(this.width * this.height * 5) + i] +=
-                tauRecip * (this.getEquilibrium(latticeWeights[5], density, velocity, 5)
-                    - this.totalDistribution[((this.width * this.height * 5) + i)]);
-
-            this.totalDistribution[(this.width * this.height * 6) + i] +=
-                tauRecip * (this.getEquilibrium(latticeWeights[6], density, velocity, 6)
-                    - this.totalDistribution[((this.width * this.height * 6) + i)]);
-
-            this.totalDistribution[(this.width * this.height * 7) + i] +=
-                tauRecip * (this.getEquilibrium(latticeWeights[7], density, velocity, 7)
-                    - this.totalDistribution[((this.width * this.height * 7) + i)]);
-
-            this.totalDistribution[(this.width * this.height * 8) + i] +=
-                tauRecip * (this.getEquilibrium(latticeWeights[8], density, velocity, 8)
-                    - this.totalDistribution[((this.width * this.height * 8) + i)]);
-
-            */
         }
     }
 
 
     private streamInDirection(x: number, y: number, direction: Directions) {
         let offset: Vector = { x: -latticeXs[direction], y: -latticeYs[direction] };
-        /*
-        this.totalDistribution[this.distIndex(x, y, direction)] =
-            this.totalDistribution[this.distIndex(x + offset.x, y + offset.y, direction)];
-            */
         let field = `d${Directions[direction]}` as DistributionDir;
         //@ts-expect-error
         this[field][this.index(x, y)] = this[field][this.index(x + offset.x, y + offset.y)];
@@ -276,8 +219,6 @@ class Fluid {
             for (let x = 1; x < this.width - 1; x++) {
                 //nw
                 this.dNorthWest[this.index(x, y)] = this.dNorthWest[this.index(x + 1, y - 1)]
-                //this.totalDistribution[this.distIndex(x, y, Directions.NorthWest)] =
-                //this.totalDistribution[this.distIndex(x + 1, y - 1, Directions.NorthWest)];
                 //this.streamInDirection(x, y, Directions.NorthWest);
 
                 //n
@@ -327,12 +268,7 @@ class Fluid {
 
     private reflect(x: number, y: number, direction: number) {
         let offset: Vector = { x: latticeXs[direction], y: latticeYs[direction] };
-        let oppositeDirection: Directions = getOppositeDirection(direction);    //OppositeDirections[direction];
-        /*
-        this.totalDistribution[this.distIndex(x + offset.x, y + offset.y, direction)] =
-            this.totalDistribution[this.distIndex(x, y, oppositeDirection)];
-        */
-
+        let oppositeDirection: Directions = getOppositeDirection(direction);
         let field = `d${Directions[direction]}` as DistributionDir;
         let oppositeField = `d${Directions[oppositeDirection]}` as DistributionDir;
         //@ts-expect-error
@@ -344,8 +280,6 @@ class Fluid {
             for (let x = 1; x < this.width - 1; x++) {
                 let i = this.index(x, y);
                 if (this.properties.solid[i]) {
-                    //Refactor???
-
                     //Bounce back
                     /*
                     for (let dir = 1; dir < Object.keys(Directions).length / 2; dir++) {
@@ -380,11 +314,10 @@ class Fluid {
 
     private newComputeMoments(): void {
         for (let i = 0; i < this.numCells; i++) {
-            //const mapToDist = (arr: number[], nodeIndex: number) => arr.map((value) => this.totalDistribution[(this.width * this.height * value) + nodeIndex])
             const summation = (arr: number[]) => arr.reduce((acc, val) => acc + val, 0);
             const mapToLat = (arr: number[], lat: number[]) => arr.map((val, i) => val * lat[i]);
 
-            //let nodeDistribution = this.getDistribution(i);//mapToDist(latticeIndices, i);
+            //let nodeDistribution = this.getDistribution(i);
 
             let nodeDensity = //summation(nodeDistribution);
                 this.dCentre[i] + this.dNorth[i] + this.dNorthEast[i] +
