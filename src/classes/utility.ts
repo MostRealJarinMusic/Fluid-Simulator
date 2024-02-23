@@ -39,7 +39,7 @@ function isGraphingMode(testMode: unknown): testMode is GraphingMode {
 
 //#region Enums
 enum Directions {
-    Centre,
+    Centre = 0,
     North,
     NorthEast,
     East,
@@ -50,7 +50,7 @@ enum Directions {
     NorthWest
 }
 enum OppositeDirections {
-    Centre,
+    Centre = 0,
     South,
     SouthWest,
     West,
@@ -62,6 +62,17 @@ enum OppositeDirections {
 }
 
 //#endregion
+
+/**
+ * Takes any Direction from the Directions enum and returns the opposite Direction
+ * @param direction The direction
+ */
+function getOppositeDirection(direction: Directions): Directions {
+    let opposite: string = OppositeDirections[direction];
+    //console.log(opposite);
+    return Directions[opposite as keyof typeof Directions];
+}
+
 
 /**
  * Maps the GraphDataset type to the Chart.ChartDataSets type
