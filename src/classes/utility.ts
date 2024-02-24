@@ -148,6 +148,14 @@ function checkInVectorList(currentList: Vector[], testVector: Vector): boolean {
     return false;
 }
 
+function removeDuplicateVectors(vectorSet: Vector[]): Vector[] {
+    let finalSet: Vector[] = [];
+    for (let vector of vectorSet) {
+        if (!checkInVectorList(finalSet, vector)) finalSet.push(vector);
+    }
+    return finalSet;
+}
+
 function addVectors(vector1: Vector, vector2: Vector): Vector {
     return { x: vector1.x + vector2.x, y: vector1.y + vector2.y };
 }

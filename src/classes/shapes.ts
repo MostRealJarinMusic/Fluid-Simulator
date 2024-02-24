@@ -116,13 +116,13 @@ class Rectangle extends Shape {
         let tempGridPoints: Vector[] = [];
 
         for (let x = 0; x <= width; x += 0.05) {
-            tempGridPoints.push({ x: x, y: 0 })
-            tempGridPoints.push({ x: x, y: height })
+            tempGridPoints.push({ x: x - width / 2, y: -height / 2 })
+            tempGridPoints.push({ x: x - width / 2, y: height / 2 })
         }
 
         for (let y = 0; y <= height; y += 0.05) {
-            tempGridPoints.push({ x: 0, y: y })
-            tempGridPoints.push({ x: width, y: y })
+            tempGridPoints.push({ x: -width / 2, y: y - height / 2 })
+            tempGridPoints.push({ x: width / 2, y: y - height / 2 })
         }
 
         this.gridPoints = tempGridPoints;
@@ -258,7 +258,7 @@ class Airfoil extends Shape {
         let translation: Vector = { x: -Math.round(scaleFactor / 2), y: 0 };
 
         //Outline
-        for (let beta = 0; beta <= Math.PI; beta += 0.001) {
+        for (let beta = 0; beta <= Math.PI; beta += 0.01) {
             let sampleX = (1 - Math.cos(beta)) / 2;
             let testLower: Vector = (addVectors(scaleVector(this.getLowerPoint(sampleX), scaleFactor), translation));
             let testUpper: Vector = (addVectors(scaleVector(this.getUpperPoint(sampleX), scaleFactor), translation));

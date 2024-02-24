@@ -5,6 +5,7 @@ class FluidManager {
     private simulationMode: SimulationMode;
 
     private airfoilGridPoints!: Vector[];
+    private airfoilOutline!: Vector[];
 
     private angleOfAttack!: number;
     private angleOfAttackInfo: ParameterInfo;
@@ -26,7 +27,7 @@ class FluidManager {
         this.simulationModeSelector = simulationModeSelector;
 
         this.angleOfAttackInput = angleOfAttackInput;
-        this.angleOfAttackInfo = { name: "AOA", labelText: "n/a", defaultValue: 0, bounds: { lower: 0, upper: 0.7 } };
+        this.angleOfAttackInfo = { name: "AOA", labelText: "n/a", defaultValue: 0, bounds: { lower: 0, upper: 0.5 } };
         this.angleOfAttack = this.angleOfAttackInfo.defaultValue;
 
         this.freeStreamVelocityInput = fSVelocityInput;
@@ -73,13 +74,17 @@ class FluidManager {
     private rotateAirfoil(): Vector[] {
         let centroid: Vector = getCentroid(getFullShape(roundAll(this.airfoilGridPoints)));
         //return this.airfoilGridPoints.map((vector) => roundVector(rotateVectorAroundPoint(vector, this.angleOfAttack, centroid)));
-        return getFullShape(this.airfoilGridPoints.map((vector) => roundVector(rotateVectorAroundPoint(vector, this.angleOfAttack, centroid))));
+        this.airfoilOutline = removeDuplicateVectors(
+            this.airfoilGridPoints.map((vector) => roundVector(rotateVectorAroundPoint(vector, this.angleOfAttack, centroid)))
+        );
+        let finalShape = getFullShape(this.airfoilOutline);
+        console.log(this.airfoilOutline)
+        return finalShape;
     }
 
     //#region Angle of Attack and Free Stream Velocity
     public updateAngleOfAttack(): void {
         this.angleOfAttack = -parseFloat(this.angleOfAttackInput.value);
-        //console.log(this.angleOfAttack)
         let rotatedAirfoil = this.rotateAirfoil();
         this.fluid.updateAirfoil(rotatedAirfoil);
 
@@ -112,7 +117,7 @@ class FluidManager {
         if (currentMode !== newMode && isSimulationMode(newMode)) {
             this.simulationMode = newMode;
         } else {
-            console.log("Error")
+            console.log("Error");
         }
     }
     //#endregion

@@ -775,7 +775,7 @@ class Fluid {
     private setupObstacle(): void {
         //Reset solid
         this.properties.solid = new Array(this.numCells).fill(false);
-        let originX = Math.round(this.width / 3);
+        let originX = Math.round(this.width / 3 + this.width / 10);
         let originY = Math.round(this.height / 2);
 
         for (let i = 0; i < this.airfoilGridPoints.length; i++) {
