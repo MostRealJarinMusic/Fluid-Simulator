@@ -61,6 +61,11 @@ enum OppositeDirections {
     SouthEast
 }
 
+enum Orientation {
+    CounterClockwise = -1,
+    Colinear = 0,
+    Clockwise = 1
+}
 //#endregion
 
 /**
@@ -147,6 +152,10 @@ function addVectors(vector1: Vector, vector2: Vector): Vector {
     return { x: vector1.x + vector2.x, y: vector1.y + vector2.y };
 }
 
+function subVectors(vector1: Vector, vector2: Vector): Vector {
+    return { x: vector1.x - vector2.x, y: vector1.y - vector2.y };
+}
+
 function scaleVector(vector1: Vector, scalar: number): Vector {
     return { x: vector1.x * scalar, y: vector1.y * scalar };
 }
@@ -165,12 +174,26 @@ function rotateVector(vector: Vector, theta: number): Vector {
     }
 }
 
+/**
+ * Rotates a vector by a given angle theta, around a given point
+ * @param vector The vector to be rotated
+ * @param theta The angle of rotation
+ * @param point The origin of rotation
+ */
+function rotateVectorAroundPoint(vector: Vector, theta: number, point: Vector): Vector {
+    return addVectors(rotateVector(subVectors(vector, point), theta), point);
+}
+
 function dotVectors(vector1: Vector, vector2: Vector): number {
     return (vector1.x * vector2.x) + (vector1.y * vector2.y);
 }
 
 function absoluteVector(vector: Vector): number {
     return Math.sqrt(vector.x ** 2 + vector.y ** 2);
+}
+
+function normaliseVector(vector: Vector): Vector {
+    return scaleVector(vector, 1 / absoluteVector(vector));
 }
 
 /**
@@ -225,4 +248,53 @@ function getFullShape(outline: Vector[]): Vector[] {
     }
 
     return fullShape;
+}
+
+function getOrientation(p: Vector, q: Vector, r: Vector): Orientation {
+    let value = ((q.y - p.y) * (r.x - p.x)) - ((r.y - p.y) * (q.x - p.x));
+    if (value === 0) return Orientation.Colinear;
+    return (value > 0) ? Orientation.Clockwise : Orientation.CounterClockwise;
+}
+
+/**
+ * Takes a shape as a set of position vectors and returns the outline as a set of position vectors
+ * @param fullShape - The vector array of full shape, positions, as integer coordinates
+ */
+function getOutline(fullShape: Vector[]): Vector[] {
+    let outline: Vector[] = [];
+    let length = fullShape.length;
+
+    let l = 0;
+    for (let i = 1; i < length; i++) {
+        if (fullShape[i].x < fullShape[l].x) {
+            l = i;
+        }
+    }
+
+    console.log(fullShape[l])
+
+    let p = l, q;
+    do {
+        outline.push(fullShape[p]);
+        q = (p + 1) % length;
+        for (let i = 0; i < length; i++) {
+            if (getOrientation(fullShape[p], fullShape[i], fullShape[q]) === Orientation.CounterClockwise) {
+                q = i;
+            }
+        }
+        p = q;
+    } while (p != l);
+
+    console.log(outline);
+
+    return outline;
+}
+
+function getCentroid(fullShape: Vector[]): Vector {
+    let summation = fullShape.reduce((acc, { x, y }) => ({ x: acc.x + x, y: acc.y + y }), { x: 0, y: 0 });
+    return scaleVector(summation, 1 / fullShape.length);
+}
+
+function roundAll(vectorSet: Vector[]): Vector[] {
+    return vectorSet.map((vector) => roundVector(vector));
 }

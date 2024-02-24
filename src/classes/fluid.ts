@@ -178,7 +178,7 @@ class Fluid {
             let density = this.properties.localDensity[i];
             let velocity = this.properties.localVelocity[i];
 
-            //#region 
+            //#region Collision step
             this.dCentre[i] += tauRecip * (this.getEquilibrium(latticeWeights[0], density, velocity, 0) - this.dCentre[i]);
             this.dNorth[i] += tauRecip * (this.getEquilibrium(latticeWeights[1], density, velocity, 1) - this.dNorth[i]);
             this.dNorthEast[i] += tauRecip * (this.getEquilibrium(latticeWeights[2], density, velocity, 2) - this.dNorthEast[i]);
@@ -798,6 +798,7 @@ class Fluid {
         this.setupObstacle();
     }
     //#endregion
+
 }
 
 //#region Tracer and Streamline

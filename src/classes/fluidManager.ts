@@ -71,8 +71,9 @@ class FluidManager {
     //#endregion
 
     private rotateAirfoil(): Vector[] {
-        //return this.airfoilGridPoints.map((vector) => roundVector(rotateVector(vector, this.angleOfAttack)));
-        return getFullShape(this.airfoilGridPoints.map((vector) => roundVector(rotateVector(vector, this.angleOfAttack))));
+        let centroid: Vector = getCentroid(getFullShape(roundAll(this.airfoilGridPoints)));
+        //return this.airfoilGridPoints.map((vector) => roundVector(rotateVectorAroundPoint(vector, this.angleOfAttack, centroid)));
+        return getFullShape(this.airfoilGridPoints.map((vector) => roundVector(rotateVectorAroundPoint(vector, this.angleOfAttack, centroid))));
     }
 
     //#region Angle of Attack and Free Stream Velocity

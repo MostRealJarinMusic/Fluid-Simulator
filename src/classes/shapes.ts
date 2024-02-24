@@ -73,14 +73,14 @@ class Ellipse extends Shape {
         let yRadius = Math.round(this.params.yRadius * scaleFactor);
         let tempGridPoints: Vector[] = [];
 
-        for (let theta = 0; theta <= 2 * Math.PI; theta += 0.01) {
+        for (let theta = 0; theta <= 2 * Math.PI; theta += 0.005) {
             tempGridPoints.push({
-                x: Math.round(xRadius * Math.cos(theta)),
-                y: Math.round(yRadius * Math.sin(theta)),
+                x: xRadius * Math.cos(theta),
+                y: yRadius * Math.sin(theta),
             })
         }
 
-        tempGridPoints = getFullShape(tempGridPoints);
+        //tempGridPoints = getFullShape(tempGridPoints);
 
         this.gridPoints = tempGridPoints;
     }
@@ -115,12 +115,14 @@ class Rectangle extends Shape {
         let height = Math.round(this.params.height * scaleFactor);
         let tempGridPoints: Vector[] = [];
 
-        for (let x = 0; x <= width; x++) {
-            for (let y = 0; y <= height; y++) {
-                tempGridPoints.push({
-                    x: Math.round(x - width / 2), y: Math.round(y - height / 2)
-                })
-            }
+        for (let x = 0; x <= width; x += 0.05) {
+            tempGridPoints.push({ x: x, y: 0 })
+            tempGridPoints.push({ x: x, y: height })
+        }
+
+        for (let y = 0; y <= height; y += 0.05) {
+            tempGridPoints.push({ x: 0, y: y })
+            tempGridPoints.push({ x: width, y: y })
         }
 
         this.gridPoints = tempGridPoints;
@@ -138,7 +140,7 @@ class Line extends Shape {
     }
 
     override get Area(): number {
-        return 2 * (nodeDistance) * this.params.lineLength;
+        return (nodeDistance) * this.params.lineLength;
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
@@ -151,10 +153,10 @@ class Line extends Shape {
         let pixelLength = Math.round(this.params.lineLength * scaleFactor);
         let tempGridPoints: Vector[] = [];
 
-        for (let x = 0; x <= 2; x++) {
-            for (let y = 0; y < pixelLength; y++) {
+        for (let x = 0; x <= 1; x += 0.25) {
+            for (let y = 0; y < pixelLength; y += 0.01) {
                 tempGridPoints.push({
-                    x: x, y: Math.round(y - pixelLength / 2)
+                    x: x, y: y - pixelLength / 2
                 })
             }
         }
@@ -256,20 +258,20 @@ class Airfoil extends Shape {
         let translation: Vector = { x: -Math.round(scaleFactor / 2), y: 0 };
 
         //Outline
-        for (let beta = 0; beta <= Math.PI; beta += 0.01) {
+        for (let beta = 0; beta <= Math.PI; beta += 0.001) {
             let sampleX = (1 - Math.cos(beta)) / 2;
-            let testLower: Vector = roundVector(addVectors(scaleVector(this.getLowerPoint(sampleX), scaleFactor), translation));
-            let testUpper: Vector = roundVector(addVectors(scaleVector(this.getUpperPoint(sampleX), scaleFactor), translation));
+            let testLower: Vector = (addVectors(scaleVector(this.getLowerPoint(sampleX), scaleFactor), translation));
+            let testUpper: Vector = (addVectors(scaleVector(this.getUpperPoint(sampleX), scaleFactor), translation));
 
-            if (!checkInVectorList(tempGridPoints, testLower)) {
-                tempGridPoints.push(testLower);
-            }
-            if (!checkInVectorList(tempGridPoints, testUpper)) {
-                tempGridPoints.push(testUpper);
-            }
+            //if (!checkInVectorList(tempGridPoints, testLower)) {
+            tempGridPoints.push(testLower);
+            //}
+            //if (!checkInVectorList(tempGridPoints, testUpper)) {
+            tempGridPoints.push(testUpper);
+            //}
         }
 
-        tempGridPoints = getFullShape(tempGridPoints);
+        //tempGridPoints = getFullShape(tempGridPoints);
 
         this.gridPoints = tempGridPoints;
     }
