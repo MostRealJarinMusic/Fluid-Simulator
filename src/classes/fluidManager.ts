@@ -27,11 +27,11 @@ class FluidManager {
         this.simulationModeSelector = simulationModeSelector;
 
         this.angleOfAttackInput = angleOfAttackInput;
-        this.angleOfAttackInfo = { name: "AOA", labelText: "n/a", defaultValue: 0, bounds: { lower: 0, upper: 0.5 } };
+        this.angleOfAttackInfo = { name: "AOA", labelText: "n/a", defaultValue: 0, bounds: { lower: -0.35, upper: 0.35 } };
         this.angleOfAttack = this.angleOfAttackInfo.defaultValue;
 
         this.freeStreamVelocityInput = fSVelocityInput;
-        this.freeStreamVelocityInfo = { name: "FSV", labelText: "N/A", defaultValue: 0.1, bounds: { lower: 0.05, upper: 0.15 } };
+        this.freeStreamVelocityInfo = { name: "FSV", labelText: "N/A", defaultValue: 0.1, bounds: { lower: 0.05, upper: 0.14 } };
         this.freeStreamVelocity = this.freeStreamVelocityInfo.defaultValue;
     }
 
@@ -104,6 +104,7 @@ class FluidManager {
 
     public updateFreeStreamVelocity(): void {
         this.freeStreamVelocity = parseFloat(this.freeStreamVelocityInput.value);
+        console.log(this.freeStreamVelocity);
         this.fluid.FreeStreamVelocity = this.freeStreamVelocity;
     }
 

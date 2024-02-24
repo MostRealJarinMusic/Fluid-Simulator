@@ -155,11 +155,11 @@ class Fluid {
     //#region Setters
     set ShowTracers(value: boolean) {
         this.showTracers = value;
-        console.log(`Show Tracers: ${this.showTracers}`)
+        //console.log(`Show Tracers: ${this.showTracers}`)
     }
     set ShowStreamlines(value: boolean) {
         this.showStreamlines = value;
-        console.log(`Show Streamlines: ${this.showStreamlines}`)
+        //console.log(`Show Streamlines: ${this.showStreamlines}`)
     }
 
     set FreeStreamVelocity(value: number) {
@@ -673,7 +673,7 @@ class Fluid {
                             break;
                         case 'pressureGradient':
                             let pressureGradient = absoluteVector(this.properties.pressureGradient[index]);
-                            colourIndex = Math.round(this.colourMap.NumColours * ((10 * pressureGradient) * 3 * contrast + 0.3));
+                            colourIndex = Math.round(this.colourMap.NumColours * ((10 * pressureGradient) * 3 * contrast + 0.35));
                             break;
                         default:
                             console.log("Error");
