@@ -699,7 +699,7 @@ class Fluid {
 
     private drawStreamlines(): void {
         let velocityScale = 10;
-        let simulationScale = 2;
+        let simulationScale = this.pxPerNode;
         this.context.strokeStyle = "#000000";
         this.context.lineWidth = 1;
 
@@ -728,7 +728,7 @@ class Fluid {
     }
 
     private drawTracers(): void {
-        let simulationScale = 2;
+        let simulationScale = this.pxPerNode;
         this.context.fillStyle = "rgb(40,42,54)";
         for (let tracer of this.tracers) {
             let position = this.gridPosToImagePos(tracer.Position);
