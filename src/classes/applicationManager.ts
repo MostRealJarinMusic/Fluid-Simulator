@@ -50,7 +50,7 @@ class ApplicationManager {
         this.FMFSVelocityInput = document.getElementById("freeStreamVelocity") as HTMLInputElement;
 
         this.fluidManager = new FluidManager(this.FMCanvas, this.FMSimulationModeSelector, this.FMAngleOfAttackInput, this.FMFSVelocityInput);
-        this.fluidManager.updateAirfoil(this.airfoilDesigner.ShapeGridPoints);
+        this.fluidManager.updateAirfoil(this.airfoilDesigner.ShapeOutline);
         this.fluidManager.initFluid();
     }
 
@@ -72,7 +72,7 @@ class ApplicationManager {
         this.ADTypeSelector.addEventListener('change', function () {
             applicationManager.airfoilDesigner.changeAirfoil();
             applicationManager.fluidManager.resetParameters();
-            applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeGridPoints);
+            applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeOutline);
         });
         this.FMSimulationModeSelector.addEventListener('change', function () {
             applicationManager.fluidManager.updateSimulationMode();
@@ -95,5 +95,6 @@ class ApplicationManager {
             this.fluidManager.runMainLoop();
         }
         this.fluidManager.drawFluid();
+        this.resultsManager.calculateForce(this.fluidManager.PressureGradient, this.fluidManager.SurfaceNormals, this.fluidManager.Origin);
     }
 }

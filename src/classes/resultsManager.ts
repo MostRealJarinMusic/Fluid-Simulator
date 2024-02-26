@@ -47,6 +47,17 @@ class ResultsManager {
 
 
     //#region Calculations
+    public calculateForce(pressureGradient: Vector[], surfaceNormals: SurfaceNormal[], origin: Vector) {
+        //Iterate through each point at the surface normal,
+        //console.log(surfaceNormals);
+        //for (let pair of surfaceNormals) {
+        //let testPosition = roundVector(addVectors(pair.position, origin));
+        //console.log(testPosition);
+        //let pressureAtPoint = pressureGradient[]
+        //}
+    }
+
+
     private calculateLift() {
 
     }

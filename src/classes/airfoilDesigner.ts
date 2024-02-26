@@ -22,8 +22,8 @@ class AirfoilDesigner {
     }
 
 
-    get ShapeGridPoints(): Vector[] {
-        return this.shape.GridPoints;
+    get ShapeOutline(): Vector[] {
+        return this.shape.Outline;
     }
 
     //#region Mapping

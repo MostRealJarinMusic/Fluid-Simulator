@@ -10,6 +10,7 @@ type Bound = { lower: number, upper: number };
 type ParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: Bound; }
 type Colour = { red: number, green: number, blue: number, alpha: number };
 type DistributionDir = keyof Fluid;
+type SurfaceNormal = { position: Vector, normal: Vector }
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure', 'pressureGradient'] as const;
 type SimulationMode = typeof validSimulationModes[number];
@@ -316,37 +317,71 @@ function sortClosestToVector(vector: Vector, outline: Vector[]): Vector[] {
 }
 
 
+function getAllSurfaceNormals(outline: Vector[]): SurfaceNormal[] {
+    let fullShape = getFullShape(outline);
+    let pairs: SurfaceNormal[] = [];
+    for (let i = 0; i < outline.length; i++) {
+        let currentVector = outline[i]
+        let normal = getSurfaceNormal(currentVector, outline);
+        let testPoint = roundVector(addVectors(currentVector, normal));
+        if (checkInVectorList(fullShape, testPoint)) {
+            //normal is facing inwards
+            normal = scaleVector(normal, -1);
+        }
+
+        pairs.push({ position: currentVector, normal: normal });
+    }
+    return pairs;
+}
+
+
 function getSurfaceNormal(vector: Vector, outline: Vector[]): Vector {
     //console.log(outline);
     if (checkInVectorList(outline, vector)) {
-        console.log(`LOOKING FOR NORMAL VECTOR FOR ${vector.x},${vector.y}`);
+        //console.log(`LOOKING FOR NORMAL VECTOR FOR ${vector.x},${vector.y}`);
         let sortedOutline = sortClosestToVector(vector, outline);
+        /*
+        let nearest: Vector[] = sortedOutline.slice(0, 4)
+        nearest.push(vector)
+        console.log(nearest);
+        let meanX = nearest.map((value) => value.x).reduce((acc, val) => acc + val, 0);
+        let meanY = nearest.map((value) => value.y).reduce((acc, val) => acc + val, 0);
+        let xDifferences = nearest.map((value) => value.x - meanX).reduce((acc, val) => acc + val, 0);
+        let productDifferences = nearest.map((value) => (value.x - meanX) * (value.y - meanY)).reduce((acc, val) => acc + val, 0);
+        let newTangent = (productDifferences) / (xDifferences ** 2);
+
+        console.log(newTangent);
+        console.log(- (1 / newTangent));
+        */
+
         let vector1 = sortedOutline[0];
         let vector2 = sortedOutline[1];
-        console.log(`VECTOR1 ${vector1.x},${vector1.y}`);
-        console.log(`VECTOR2 ${vector2.x},${vector2.y}`);
+        //console.log(`VECTOR1 ${vector1.x},${vector1.y}`);
+        //console.log(`VECTOR2 ${vector2.x},${vector2.y}`);
 
         let tangent = { x: vector1.x - vector2.x, y: vector1.y - vector2.y };
         //More accurate then rotate function, which introduces some rounding errors
         let normal = normaliseVector({ x: -tangent.y, y: tangent.x })///rotateVector(tangent, Math.PI / 2);
-        let testPoint = roundVector(addVectors(vector, normal));
+
+        /*
+        let testPoint = roundVector(addVectors(currentVector, normal));
 
         if (!checkInVectorList(getFullShape(outline), testPoint)) {
             //the normal is facing outwards
-            console.log("NORMAL FACING OUTWARDS");
+            //console.log("NORMAL FACING OUTWARDS");
         } else {
-            console.log("NORMAL FACING INWARDS");
+            //console.log("NORMAL FACING INWARDS");
             normal = scaleVector(normal, -1);//rotateVector(normal, Math.PI);
         }
+        */
 
         //normal = normaliseVector(normal);
-        console.log(normal);
+        //console.log(normal);
 
         return normal;
-    } else {
-        console.log("Error");
     }
 
+    console.log("Error");
     return { x: 0, y: 0 };
 }
 

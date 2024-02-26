@@ -1,6 +1,6 @@
 //#region Shape parent class
 abstract class Shape {
-    protected gridPoints: Vector[] = [];
+    protected outline: Vector[] = [];
     protected graphDatasets: GraphDataset[] = [];
     protected params: Record<string, number> = {};
 
@@ -14,7 +14,7 @@ abstract class Shape {
     /**
      * Updates the set of position vectors representing the shape
      */
-    abstract updateGridPoints(): void;
+    abstract updateOutline(): void;
     /**
      * Returns the approximate area of the shape - implemented differently from shape to shape
      */
@@ -29,8 +29,8 @@ abstract class Shape {
         return this.params;
     }
 
-    get GridPoints(): Vector[] {
-        return this.gridPoints;
+    get Outline(): Vector[] {
+        return this.outline;
     }
 
     get GraphDatasets(): GraphDataset[] {
@@ -50,7 +50,7 @@ class Ellipse extends Shape {
     constructor() {
         super();
         this.params = setupParameters(this.parameterInfo);
-        this.updateGridPoints();
+        this.updateOutline();
     }
 
     override get Area(): number {
@@ -64,25 +64,25 @@ class Ellipse extends Shape {
         this.params['xRadius'] = newParameters['xRadius'];
         this.params['yRadius'] = newParameters['yRadius'];
 
-        this.updateGridPoints();
+        this.updateOutline();
     }
 
-    override updateGridPoints(): void {
+    override updateOutline(): void {
         let scaleFactor = nodesPerMeter;
         let xRadius = Math.round(this.params.xRadius * scaleFactor);
         let yRadius = Math.round(this.params.yRadius * scaleFactor);
-        let tempGridPoints: Vector[] = [];
+        let tempOutline: Vector[] = [];
 
         for (let theta = 0; theta <= 2 * Math.PI; theta += 0.005) {
-            tempGridPoints.push({
+            tempOutline.push({
                 x: xRadius * Math.cos(theta),
                 y: yRadius * Math.sin(theta),
             })
         }
 
-        //tempGridPoints = getFullShape(tempGridPoints);
+        //tempOutline = getFullShape(tempOutline);
 
-        this.gridPoints = tempGridPoints;
+        this.outline = tempOutline;
     }
 }
 
@@ -95,7 +95,7 @@ class Rectangle extends Shape {
     constructor() {
         super();
         this.params = setupParameters(this.parameterInfo);
-        this.updateGridPoints();
+        this.updateOutline();
     }
 
     override get Area(): number {
@@ -106,26 +106,26 @@ class Rectangle extends Shape {
         this.params['width'] = newParameters['width'];
         this.params['height'] = newParameters['height'];
 
-        this.updateGridPoints();
+        this.updateOutline();
     }
 
-    override updateGridPoints(): void {
+    override updateOutline(): void {
         let scaleFactor = nodesPerMeter;
         let width = Math.round(this.params.width * scaleFactor);
         let height = Math.round(this.params.height * scaleFactor);
-        let tempGridPoints: Vector[] = [];
+        let tempOutline: Vector[] = [];
 
         for (let x = 0; x < width; x += 0.05) {
-            tempGridPoints.push({ x: x - width / 2, y: -height / 2 })
-            tempGridPoints.push({ x: x - width / 2, y: height / 2 })
+            tempOutline.push({ x: x - width / 2, y: -height / 2 })
+            tempOutline.push({ x: x - width / 2, y: height / 2 })
         }
 
         for (let y = 0; y < height; y += 0.05) {
-            tempGridPoints.push({ x: -width / 2, y: y - height / 2 })
-            tempGridPoints.push({ x: width / 2, y: y - height / 2 })
+            tempOutline.push({ x: -width / 2, y: y - height / 2 })
+            tempOutline.push({ x: width / 2, y: y - height / 2 })
         }
 
-        this.gridPoints = tempGridPoints;
+        this.outline = tempOutline;
     }
 }
 
@@ -136,7 +136,7 @@ class Line extends Shape {
     constructor() {
         super();
         this.params = setupParameters(this.parameterInfo);
-        this.updateGridPoints();
+        this.updateOutline();
     }
 
     override get Area(): number {
@@ -145,23 +145,23 @@ class Line extends Shape {
 
     override updateParameters(newParameters: Record<string, number>): void {
         this.params['lineLength'] = newParameters['lineLength'];
-        this.updateGridPoints();
+        this.updateOutline();
     }
 
-    override updateGridPoints(): void {
+    override updateOutline(): void {
         let scaleFactor = nodesPerMeter;
         let pixelLength = Math.round(this.params.lineLength * scaleFactor);
-        let tempGridPoints: Vector[] = [];
+        let tempOutline: Vector[] = [];
 
         for (let x = 0; x <= 1; x += 0.25) {
             for (let y = 0; y < pixelLength; y += 0.01) {
-                tempGridPoints.push({
+                tempOutline.push({
                     x: 0, y: y - pixelLength / 2
                 })
             }
         }
 
-        this.gridPoints = tempGridPoints;
+        this.outline = tempOutline;
     }
 }
 
@@ -177,7 +177,7 @@ class Airfoil extends Shape {
         this.params = setupParameters(this.parameterInfo);
 
         this.updateGraphDatasets();
-        this.updateGridPoints();
+        this.updateOutline();
     }
 
     override get Area(): number {
@@ -218,7 +218,7 @@ class Airfoil extends Shape {
         this.params['t'] = testT;
 
         this.updateGraphDatasets();
-        this.updateGridPoints();
+        this.updateOutline();
     }
 
     private updateGraphDatasets(): void {
@@ -251,9 +251,9 @@ class Airfoil extends Shape {
     }
 
 
-    override updateGridPoints(): void {
-        this.gridPoints = [];
-        let tempGridPoints: Vector[] = [];
+    override updateOutline(): void {
+        this.outline = [];
+        let tempOutline: Vector[] = [];
         let scaleFactor = nodesPerMeter;
         let translation: Vector = { x: -Math.round(scaleFactor / 2), y: 0 };
 
@@ -263,17 +263,17 @@ class Airfoil extends Shape {
             let testLower: Vector = (addVectors(scaleVector(this.getLowerPoint(sampleX), scaleFactor), translation));
             let testUpper: Vector = (addVectors(scaleVector(this.getUpperPoint(sampleX), scaleFactor), translation));
 
-            //if (!checkInVectorList(tempGridPoints, testLower)) {
-            tempGridPoints.push(testLower);
+            //if (!checkInVectorList(tempOutline, testLower)) {
+            tempOutline.push(testLower);
             //}
-            //if (!checkInVectorList(tempGridPoints, testUpper)) {
-            tempGridPoints.push(testUpper);
+            //if (!checkInVectorList(tempOutline, testUpper)) {
+            tempOutline.push(testUpper);
             //}
         }
 
-        //tempGridPoints = getFullShape(tempGridPoints);
+        //tempOutline = getFullShape(tempOutline);
 
-        this.gridPoints = tempGridPoints;
+        this.outline = tempOutline;
     }
 
     //#region Airfoil geometry functions

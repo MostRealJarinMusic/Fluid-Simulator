@@ -6,6 +6,7 @@ class FluidManager {
 
     private airfoilGridPoints!: Vector[];
     private airfoilOutline!: Vector[];
+    private airfoilSurfaceNormals!: SurfaceNormal[];
 
     private angleOfAttack!: number;
     private angleOfAttackInfo: ParameterInfo;
@@ -50,6 +51,18 @@ class FluidManager {
     }
     //#endregion
 
+    //#region Getters
+    get SurfaceNormals(): SurfaceNormal[] {
+        return this.airfoilSurfaceNormals;
+    }
+    get PressureGradient(): Vector[] {
+        return this.fluid.PressureGradient;
+    }
+    get Origin(): Vector {
+        return this.fluid.origin;
+    }
+    //#endregion
+
     //#region Exposing fluid functions
     public initFluid(): void {
         this.fluid.initFluid();
@@ -63,34 +76,35 @@ class FluidManager {
         this.fluid.drawFluid(this.simulationMode);
     }
 
-    public updateAirfoil(newGridPoints: Vector[]): void {
-        this.airfoilGridPoints = newGridPoints;
-        let rotatedAirfoil = this.rotateAirfoil();
-        //this.applyRotationToAirfoil();
-        this.fluid.updateAirfoil(rotatedAirfoil);
+    public updateAirfoil(outline: Vector[]): void {
+        this.airfoilOutline = outline;
+        this.rotateAirfoil();
+        this.fluid.updateAirfoil(this.airfoilGridPoints);
     }
     //#endregion
 
-    private rotateAirfoil(): Vector[] {
-        let centroid: Vector = getCentroid(roundAll(this.airfoilGridPoints));
-        //return this.airfoilGridPoints.map((vector) => roundVector(rotateVectorAroundPoint(vector, this.angleOfAttack, centroid)));
-        this.airfoilOutline = removeDuplicateVectors(
-            this.airfoilGridPoints.map((vector) => roundVector(rotateVectorAroundPoint(vector, this.angleOfAttack, centroid)))
+    private rotateAirfoil() {
+        let centroid: Vector = getCentroid(roundAll(this.airfoilOutline));
+        let tempRotated = removeDuplicateVectors(
+            this.airfoilOutline.map((vector) => roundVector(rotateVectorAroundPoint(vector, this.angleOfAttack, centroid)))
         );
-        let finalShape = (this.airfoilOutline);
-        console.log(this.airfoilOutline);
 
-        let test = getSurfaceNormal(this.airfoilOutline[0], this.airfoilOutline);
-        //console.log(this.airfoilOutline[0]);
-        //console.log(sortClosestToVector(this.airfoilOutline[0], this.airfoilOutline));
-        return finalShape;
+        //let test = getSurfaceNormal(this.airfoilOutline[0], this.airfoilOutline);
+        /*
+        for (let i = 0; i < this.airfoilOutline.length; i++) {
+            let test = getSurfaceNormal(this.airfoilOutline[i], this.airfoilOutline);
+            console.log(`${this.airfoilOutline[i].x},${this.airfoilOutline[i].y} -> NORMAL: ${test.x},${test.y}`)
+        }
+        */
+        this.airfoilSurfaceNormals = getAllSurfaceNormals(tempRotated);
+        this.airfoilGridPoints = (tempRotated);
     }
 
     //#region Angle of Attack and Free Stream Velocity
     public updateAngleOfAttack(): void {
         this.angleOfAttack = -parseFloat(this.angleOfAttackInput.value);
-        let rotatedAirfoil = this.rotateAirfoil();
-        this.fluid.updateAirfoil(rotatedAirfoil);
+        this.rotateAirfoil();
+        this.fluid.updateAirfoil(this.airfoilGridPoints);
 
     }
     public resetParameters(): void {

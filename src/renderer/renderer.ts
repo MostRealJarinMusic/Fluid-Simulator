@@ -32,16 +32,16 @@ const applicationManager = new ApplicationManager();
 //#region Listener events
 function updateAirfoilParameters(): void {
     applicationManager.airfoilDesigner.updateAirfoil();
-    applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeGridPoints);
+    applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeOutline);
 }
 function resetAirfoilParameters(): void {
     applicationManager.airfoilDesigner.resetAirfoil();
     //applicationManager.fluidManager.resetParameters();
-    applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeGridPoints);
+    applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeOutline);
 }
 function resetFluidParameters(): void {
     applicationManager.fluidManager.resetParameters();
-    applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeGridPoints);
+    applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeOutline);
     resetGeneralFluidControls();
 }
 function resetGeneralFluidControls(): void {

@@ -40,6 +40,8 @@ class Fluid {
     private tracers: Tracer[];
     private showStreamlines: boolean;
     private streamlines: StreamLine[];
+
+    public readonly origin: Vector;
     //#endregion
 
     constructor(width: number, height: number, density: number, freeStreamVelocity: number, viscosity: number, canvas: HTMLCanvasElement) {
@@ -82,6 +84,9 @@ class Fluid {
         //#region Airfoil setup
         this.running = true;
         this.airfoilGridPoints = [];
+        let originX = Math.round(this.width / 3 + this.width / 10);
+        let originY = Math.round(this.height / 2);
+        this.origin = { x: originX, y: originY };
         //#endregion
 
         //#region Tracers and streamlines
@@ -152,6 +157,12 @@ class Fluid {
         }
     }
 
+    //#region Getters
+    get PressureGradient(): Vector[] {
+        return this.properties.pressureGradient;
+    }
+    //#endregion
+
     //#region Setters
     set ShowTracers(value: boolean) {
         this.showTracers = value;
@@ -203,14 +214,12 @@ class Fluid {
         }
     }
 
-
     private streamInDirection(x: number, y: number, direction: Directions) {
         let offset: Vector = { x: -latticeXs[direction], y: -latticeYs[direction] };
         let field = `d${Directions[direction]}` as DistributionDir;
         //@ts-expect-error
         this[field][this.index(x, y)] = this[field][this.index(x + offset.x, y + offset.y)];
     }
-
 
     //Credit???
     private newStream(): void {
@@ -695,6 +704,7 @@ class Fluid {
         this.context.putImageData(this.image, 0, 0);
         if (this.showTracers) this.drawTracers();
         if (this.showStreamlines) this.drawStreamlines();
+        //this.drawNormals();
     }
 
     private drawStreamlines(): void {
@@ -722,6 +732,34 @@ class Fluid {
                 this.context.lineTo(simulationScale * imagePosition.x, simulationScale * imagePosition.y);
             }
 
+            this.context.stroke();
+            this.context.closePath();
+        }
+    }
+
+    private drawNormals(): void {
+        this.context.strokeStyle = "#FFFFFF";
+        this.context.lineWidth = 1;
+
+        let originX = Math.round(this.width / 3 + this.width / 10);
+        let originY = Math.round(this.height / 2);
+        let origin: Vector = { x: originX, y: originY };
+
+        let simulationScale = this.pxPerNode;
+        for (let i = 0; i < this.airfoilGridPoints.length; i++) {
+            let currentVector = addVectors(this.airfoilGridPoints[i], origin);
+            let test = scaleVector(getSurfaceNormal(this.airfoilGridPoints[i], this.airfoilGridPoints), 12);
+
+            let imageVector = this.gridPosToImagePos(currentVector);
+            let imageTest = this.gridPosToImagePos(addVectors(test, currentVector));
+            //console.log(`${this.airfoilGridPoints[i].x},${this.airfoilGridPoints[i].y} -> NORMAL: ${test.x},${test.y}`);
+            //console.log(currentVector);
+            //console.log(imageVector);
+
+            this.context.beginPath();
+            this.context.moveTo((imageVector.x) * simulationScale, (imageVector.y) * simulationScale);
+            this.context.lineTo((imageTest.x) * simulationScale, (imageTest.y) * simulationScale);
+            //this.context.lineTo(test.x * simulationScale, test.y * simulationScale);
             this.context.stroke();
             this.context.closePath();
         }
@@ -775,12 +813,12 @@ class Fluid {
     private setupObstacle(): void {
         //Reset solid
         this.properties.solid = new Array(this.numCells).fill(false);
-        let originX = Math.round(this.width / 3 + this.width / 10);
-        let originY = Math.round(this.height / 2);
+        //let originX = Math.round(this.width / 3 + this.width / 10);
+        //let originY = Math.round(this.height / 2);
 
         for (let i = 0; i < this.airfoilGridPoints.length; i++) {
             let point = this.airfoilGridPoints[i];
-            let index = this.index(originX + point.x, originY + point.y);
+            let index = this.index(this.origin.x + point.x, this.origin.y + point.y);
             this.properties.solid[index] = true;
         }
 
