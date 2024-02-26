@@ -1,15 +1,11 @@
+
+//Credit???
 class ColourMap {
     private numColours: number;
-    private redList: number[];
-    private greenList: number[];
-    private blueList: number[];
     private colourMap: Colour[];
 
     constructor() {
         this.numColours = 400;
-        this.redList = new Array(this.numColours + 2).fill(0);
-        this.greenList = new Array(this.numColours + 2).fill(0);
-        this.blueList = new Array(this.numColours + 2).fill(0);
         this.colourMap = new Array(this.numColours + 2);
 
         this.generateColourMap();
@@ -39,12 +35,8 @@ class ColourMap {
                 g = 0;
                 b = 0;
             }
-            this.redList[colourIndex] = r;
-            this.greenList[colourIndex] = g;
-            this.blueList[colourIndex] = b;
 
-            let tempColour: Colour = { red: r, green: g, blue: b, alpha: 255 };
-            this.colourMap[colourIndex] = tempColour;
+            this.colourMap[colourIndex] = { red: r, green: g, blue: b, alpha: 255 };
         }
     }
 
