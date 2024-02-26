@@ -72,13 +72,17 @@ class FluidManager {
     //#endregion
 
     private rotateAirfoil(): Vector[] {
-        let centroid: Vector = getCentroid(getFullShape(roundAll(this.airfoilGridPoints)));
+        let centroid: Vector = getCentroid(roundAll(this.airfoilGridPoints));
         //return this.airfoilGridPoints.map((vector) => roundVector(rotateVectorAroundPoint(vector, this.angleOfAttack, centroid)));
         this.airfoilOutline = removeDuplicateVectors(
             this.airfoilGridPoints.map((vector) => roundVector(rotateVectorAroundPoint(vector, this.angleOfAttack, centroid)))
         );
-        let finalShape = getFullShape(this.airfoilOutline);
-        console.log(this.airfoilOutline)
+        let finalShape = (this.airfoilOutline);
+        console.log(this.airfoilOutline);
+
+        let test = getSurfaceNormal(this.airfoilOutline[0], this.airfoilOutline);
+        //console.log(this.airfoilOutline[0]);
+        //console.log(sortClosestToVector(this.airfoilOutline[0], this.airfoilOutline));
         return finalShape;
     }
 

@@ -196,6 +196,14 @@ function dotVectors(vector1: Vector, vector2: Vector): number {
     return (vector1.x * vector2.x) + (vector1.y * vector2.y);
 }
 
+/**
+ * Cross product - note that the cross product is not well defined in 3D
+ * This returns the magnitude of the 3D cross product
+ */
+function crossVectors(vector1: Vector, vector2: Vector): number {
+    return (vector1.x * vector2.y) - (vector1.y * vector2.x);
+}
+
 function absoluteVector(vector: Vector): number {
     return Math.sqrt(vector.x ** 2 + vector.y ** 2);
 }
@@ -264,39 +272,6 @@ function getOrientation(p: Vector, q: Vector, r: Vector): Orientation {
     return (value > 0) ? Orientation.Clockwise : Orientation.CounterClockwise;
 }
 
-/**
- * Takes a shape as a set of position vectors and returns the outline as a set of position vectors
- * @param fullShape - The vector array of full shape, positions, as integer coordinates
- */
-function getOutline(fullShape: Vector[]): Vector[] {
-    let outline: Vector[] = [];
-    let length = fullShape.length;
-
-    let l = 0;
-    for (let i = 1; i < length; i++) {
-        if (fullShape[i].x < fullShape[l].x) {
-            l = i;
-        }
-    }
-
-    console.log(fullShape[l])
-
-    let p = l, q;
-    do {
-        outline.push(fullShape[p]);
-        q = (p + 1) % length;
-        for (let i = 0; i < length; i++) {
-            if (getOrientation(fullShape[p], fullShape[i], fullShape[q]) === Orientation.CounterClockwise) {
-                q = i;
-            }
-        }
-        p = q;
-    } while (p != l);
-
-    console.log(outline);
-
-    return outline;
-}
 
 function getCentroid(fullShape: Vector[]): Vector {
     let summation = fullShape.reduce((acc, { x, y }) => ({ x: acc.x + x, y: acc.y + y }), { x: 0, y: 0 });
@@ -306,3 +281,122 @@ function getCentroid(fullShape: Vector[]): Vector {
 function roundAll(vectorSet: Vector[]): Vector[] {
     return vectorSet.map((vector) => roundVector(vector));
 }
+
+function sortVectorsAntiClockwise(outline: Vector[]): Vector[] {
+    let centroid: Vector = { x: 0, y: 0 }//roundVector(getCentroid(outline));
+    let translatedOutline = outline.map((value) => subVectors(value, centroid));
+    let sorted = translatedOutline.sort((a, b) => {
+        let angleA = getAngle(a);
+        let angleB = getAngle(b);
+        if (angleA < angleB) return -1;
+        if ((angleA === angleB) && (absoluteVector(a) < absoluteVector(b))) return -1;
+        return 1;
+    });
+
+    return sorted.map((value) => addVectors(value, centroid));
+}
+
+function sortClosestToVector(vector: Vector, outline: Vector[]): Vector[] {
+    outline = outline.filter((value) => {
+        return value != vector
+    });
+    outline = outline.map((value) => subVectors(value, vector));
+    let sorted = outline.sort((a, b) => absoluteVector(a) - absoluteVector(b));
+    sorted = sorted.map((value) => addVectors(value, vector));
+    return sorted;
+}
+
+function getAngle(vector: Vector): number {
+    let angle = Math.atan2(vector.y, vector.x);
+    if (angle <= 0) {
+        angle += 2 * Math.PI;
+    }
+    return angle;
+}
+
+function getContinuousOrder(startVector: Vector, outline: Vector[]): Vector[] {
+
+
+    return [];
+}
+
+function getSurfaceNormal(vector: Vector, outline: Vector[]): Vector {
+    console.log(outline);
+    if (checkInVectorList(outline, vector)) {
+        /*
+        let sortedOutline = sortVectorsAntiClockwise(outline);
+        let index = sortedOutline.findIndex((value) => (value.x === vector.x && value.y === vector.y));
+
+        if (index !== -1) {
+            //Valid index
+            let prevIndex = (index + sortedOutline.length - 1) % sortedOutline.length;
+            let nextIndex = (index + 1) % sortedOutline.length;
+
+            //console.log(prevIndex);
+            //console.log(index);
+            //console.log(nextIndex);
+
+            let previousVector = sortedOutline[prevIndex];
+            let nextVector = sortedOutline[nextIndex];
+
+            console.log(previousVector);
+            console.log(vector);
+            console.log(nextVector);
+
+            let tangent = { x: nextVector.x - previousVector.x, y: nextVector.y - previousVector.y };
+            let normal = rotateVector(tangent, Math.PI / 2);
+
+            console.log(tangent);
+            console.log(normal)
+        }*/
+        console.log(`CLOSEST TO VECTOR ${vector.x},${vector.y}`);
+        let sortedOutline = sortClosestToVector(vector, outline);
+        let vector1 = sortedOutline[0];
+        let vector2 = sortedOutline[1];
+
+        //console.log(sortedOutline);
+        console.log(`VECTOR1 ${vector1.x},${vector1.y}`);
+        console.log(`VECTOR2 ${vector2.x},${vector2.y}`);
+
+        let tangent = { x: vector1.x - vector2.x, y: vector1.y - vector2.y };
+        //More accurate then rotate function, which introduces some rounding errors
+        let normal = normaliseVector({ x: -tangent.y, y: tangent.x })///rotateVector(tangent, Math.PI / 2);
+
+        let testPoint = roundVector(addVectors(vector, normal));
+
+        if (getFullShape(outline).includes(testPoint)) {
+            //the normal is facing outwards
+            console.log("NORMAL FACING OUTWARDS");
+        } else {
+            console.log("NORMAL FACING INWARDS");
+            normal = scaleVector(normal, -1);//rotateVector(normal, Math.PI);
+        }
+
+        //normal = normaliseVector(normal);
+        console.log(normal);
+
+        return normal;
+
+        //let centroid = getCentroid(outline);
+
+        //let centroidToVector = subVectors(vector, centroid);
+        //let dotProduct = dotVectors(normal, centroidToVector);
+        //let angle = Math.acos((dotProduct) / (absoluteVector(normal) * absoluteVector(centroidToVector)));
+        /*
+        if (angle > Math.PI / 2) {
+            normal = rotateVector(normal, Math.PI);
+        }
+        */
+        //console.log(`CENTROID ${centroid.x},${centroid.y}`);
+        //console.log(`TANGENT ${tangent.x},${tangent.y}`);
+        //console.log(`NORMAL ${normal.x},${normal.y}`)
+        //console.log(`COMPARISON ${centroidToVector.x},${centroidToVector.y}`);
+        //console.log(`DOT PRODUCT ${dotProduct}`);
+        //console.log(`ANGLE ${angle * 180 / Math.PI}`);
+    } else {
+        console.log("Error");
+    }
+
+    return { x: 0, y: 0 };
+}
+
