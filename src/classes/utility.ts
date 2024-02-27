@@ -10,7 +10,7 @@ type Bound = { lower: number, upper: number };
 type ParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: Bound; }
 type Colour = { red: number, green: number, blue: number, alpha: number };
 type DistributionDir = keyof Fluid;
-type SurfaceNormal = { position: Vector, normal: Vector }
+type SurfaceNormal = { position: Vector, normal: Vector };
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure', 'pressureGradient'] as const;
 type SimulationMode = typeof validSimulationModes[number];
@@ -385,3 +385,6 @@ function getSurfaceNormal(vector: Vector, outline: Vector[]): Vector {
     return { x: 0, y: 0 };
 }
 
+function globalIndex(i: number, j: number, width: number) {
+    return (width * j) + i;
+}

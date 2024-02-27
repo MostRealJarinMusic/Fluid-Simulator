@@ -95,6 +95,7 @@ class ApplicationManager {
             this.fluidManager.runMainLoop();
         }
         this.fluidManager.drawFluid();
-        this.resultsManager.calculateForce(this.fluidManager.PressureGradient, this.fluidManager.SurfaceNormals, this.fluidManager.Origin);
+        this.resultsManager.calculateForce(this.fluidManager.PressureGradient, this.fluidManager.SurfaceNormals, this.fluidManager.Origin, this.fluidManager.FluidWidth);
+        this.resultsManager.displayValues();
     }
 }

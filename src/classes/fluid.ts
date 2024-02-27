@@ -101,7 +101,8 @@ class Fluid {
 
     private index(i: number, j: number): number {
         //return i * this.height + j;
-        return (this.width * j) + i;
+        //return (this.width * j) + i;
+        return globalIndex(i, j, this.width);
     }
 
     //#region Fluid setup + debug
@@ -166,6 +167,9 @@ class Fluid {
     //#region Getters
     get PressureGradient(): Vector[] {
         return this.properties.pressureGradient;
+    }
+    get Width(): number {
+        return this.width;
     }
     //#endregion
 

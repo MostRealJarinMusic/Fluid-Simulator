@@ -61,6 +61,9 @@ class FluidManager {
     get Origin(): Vector {
         return this.fluid.origin;
     }
+    get FluidWidth(): number {
+        return this.fluid.Width;
+    }
     //#endregion
 
     //#region Exposing fluid functions
@@ -97,7 +100,7 @@ class FluidManager {
         }
         */
         this.airfoilSurfaceNormals = getAllSurfaceNormals(tempRotated);
-        this.airfoilGridPoints = (tempRotated);
+        this.airfoilGridPoints = getFullShape(tempRotated);
     }
 
     //#region Angle of Attack and Free Stream Velocity
