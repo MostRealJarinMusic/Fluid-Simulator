@@ -104,6 +104,8 @@ class Fluid {
         return (this.width * j) + i;
     }
 
+    //#region Fluid setup + debug
+
     private setupDistribution(): void {
         for (let dir = 0; dir < Object.keys(Directions).length / 2; dir++) {
             let field = `d${Directions[dir]}` as DistributionDir;
@@ -116,8 +118,8 @@ class Fluid {
         let velocityVector: Vector = { x: this.freeStreamVelocity, y: 0 };
         for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
             /*
-            for (let i = 0; i < this.discreteVelocities; i++) {
-                this.distribution[this.index(x, y)][i] = this.getEquilibrium(this.latticeWeights[i], this.density, velocityVector, i);
+            for (let i = 0; i < discreteVelocities; i++) {
+                this.distribution[nodeIndex][i] = this.getEquilibrium(latticeWeights[i], this.density, velocityVector, i);
             }
             */
 
@@ -141,21 +143,25 @@ class Fluid {
     public runMainLoop(): void {
         if (this.running) {
             /*
-            //this.computeMoments();
-            //this.applyBoundaryConditions();
-            //this.computeEquilibrium();
-            //this.collideLocally();
-            //this.stream();
+            this.computeMoments();
+            this.applyBoundaryConditions();
+            this.computeEquilibrium();
+            this.collideLocally();
+            this.stream();
             */
+
+
             this.newComputeMoments();
             this.newCollide();
             this.newStream();
             this.newApplyBoundaryConditions();
+
             this.computePressureGradient();
 
             if (this.showTracers) this.moveTracers();
         }
     }
+    //#endregion
 
     //#region Getters
     get PressureGradient(): Vector[] {
@@ -416,6 +422,7 @@ class Fluid {
             this.properties.localDensity[i] = nodeDensity;
 
             //Pressure????
+            this.properties.localPressure[i] = (latticeSpeedOfSound ** 2) * nodeDensity;
         }
     }
 
@@ -793,28 +800,9 @@ class Fluid {
     //#endregion
 
     //#region Airfoil functions
-    /*
-    public setupDefaultObstacle(): void {
-        let radiusSqr = 10 ** 2;
-        let obstacleX = this.width / 3;
-        let obstacleY = this.height / 2;
-        for (let y = 0; y < this.height; y++) {
-            for (let x = 0; x < this.width; x++) {
-                if (this.distanceBetweenSqr(obstacleX, obstacleY, x, y) < radiusSqr) {
-                    this.properties.solid[this.index(x, y)] = true;
-                } else {
-                    this.properties.solid[this.index(x, y)] = false;
-                }
-            }
-        }
-    }
-    */
-
     private setupObstacle(): void {
         //Reset solid
         this.properties.solid = new Array(this.numCells).fill(false);
-        //let originX = Math.round(this.width / 3 + this.width / 10);
-        //let originY = Math.round(this.height / 2);
 
         for (let i = 0; i < this.airfoilGridPoints.length; i++) {
             let point = this.airfoilGridPoints[i];
@@ -836,7 +824,6 @@ class Fluid {
         this.setupObstacle();
     }
     //#endregion
-
 }
 
 //#region Tracer and Streamline

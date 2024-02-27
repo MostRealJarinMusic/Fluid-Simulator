@@ -2,7 +2,7 @@
 abstract class Shape {
     protected outline: Vector[] = [];
     protected graphDatasets: GraphDataset[] = [];
-    protected params: Record<string, number> = {};
+    protected parameters: Record<string, number> = {};
 
     abstract parameterInfo: Record<string, ParameterInfo>;
     /**
@@ -26,7 +26,7 @@ abstract class Shape {
     }
 
     get Parameters(): Record<string, number> {
-        return this.params;
+        return this.parameters;
     }
 
     get Outline(): Vector[] {
@@ -49,28 +49,28 @@ class Ellipse extends Shape {
 
     constructor() {
         super();
-        this.params = setupParameters(this.parameterInfo);
+        this.parameters = setupParameters(this.parameterInfo);
         this.updateOutline();
     }
 
     override get Area(): number {
-        let xRadius = this.params.xRadius;
-        let yRadius = this.params.yRadius;
+        let xRadius = this.parameters.xRadius;
+        let yRadius = this.parameters.yRadius;
 
         return Math.PI * (xRadius * yRadius);
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
-        this.params['xRadius'] = newParameters['xRadius'];
-        this.params['yRadius'] = newParameters['yRadius'];
+        this.parameters['xRadius'] = newParameters['xRadius'];
+        this.parameters['yRadius'] = newParameters['yRadius'];
 
         this.updateOutline();
     }
 
     override updateOutline(): void {
         let scaleFactor = nodesPerMeter;
-        let xRadius = Math.round(this.params.xRadius * scaleFactor);
-        let yRadius = Math.round(this.params.yRadius * scaleFactor);
+        let xRadius = Math.round(this.parameters.xRadius * scaleFactor);
+        let yRadius = Math.round(this.parameters.yRadius * scaleFactor);
         let tempOutline: Vector[] = [];
 
         for (let theta = 0; theta <= 2 * Math.PI; theta += 0.005) {
@@ -79,9 +79,6 @@ class Ellipse extends Shape {
                 y: yRadius * Math.sin(theta),
             })
         }
-
-        //tempOutline = getFullShape(tempOutline);
-
         this.outline = tempOutline;
     }
 }
@@ -94,25 +91,25 @@ class Rectangle extends Shape {
 
     constructor() {
         super();
-        this.params = setupParameters(this.parameterInfo);
+        this.parameters = setupParameters(this.parameterInfo);
         this.updateOutline();
     }
 
     override get Area(): number {
-        return this.params['width'] * this.params['height'];
+        return this.parameters['width'] * this.parameters['height'];
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
-        this.params['width'] = newParameters['width'];
-        this.params['height'] = newParameters['height'];
+        this.parameters['width'] = newParameters['width'];
+        this.parameters['height'] = newParameters['height'];
 
         this.updateOutline();
     }
 
     override updateOutline(): void {
         let scaleFactor = nodesPerMeter;
-        let width = Math.round(this.params.width * scaleFactor);
-        let height = Math.round(this.params.height * scaleFactor);
+        let width = Math.round(this.parameters.width * scaleFactor);
+        let height = Math.round(this.parameters.height * scaleFactor);
         let tempOutline: Vector[] = [];
 
         for (let x = 0; x < width; x += 0.05) {
@@ -135,22 +132,22 @@ class Line extends Shape {
     }
     constructor() {
         super();
-        this.params = setupParameters(this.parameterInfo);
+        this.parameters = setupParameters(this.parameterInfo);
         this.updateOutline();
     }
 
     override get Area(): number {
-        return (nodeDistance) * this.params.lineLength;
+        return (nodeDistance) * this.parameters.lineLength;
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
-        this.params['lineLength'] = newParameters['lineLength'];
+        this.parameters['lineLength'] = newParameters['lineLength'];
         this.updateOutline();
     }
 
     override updateOutline(): void {
         let scaleFactor = nodesPerMeter;
-        let pixelLength = Math.round(this.params.lineLength * scaleFactor);
+        let pixelLength = Math.round(this.parameters.lineLength * scaleFactor);
         let tempOutline: Vector[] = [];
 
         for (let x = 0; x <= 1; x += 0.25) {
@@ -174,7 +171,7 @@ class Airfoil extends Shape {
 
     constructor() {
         super();
-        this.params = setupParameters(this.parameterInfo);
+        this.parameters = setupParameters(this.parameterInfo);
 
         this.updateGraphDatasets();
         this.updateOutline();
@@ -213,9 +210,9 @@ class Airfoil extends Shape {
         if (testM > 0 && (testP >= 0 && testP < 10)) testP = 10;
         if (testT > 30 && testT < 40) testT = 30;
 
-        this.params['m'] = testM;
-        this.params['p'] = testP;
-        this.params['t'] = testT;
+        this.parameters['m'] = testM;
+        this.parameters['p'] = testP;
+        this.parameters['t'] = testT;
 
         this.updateGraphDatasets();
         this.updateOutline();
@@ -263,16 +260,9 @@ class Airfoil extends Shape {
             let testLower: Vector = (addVectors(scaleVector(this.getLowerPoint(sampleX), scaleFactor), translation));
             let testUpper: Vector = (addVectors(scaleVector(this.getUpperPoint(sampleX), scaleFactor), translation));
 
-            //if (!checkInVectorList(tempOutline, testLower)) {
             tempOutline.push(testLower);
-            //}
-            //if (!checkInVectorList(tempOutline, testUpper)) {
             tempOutline.push(testUpper);
-            //}
         }
-
-        //tempOutline = getFullShape(tempOutline);
-
         this.outline = tempOutline;
     }
 
@@ -294,7 +284,7 @@ class Airfoil extends Shape {
 
     //General equation for half-thickness at any given x
     private calculateHalfThickness(x: number): number {
-        let t = this.params['t'] / 100;
+        let t = this.parameters['t'] / 100;
 
         let tempSum = (0.2969 * Math.pow(x, 0.5)) - (0.1260 * x) - (0.3516 * Math.pow(x, 2)) + (0.2843 * Math.pow(x, 3)) - (0.1036 * Math.pow(x, 4));
         return (5 * t * tempSum);
@@ -302,8 +292,8 @@ class Airfoil extends Shape {
 
     //Calculates the mean line of camber for any given x
     private calculateMeanCamber(x: number): number {
-        let m = this.params['m'] / 100;
-        let p = this.params['p'] / 100;
+        let m = this.parameters['m'] / 100;
+        let p = this.parameters['p'] / 100;
         let final = 0;
 
         if (0 <= x && x < p) {
@@ -316,8 +306,8 @@ class Airfoil extends Shape {
     }
 
     private calculateCamberDerivative(x: number): number {
-        let m = this.params['m'] / 100;
-        let p = this.params['p'] / 100;
+        let m = this.parameters['m'] / 100;
+        let p = this.parameters['p'] / 100;
         let final = 0;
 
         if (0 <= x && x < p) {
