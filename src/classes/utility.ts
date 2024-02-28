@@ -13,6 +13,8 @@ type DistributionDir = keyof Fluid;
 type SurfaceNormal = { position: Vector, normal: Vector };
 type TaggedPosition = { position: Vector, tag: PositionTag };
 
+type ResultsValues = { lift: number, drag: number, LTDRatio: number, liftCoefficient: number, dragCoefficient: number };
+
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure', 'pressureGradient'] as const;
 type SimulationMode = typeof validSimulationModes[number];
 const validResultGraphModes = ['surfacePressure', 'velocity'] as const;

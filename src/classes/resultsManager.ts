@@ -20,7 +20,7 @@ class ResultsManager {
         this.canvas = canvas;
         this.context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-        this.values = new ResultsValues();
+        this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
 
         this.valuesDisplayContainer = valueDisplay;
         this.graphingMode = 'surfacePressure';
