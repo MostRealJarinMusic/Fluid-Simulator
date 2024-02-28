@@ -6,6 +6,10 @@ class ResultsManager {
     private context!: CanvasRenderingContext2D;
 
     private values: ResultsValues;
+    private fluidManager!: FluidManager;
+
+    private origin!: Vector;
+    private fluidWidth!: number;
 
     private valuesDisplayContainer: HTMLDivElement;
     private graphingModeSelector: HTMLSelectElement;
@@ -21,6 +25,12 @@ class ResultsManager {
         this.valuesDisplayContainer = valueDisplay;
         this.graphingMode = 'surfacePressure';
         this.graphingModeSelector = graphingModeSelector;
+    }
+
+    public assignFluidManager(fluidManager: FluidManager) {
+        this.fluidManager = fluidManager;
+        this.origin = this.fluidManager.Origin;
+        this.fluidWidth = this.fluidManager.FluidWidth;
     }
 
     //#region Graphs
@@ -52,27 +62,24 @@ class ResultsManager {
 
 
     //#region Calculations
-    public calculateForce(pressureGradient: Vector[], surfaceNormals: SurfaceNormal[], origin: Vector, fluidWidth: number): void {
-        //Iterate through each point at the surface normal,
-        //console.log(surfaceNormals);
-        //let totalForce = 0;
+    //pressureGradient: Vector[], surfaceNormals: SurfaceNormal[], origin: Vector, fluidWidth: number
+    public calculateForce(): void {
+        let pressureGradient = this.fluidManager.PressureGradient;
+        let surfaceNormals = this.fluidManager.SurfaceNormals;
+
+        //Iterate through each point at the surface normal
         this.values.lift = 0
         this.values.drag = 0;
         for (let pair of surfaceNormals) {
-            let testPosition = roundVector(addVectors(pair.position, origin));
-            //console.log(testPosition);
-            let pressureAtPoint = pressureGradient[globalIndex(testPosition.x, testPosition.y, fluidWidth)];
-            //console.log(`At position: ${testPosition.x},${testPosition.y} -> pressureGrad: ${pressureAtPoint.x},${pressureAtPoint.y}`);
+            let testPosition = roundVector(addVectors(pair.position, this.origin));
+            let pressureAtPoint = pressureGradient[globalIndex(testPosition.x, testPosition.y, this.fluidWidth)];
             let force = dotVectors(pressureAtPoint, pair.normal);
-            //console.log(`Force at point ${force}`);
-            //totalForce += force;
             this.values.lift += force * pair.normal.y;
             this.values.drag += force * pair.normal.x;
         }
-        //console.log(`Lift ${lift}`);
-        //console.log(`Drag ${drag}`);
 
-        //console.log(`Total force ${totalForce}`);
+        //By Newton's third law - I have the force by the airfoil on the fluid
+        //I want the force on the airfoil by the fluid - flip the force
         this.values.lift *= -1;
         this.values.drag *= -1;
     }

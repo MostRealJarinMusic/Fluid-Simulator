@@ -4,6 +4,8 @@ class FluidManager {
     private fluid: Fluid;
     private simulationMode: SimulationMode;
 
+    private airfoilTaggedOutline!: TaggedPosition[];
+    private airfoilTaggedRotatedOutline!: TaggedPosition[];
     private airfoilGridPoints!: Vector[];
     private airfoilOutline!: Vector[];
     private airfoilSurfaceNormals!: SurfaceNormal[];
@@ -36,7 +38,6 @@ class FluidManager {
         this.freeStreamVelocity = this.freeStreamVelocityInfo.defaultValue;
     }
 
-
     //#region Setters
     set ShowTracers(value: boolean) {
         this.fluid.ShowTracers = value;
@@ -64,6 +65,17 @@ class FluidManager {
     get FluidWidth(): number {
         return this.fluid.Width;
     }
+    get PressureField(): number[] {
+        return this.fluid.PressureField;
+    }
+    get VelocityField(): Vector[] {
+        return this.fluid.VelocityField;
+    }
+
+
+    get TaggedOutline(): TaggedPosition[] {
+        return this.airfoilTaggedRotatedOutline;
+    }
     //#endregion
 
     //#region Exposing fluid functions
@@ -79,18 +91,43 @@ class FluidManager {
         this.fluid.drawFluid(this.simulationMode);
     }
 
-    public updateAirfoil(outline: Vector[]): void {
-        this.airfoilOutline = outline;
+    public updateAirfoil(taggedOutline: TaggedPosition[]): void {
+        //this.airfoilOutline = outline;
+        this.airfoilTaggedOutline = taggedOutline;
         this.rotateAirfoil();
         this.fluid.updateAirfoil(this.airfoilGridPoints);
     }
     //#endregion
 
+    private removeDuplicateVectors(taggedPositions: TaggedPosition[]): TaggedPosition[] {
+        let finalTaggedPositions: TaggedPosition[] = [];
+        let finalVectors: Vector[] = [];;
+        for (let taggedPosition of taggedPositions) {
+            if (!checkInVectorList(finalVectors, taggedPosition.position)) {
+                finalVectors.push(taggedPosition.position);
+                finalTaggedPositions.push(taggedPosition);
+            }
+        }
+        return finalTaggedPositions;
+    }
+
     private rotateAirfoil() {
+        const untagPositions = (taggedPositions: TaggedPosition[]) => taggedPositions.map((value) => value.position);
+
+        this.airfoilOutline = untagPositions(this.airfoilTaggedOutline);
+
         let centroid: Vector = getCentroid(roundAll(this.airfoilOutline));
-        let tempRotated = removeDuplicateVectors(
-            this.airfoilOutline.map((vector) => roundVector(rotateVectorAroundPoint(vector, this.angleOfAttack, centroid)))
+        //let tempTaggedRotated
+        this.airfoilTaggedRotatedOutline = this.removeDuplicateVectors(
+            this.airfoilTaggedOutline.map((taggedPosition) => {
+                return {
+                    position: roundVector(rotateVectorAroundPoint(taggedPosition.position, this.angleOfAttack, centroid)),
+                    tag: taggedPosition.tag
+                }
+            })
         );
+
+        let tempRotated = untagPositions(this.airfoilTaggedRotatedOutline);
 
         //let test = getSurfaceNormal(this.airfoilOutline[0], this.airfoilOutline);
         /*
@@ -101,6 +138,7 @@ class FluidManager {
         */
         this.airfoilSurfaceNormals = getAllSurfaceNormals(tempRotated);
         this.airfoilGridPoints = getFullShape(tempRotated);
+        this.fluid.SurfaceNormals = this.airfoilSurfaceNormals;
     }
 
     //#region Angle of Attack and Free Stream Velocity

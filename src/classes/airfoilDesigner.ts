@@ -22,7 +22,7 @@ class AirfoilDesigner {
     }
 
 
-    get ShapeOutline(): Vector[] {
+    get ShapeOutline(): TaggedPosition[] {
         return this.shape.Outline;
     }
 

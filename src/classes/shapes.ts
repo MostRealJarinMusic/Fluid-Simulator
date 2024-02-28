@@ -1,6 +1,6 @@
 //#region Shape parent class
 abstract class Shape {
-    protected outline: Vector[] = [];
+    protected outline: TaggedPosition[] = [];
     protected graphDatasets: GraphDataset[] = [];
     protected parameters: Record<string, number> = {};
 
@@ -29,7 +29,7 @@ abstract class Shape {
         return this.parameters;
     }
 
-    get Outline(): Vector[] {
+    get Outline(): TaggedPosition[] {
         return this.outline;
     }
 
@@ -79,7 +79,9 @@ class Ellipse extends Shape {
                 y: yRadius * Math.sin(theta),
             })
         }
-        this.outline = tempOutline;
+        this.outline = tempOutline.map((value) => {
+            return { position: value, tag: 'default' }
+        });
     }
 }
 
@@ -122,7 +124,9 @@ class Rectangle extends Shape {
             tempOutline.push({ x: width / 2, y: y - height / 2 })
         }
 
-        this.outline = tempOutline;
+        this.outline = tempOutline.map((value) => {
+            return { position: value, tag: 'default' }
+        });
     }
 }
 
@@ -158,7 +162,9 @@ class Line extends Shape {
             }
         }
 
-        this.outline = tempOutline;
+        this.outline = tempOutline.map((value) => {
+            return { position: value, tag: 'default' }
+        });
     }
 }
 
@@ -250,7 +256,7 @@ class Airfoil extends Shape {
 
     override updateOutline(): void {
         this.outline = [];
-        let tempOutline: Vector[] = [];
+        let tempOutline: TaggedPosition[] = [];
         let scaleFactor = nodesPerMeter;
         let translation: Vector = { x: -Math.round(scaleFactor / 2), y: 0 };
 
@@ -260,8 +266,8 @@ class Airfoil extends Shape {
             let testLower: Vector = (addVectors(scaleVector(this.getLowerPoint(sampleX), scaleFactor), translation));
             let testUpper: Vector = (addVectors(scaleVector(this.getUpperPoint(sampleX), scaleFactor), translation));
 
-            tempOutline.push(testLower);
-            tempOutline.push(testUpper);
+            tempOutline.push({ position: testLower, tag: 'lowerSurface' });
+            tempOutline.push({ position: testUpper, tag: 'upperSurface' });
         }
         this.outline = tempOutline;
     }

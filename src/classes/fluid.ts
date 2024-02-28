@@ -25,6 +25,9 @@ class Fluid {
     private distribution: number[][];
     private equilibriumDistribution: number[][];
 
+    private barrierFx: number = 0;
+    private barrierFy: number = 0;
+
     private properties: FluidProperties;
 
     private canvas: HTMLCanvasElement;
@@ -34,6 +37,7 @@ class Fluid {
     private pxPerNode: number;
 
     private airfoilGridPoints!: Vector[];
+    private surfaceNormals!: SurfaceNormal[];
     private running: boolean;
 
     private showTracers: boolean;
@@ -171,6 +175,12 @@ class Fluid {
     get Width(): number {
         return this.width;
     }
+    get VelocityField(): Vector[] {
+        return this.properties.localVelocity;
+    }
+    get PressureField(): number[] {
+        return this.properties.localPressure;
+    }
     //#endregion
 
     //#region Setters
@@ -187,6 +197,9 @@ class Fluid {
         //Set the free stream velocity
         this.freeStreamVelocity = value;
         this.initFluid();
+    }
+    set SurfaceNormals(value: SurfaceNormal[]) {
+        this.surfaceNormals = value;
     }
     //#endregion
 
@@ -295,6 +308,8 @@ class Fluid {
     }
 
     private newApplyBoundaryConditions() {
+        this.barrierFx = 0;
+        this.barrierFy = 0;
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
                 let i = this.index(x, y);
@@ -316,6 +331,9 @@ class Fluid {
                     this.dNorthWest[this.index(x - 1, y + 1)] = this.dSouthEast[i];
 
                     this.properties.localVelocity[i] = { x: 0, y: 0 };
+
+                    this.barrierFx += this.dEast[i] + this.dNorthEast[i] + this.dSouthEast[i] - this.dWest[i] - this.dNorthWest[i] - this.dSouthWest[i];
+                    this.barrierFy += this.dNorth[i] + this.dNorthWest[i] + this.dNorthEast[i] - this.dSouth[i] - this.dSouthEast[i] - this.dSouthWest[i];
                 }
             }
         }
@@ -716,6 +734,72 @@ class Fluid {
         if (this.showTracers) this.drawTracers();
         if (this.showStreamlines) this.drawStreamlines();
         //this.drawNormals();
+        this.drawForceArrow();
+        this.drawOtherForceArrow();
+    }
+
+    private drawOtherForceArrow() {
+        let centroid = this.gridPosToImagePos(addVectors(getCentroid(this.airfoilGridPoints), this.origin));
+        //console.log(centroid);
+        let pxPerSquare = this.pxPerNode
+
+        this.context.fillStyle = "rgba(50,50,255,255)";
+        this.context.translate((centroid.x + 0.5) * pxPerSquare, (centroid.y + 0.5) * pxPerSquare);
+        var magF = Math.sqrt(this.barrierFy ** 2 + this.barrierFx ** 2);
+        this.context.scale(5 * magF, 5 * magF);
+        this.context.rotate(Math.atan2(-this.barrierFy, this.barrierFx));
+        this.context.beginPath();
+        this.context.moveTo(0, 3);
+        this.context.lineTo(100, 3);
+        this.context.lineTo(100, 12);
+        this.context.lineTo(130, 0);
+        this.context.lineTo(100, -12);
+        this.context.lineTo(100, -3);
+        this.context.lineTo(0, -3);
+        this.context.lineTo(0, 3);
+        this.context.fill();
+        this.context.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    private drawForceArrow() {
+        let lift = 0
+        let drag = 0;
+        for (let pair of this.surfaceNormals) {
+            let testPosition = roundVector(addVectors(pair.position, this.origin));
+            //console.log(testPosition);
+            let pressureAtPoint = this.properties.pressureGradient[this.index(testPosition.x, testPosition.y)];
+            //console.log(`At position: ${testPosition.x},${testPosition.y} -> pressureGrad: ${pressureAtPoint.x},${pressureAtPoint.y}`);
+            let force = dotVectors(pressureAtPoint, pair.normal);
+            //console.log(`Force at point ${force}`);
+            //totalForce += force;
+            lift += force * pair.normal.y;
+            drag += force * pair.normal.x;
+        }
+
+        lift *= -1;
+        drag *= -1;
+        //console.log(lift);
+        //console.log(drag);
+        let centroid = this.gridPosToImagePos(addVectors(getCentroid(this.airfoilGridPoints), this.origin));
+        //console.log(centroid);
+        let pxPerSquare = this.pxPerNode
+
+        this.context.fillStyle = "rgba(255,50,50,255)";
+        this.context.translate((centroid.x + 0.5) * pxPerSquare, (centroid.y + 0.5) * pxPerSquare);
+        var magF = Math.sqrt(lift ** 2 + drag ** 2);
+        this.context.scale(5 * magF, 5 * magF);
+        this.context.rotate(Math.atan2(-lift, drag));
+        this.context.beginPath();
+        this.context.moveTo(0, 3);
+        this.context.lineTo(100, 3);
+        this.context.lineTo(100, 12);
+        this.context.lineTo(130, 0);
+        this.context.lineTo(100, -12);
+        this.context.lineTo(100, -3);
+        this.context.lineTo(0, -3);
+        this.context.lineTo(0, 3);
+        this.context.fill();
+        this.context.setTransform(1, 0, 0, 1, 0, 0);
     }
 
     private drawStreamlines(): void {

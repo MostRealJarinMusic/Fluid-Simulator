@@ -60,6 +60,7 @@ class ApplicationManager {
         this.RMGraphingModeSelector = document.getElementById("resultsGraphModeSelector") as HTMLSelectElement;
 
         this.resultsManager = new ResultsManager(this.RMCanvas, this.RMGraphingModeSelector, this.RMValuesDisplay);
+        this.resultsManager.assignFluidManager(this.fluidManager);
     }
 
     setupListeners(): void {
@@ -86,7 +87,6 @@ class ApplicationManager {
         this.RMGraphingModeSelector.addEventListener('change', function () {
             applicationManager.resultsManager.updateGraphingMode();
         });
-
     }
     //#endregion
 
@@ -95,7 +95,7 @@ class ApplicationManager {
             this.fluidManager.runMainLoop();
         }
         this.fluidManager.drawFluid();
-        this.resultsManager.calculateForce(this.fluidManager.PressureGradient, this.fluidManager.SurfaceNormals, this.fluidManager.Origin, this.fluidManager.FluidWidth);
+        this.resultsManager.calculateForce();
         this.resultsManager.displayValues();
     }
 }

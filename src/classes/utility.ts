@@ -11,11 +11,14 @@ type ParameterInfo = { name: string; labelText: string; defaultValue: number; bo
 type Colour = { red: number, green: number, blue: number, alpha: number };
 type DistributionDir = keyof Fluid;
 type SurfaceNormal = { position: Vector, normal: Vector };
+type TaggedPosition = { position: Vector, tag: PositionTag };
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure', 'pressureGradient'] as const;
 type SimulationMode = typeof validSimulationModes[number];
 const validResultGraphModes = ['surfacePressure', 'velocity'] as const;
 type GraphingMode = typeof validResultGraphModes[number];
+const validPositionTags = ['upperSurface', 'lowerSurface', 'default'] as const;
+type PositionTag = typeof validPositionTags[number];
 //#endregion
 
 //#region Type Guards
@@ -35,6 +38,15 @@ function isSimulationMode(testMode: unknown): testMode is SimulationMode {
 function isGraphingMode(testMode: unknown): testMode is GraphingMode {
     // @ts-expect-error
     return typeof testMode === 'string' && validResultGraphModes.includes(testMode);
+}
+
+/**
+ * Type guard for a valid tag
+ * @param testTag The tag to be tested
+ */
+function isPositionTag(testTag: unknown): testTag is PositionTag {
+    //@ts-expect-error
+    return typeof testTag === 'string' && validPositionTags.includes(testTag);
 }
 //#endregion
 
@@ -147,14 +159,6 @@ function checkInVectorList(currentList: Vector[], testVector: Vector): boolean {
         }
     }
     return false;
-}
-
-function removeDuplicateVectors(vectorSet: Vector[]): Vector[] {
-    let finalSet: Vector[] = [];
-    for (let vector of vectorSet) {
-        if (!checkInVectorList(finalSet, vector)) finalSet.push(vector);
-    }
-    return finalSet;
 }
 
 function addVectors(vector1: Vector, vector2: Vector): Vector {
