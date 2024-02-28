@@ -685,10 +685,40 @@ class Fluid {
         return { x: gridPosition.x, y: this.height - gridPosition.y - 1 }
     }
 
+    private getColourIndexFromMode(simulationMode: SimulationMode, index: number, contrast: number): number {
+        let colourIndex = 0;
+        //Different colouring modes and different graphing modes
+        switch (simulationMode) {
+            case 'velocity':
+                let velocityMagnitude = absoluteVector(this.properties.localVelocity[index]);
+                colourIndex = Math.round(this.colourMap.NumColours * (velocityMagnitude * 4 * contrast));
+                break;
+            case 'density':
+                let density = this.properties.localDensity[index];
+                colourIndex = Math.round(this.colourMap.NumColours * ((density - 1) * 6 * contrast + 0.5));
+                break;
+            case 'curl':
+                let curl = this.properties.localCurl[index];
+                colourIndex = Math.round(this.colourMap.NumColours * (curl * 5 * contrast + 0.5));
+                break;
+            case 'pressure':
+                //Since pressure is directly proportional to density
+                let pressure = this.properties.localPressure[index];
+                colourIndex = Math.round(this.colourMap.NumColours * ((2.9 * pressure - 1) * 5 * contrast + 0.5));
+                break;
+            case 'pressureGradient':
+                let pressureGradient = absoluteVector(this.properties.pressureGradient[index]);
+                colourIndex = Math.round(this.colourMap.NumColours * ((10 * pressureGradient) * 3 * contrast + 0.35));
+                break;
+            default:
+                console.log("Error");
+                break;
+        }
+        return colourIndex;
+    }
+
     public drawFluid(simulationMode: SimulationMode) {
         if (simulationMode === 'curl') this.computeCurl();
-        //if (simulationMode === 'pressureGradient') this.computePressureGradient();
-
 
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
@@ -701,42 +731,11 @@ class Fluid {
                     //Solid
                     colour = { red: 98, green: 114, blue: 164, alpha: 255 };
                 } else {
-                    //Different colouring modes and different graphing modes
-                    let mode = simulationMode;
-                    switch (mode) {
-                        case 'velocity':
-                            let velocityMagnitude = absoluteVector(this.properties.localVelocity[index]);
-                            colourIndex = Math.round(this.colourMap.NumColours * (velocityMagnitude * 4 * contrast));
-                            break;
-                        case 'density':
-                            let density = this.properties.localDensity[index];
-                            colourIndex = Math.round(this.colourMap.NumColours * ((density - 1) * 6 * contrast + 0.5));
-                            break;
-                        case 'curl':
-                            let curl = this.properties.localCurl[index];
-                            colourIndex = Math.round(this.colourMap.NumColours * (curl * 5 * contrast + 0.5));
-                            break;
-                        case 'pressure':
-                            //Since pressure is directly proportional to density
-                            let pressure = this.properties.localPressure[index];
-                            colourIndex = Math.round(this.colourMap.NumColours * ((2.9 * pressure - 1) * 5 * contrast + 0.5));
-                            break;
-                        case 'pressureGradient':
-                            let pressureGradient = absoluteVector(this.properties.pressureGradient[index]);
-                            colourIndex = Math.round(this.colourMap.NumColours * ((10 * pressureGradient) * 3 * contrast + 0.35));
-                            break;
-                        default:
-                            console.log("Error");
-                            break;
-                    }
-
-                    //Stop any out of bounds errors
-                    colourIndex = Math.max(0, Math.min(colourIndex, this.colourMap.NumColours - 1));
+                    //Stop any out of bounds errors 
+                    colourIndex = enforceBounds(this.getColourIndexFromMode(simulationMode, index, contrast), this.colourMap.Bounds);
                     colour = this.colourMap.Map[colourIndex];
-
                 }
                 let position = { x: x, y: y };
-
                 this.colourPixel(position, colour);
             }
         }
@@ -745,7 +744,6 @@ class Fluid {
         this.context.putImageData(this.image, 0, 0);
         if (this.showTracers) this.drawTracers();
         if (this.showStreamlines) this.drawStreamlines();
-        //this.drawNormals();
         this.drawForceArrow();
         this.drawOtherForceArrow();
     }
@@ -839,34 +837,6 @@ class Fluid {
                 this.context.lineTo(simulationScale * imagePosition.x, simulationScale * imagePosition.y);
             }
 
-            this.context.stroke();
-            this.context.closePath();
-        }
-    }
-
-    private drawNormals(): void {
-        this.context.strokeStyle = "#FFFFFF";
-        this.context.lineWidth = 1;
-
-        let originX = Math.round(this.width / 3 + this.width / 10);
-        let originY = Math.round(this.height / 2);
-        let origin: Vector = { x: originX, y: originY };
-
-        let simulationScale = this.pxPerNode;
-        for (let i = 0; i < this.airfoilGridPoints.length; i++) {
-            let currentVector = addVectors(this.airfoilGridPoints[i], origin);
-            let test = scaleVector(getSurfaceNormal(this.airfoilGridPoints[i], this.airfoilGridPoints), 12);
-
-            let imageVector = this.gridPosToImagePos(currentVector);
-            let imageTest = this.gridPosToImagePos(addVectors(test, currentVector));
-            //console.log(`${this.airfoilGridPoints[i].x},${this.airfoilGridPoints[i].y} -> NORMAL: ${test.x},${test.y}`);
-            //console.log(currentVector);
-            //console.log(imageVector);
-
-            this.context.beginPath();
-            this.context.moveTo((imageVector.x) * simulationScale, (imageVector.y) * simulationScale);
-            this.context.lineTo((imageTest.x) * simulationScale, (imageTest.y) * simulationScale);
-            //this.context.lineTo(test.x * simulationScale, test.y * simulationScale);
             this.context.stroke();
             this.context.closePath();
         }

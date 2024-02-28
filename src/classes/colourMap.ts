@@ -3,10 +3,12 @@
 class ColourMap {
     private numColours: number;
     private colourMap: Colour[];
+    private bounds: Bound;
 
     constructor() {
         this.numColours = 400;
         this.colourMap = new Array(this.numColours + 2);
+        this.bounds = { lower: 0, upper: this.numColours - 1 };
 
         this.generateColourMap();
     }
@@ -47,6 +49,9 @@ class ColourMap {
 
     get Map(): Colour[] {
         return this.colourMap;
+    }
+    get Bounds(): Bound {
+        return this.bounds;
     }
     //#endregion
 }
