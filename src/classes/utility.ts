@@ -29,6 +29,9 @@ const validResultGraphModes = ['surfacePressure', 'velocity'] as const;
 type GraphingMode = typeof validResultGraphModes[number];
 const validPositionTags = ['upperSurface', 'lowerSurface', 'default'] as const;
 type PositionTag = typeof validPositionTags[number];
+const validAirfoilTypes = ['ellipse', 'line', 'rectangle', 'airfoil'] as const;
+type AirfoilType = typeof validAirfoilTypes[number];
+
 //#endregion
 
 //#region Type Guards
@@ -57,6 +60,11 @@ function isGraphingMode(testMode: unknown): testMode is GraphingMode {
 function isPositionTag(testTag: unknown): testTag is PositionTag {
     //@ts-expect-error
     return typeof testTag === 'string' && validPositionTags.includes(testTag);
+}
+
+function isAirfoilType(testType: unknown): testType is AirfoilType {
+    //@ts-expect-error
+    return typeof testType === 'string' && validAirfoilTypes.includes(testType);
 }
 //#endregion
 

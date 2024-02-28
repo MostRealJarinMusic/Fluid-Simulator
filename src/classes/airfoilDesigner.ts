@@ -26,6 +26,10 @@ class AirfoilDesigner {
         return this.shape.Outline;
     }
 
+    get ShapeType(): AirfoilType {
+        return this.shape.Type;
+    }
+
     //#region Mapping
 
     /**
@@ -155,18 +159,17 @@ class AirfoilDesigner {
      * It then publishes any corrected parameter inputs and if necessary, adds a profile number
      */
     public updateAirfoil(): void {
-        let airfoilType = this.shape.constructor.name;
+        let airfoilType = this.shape.constructor.name as AirfoilType;
         let currentParameters = this.getParametersFromInput();
 
         switch (airfoilType) {
-            case "Airfoil":
+            case "airfoil":
                 this.shape.updateParameters(currentParameters);
                 this.updateGraph();
                 break;
-            case "Circle":
-            case "Ellipse":
-            case "Rectangle":
-            case "Line":
+            case "ellipse":
+            case "rectangle":
+            case "line":
                 this.shape.updateParameters(currentParameters);
                 break;
             default:
@@ -192,8 +195,8 @@ class AirfoilDesigner {
 
         this.shape.updateParameters(parameters);
 
-        let airfoilType = this.shape.constructor.name;
-        if (airfoilType === "Airfoil") {
+        let airfoilType = this.shape.constructor.name as AirfoilType;
+        if (airfoilType === "airfoil") {
             this.updateGraph();
         }
 
@@ -214,8 +217,8 @@ class AirfoilDesigner {
             this.updateProfileNumber(currentParameters);
 
         } else {
-            let targetShape = this.airfoilSelector.value;
-            let currentShape = this.shape.constructor.name;
+            let targetShape = this.airfoilSelector.value as AirfoilType;
+            let currentShape = this.shape.constructor.name as AirfoilType;
 
             if (currentShape === targetShape) {
                 console.log("Same type");
@@ -227,7 +230,7 @@ class AirfoilDesigner {
                 this.setupParameterInputs();
 
                 //Disable the graph if necessary
-                if (targetShape === "Airfoil") {
+                if (targetShape === "airfoil") {
                     this.updateGraph();
                 } else {
                     //Disable the graph - changing colours
@@ -243,18 +246,18 @@ class AirfoilDesigner {
      * Switches the airfoil type
      * @param newType The type to be switched to
      */
-    private switchAirfoil(newType: string): void {
+    private switchAirfoil(newType: AirfoilType): void {
         switch (newType) {
-            case "Airfoil":
+            case "airfoil":
                 this.shape = new Airfoil();
                 break;
-            case "Rectangle":
+            case "rectangle":
                 this.shape = new Rectangle();
                 break;
-            case "Ellipse":
+            case "ellipse":
                 this.shape = new Ellipse();
                 break;
-            case "Line":
+            case "line":
                 this.shape = new Line();
                 break;
             default:

@@ -71,8 +71,6 @@ class FluidManager {
     get VelocityField(): Vector[] {
         return this.fluid.VelocityField;
     }
-
-
     get TaggedOutline(): TaggedPosition[] {
         return this.airfoilTaggedRotatedOutline;
     }

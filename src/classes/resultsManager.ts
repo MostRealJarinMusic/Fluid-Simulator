@@ -22,9 +22,13 @@ class ResultsManager {
 
         this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
 
+
+
         this.valuesDisplayContainer = valueDisplay;
         this.graphingMode = 'surfacePressure';
         this.graphingModeSelector = graphingModeSelector;
+
+        this.setupGraph();
     }
 
     public assignFluidManager(fluidManager: FluidManager) {
@@ -36,7 +40,9 @@ class ResultsManager {
     //#region Graphs
 
     private setupGraph(): void {
-
+        //Bar graph for lift and drag
+        //Scatter graph for against surface positions
+        //Disable depending on type
     }
 
     private updateGraph(): void {
@@ -52,6 +58,8 @@ class ResultsManager {
         } else {
             throw new Error("Something has gone wrong");
         }
+
+        console.log(this.graphingMode);
     }
 
     private resetGraph(): void {

@@ -19,6 +19,7 @@ abstract class Shape {
      * Returns the approximate area of the shape - implemented differently from shape to shape
      */
     abstract get Area(): number;
+    abstract get Type(): AirfoilType;
 
     //#region Getters
     get ParameterInfo(): Record<string, ParameterInfo> {
@@ -58,6 +59,10 @@ class Ellipse extends Shape {
         let yRadius = this.parameters.yRadius;
 
         return Math.PI * (xRadius * yRadius);
+    }
+
+    override get Type(): AirfoilType {
+        return 'ellipse';
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
@@ -101,6 +106,10 @@ class Rectangle extends Shape {
         return this.parameters['width'] * this.parameters['height'];
     }
 
+    override get Type(): AirfoilType {
+        return 'rectangle';
+    }
+
     override updateParameters(newParameters: Record<string, number>): void {
         this.parameters['width'] = newParameters['width'];
         this.parameters['height'] = newParameters['height'];
@@ -142,6 +151,10 @@ class Line extends Shape {
 
     override get Area(): number {
         return (nodeDistance) * this.parameters.lineLength;
+    }
+
+    override get Type(): AirfoilType {
+        return 'line';
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
@@ -205,6 +218,10 @@ class Airfoil extends Shape {
 
         totalArea *= (spacing / 3);
         return totalArea;
+    }
+
+    override get Type(): AirfoilType {
+        return 'airfoil';
     }
 
     override updateParameters(newParameters: Record<string, number>): void {
