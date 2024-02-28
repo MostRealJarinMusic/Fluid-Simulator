@@ -21,7 +21,7 @@ class AirfoilDesigner {
         this.changeAirfoil();
     }
 
-
+    //#region Getters
     get ShapeOutline(): TaggedPosition[] {
         return this.shape.Outline;
     }
@@ -29,9 +29,9 @@ class AirfoilDesigner {
     get ShapeType(): AirfoilType {
         return this.shape.Type;
     }
+    //#endregion 
 
     //#region Mapping
-
     /**
      * Maps a parameter to a HTML element
      * @param parameterName The name of the parameter
@@ -159,7 +159,7 @@ class AirfoilDesigner {
      * It then publishes any corrected parameter inputs and if necessary, adds a profile number
      */
     public updateAirfoil(): void {
-        let airfoilType = this.shape.constructor.name as AirfoilType;
+        let airfoilType = this.shape.Type as AirfoilType;
         let currentParameters = this.getParametersFromInput();
 
         switch (airfoilType) {
@@ -179,8 +179,6 @@ class AirfoilDesigner {
 
         this.publishParameters(this.shape.Parameters);
         this.updateProfileNumber(this.shape.Parameters);
-
-        //console.log(this.shape.Area);
     }
 
     /**
@@ -195,7 +193,7 @@ class AirfoilDesigner {
 
         this.shape.updateParameters(parameters);
 
-        let airfoilType = this.shape.constructor.name as AirfoilType;
+        let airfoilType = this.shape.Type as AirfoilType;
         if (airfoilType === "airfoil") {
             this.updateGraph();
         }
@@ -218,7 +216,7 @@ class AirfoilDesigner {
 
         } else {
             let targetShape = this.airfoilSelector.value as AirfoilType;
-            let currentShape = this.shape.constructor.name as AirfoilType;
+            let currentShape = this.shape.Type as AirfoilType;
 
             if (currentShape === targetShape) {
                 console.log("Same type");
@@ -271,26 +269,28 @@ class AirfoilDesigner {
      * @param currentParameters The parameters of the shape, used to generate the profile number
      */
     private updateProfileNumber(currentParameters: Record<string, number>): void {
-        let shapeType = this.shape.constructor.name;
+        let shapeType = this.shape.Type;
         let numString = "";
 
         //While I could use an if statement since there is only one different case
         //I am using a switch, keeping in mind that I ~could~ add different specifications of airfoils
         switch (shapeType) {
-            case "Airfoil":
+            case "airfoil":
                 let m = Math.floor(currentParameters.m).toString();
                 let p = Math.floor(currentParameters.p).toString()[0];
                 let t = Math.floor(currentParameters.t).toString();
+                t = currentParameters.t < 10 ? "0" + t : t;
+                /*
                 if (currentParameters.t < 10) {
-                    t = "0" + t
+                    t = "0" + t;
                 }
+                */
 
                 numString = "Profile Number: " + m + p + t;
                 break;
-            case "Circle":
-            case "Ellipse":
-            case "Rectangle":
-            case "Line":
+            case "ellipse":
+            case "rectangle":
+            case "line":
                 numString = "";
                 break;
             default:

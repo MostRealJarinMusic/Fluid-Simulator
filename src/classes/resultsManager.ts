@@ -5,9 +5,10 @@ class ResultsManager {
     private canvas!: HTMLCanvasElement;
     private context!: CanvasRenderingContext2D;
 
-    private values: ResultsValues;
-    private fluidManager!: FluidManager;
+    private values: Record<string, number>;
 
+    private airfoilDesigner!: AirfoilDesigner;
+    private fluidManager!: FluidManager;
     private origin!: Vector;
     private fluidWidth!: number;
 
@@ -36,6 +37,9 @@ class ResultsManager {
         this.origin = this.fluidManager.Origin;
         this.fluidWidth = this.fluidManager.FluidWidth;
     }
+    public assignAirfoilDesigner(airfoilDesigner: AirfoilDesigner) {
+        this.airfoilDesigner = airfoilDesigner;
+    }
 
     //#region Graphs
 
@@ -46,6 +50,11 @@ class ResultsManager {
     }
 
     private updateGraph(): void {
+        let airfoilType = this.airfoilDesigner.ShapeType as AirfoilType;
+
+        if (airfoilType === 'airfoil') {
+            //graph!!!
+        }
 
     }
 
@@ -56,7 +65,7 @@ class ResultsManager {
         if (currentMode !== newMode && isGraphingMode(newMode)) {
             this.graphingMode = newMode;
         } else {
-            throw new Error("Something has gone wrong");
+            throw new Error("Error");
         }
 
         console.log(this.graphingMode);
@@ -80,14 +89,14 @@ class ResultsManager {
         this.values.drag = 0;
         for (let pair of surfaceNormals) {
             let testPosition = roundVector(addVectors(pair.position, this.origin));
-            let pressureAtPoint = pressureGradient[globalIndex(testPosition.x, testPosition.y, this.fluidWidth)];
+            let pressureAtPoint = pressureGradient[getIndex(testPosition.x, testPosition.y, this.fluidWidth)];
             let force = dotVectors(pressureAtPoint, pair.normal);
             this.values.lift += force * pair.normal.y;
             this.values.drag += force * pair.normal.x;
         }
 
-        //By Newton's third law - I have the force by the airfoil on the fluid
-        //I want the force on the airfoil by the fluid - flip the force
+        //I have the force by the airfoil on the fluid
+        //I want the force on the airfoil by the fluid - therefore by Newton's third law, flip the force
         this.values.lift *= -1;
         this.values.drag *= -1;
     }

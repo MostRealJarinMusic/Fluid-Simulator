@@ -61,6 +61,7 @@ class ApplicationManager {
 
         this.resultsManager = new ResultsManager(this.RMCanvas, this.RMGraphingModeSelector, this.RMValuesDisplay);
         this.resultsManager.assignFluidManager(this.fluidManager);
+        this.resultsManager.assignAirfoilDesigner(this.airfoilDesigner);
     }
 
     setupListeners(): void {

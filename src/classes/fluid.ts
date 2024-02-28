@@ -107,7 +107,7 @@ class Fluid {
     private index(i: number, j: number): number {
         //return i * this.height + j;
         //return (this.width * j) + i;
-        return globalIndex(i, j, this.width);
+        return getIndex(i, j, this.width);
     }
 
     //#region Fluid setup + debug

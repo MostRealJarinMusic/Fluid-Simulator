@@ -12,8 +12,6 @@ type Colour = { red: number, green: number, blue: number, alpha: number };
 type DistributionDir = keyof Fluid;
 type SurfaceNormal = { position: Vector, normal: Vector };
 type TaggedPosition = { position: Vector, tag: PositionTag };
-
-type ResultsValues = { lift: number, drag: number, LTDRatio: number, liftCoefficient: number, dragCoefficient: number };
 type FluidProperties = {
     localDensity: number[],
     localVelocity: Vector[],
@@ -62,6 +60,10 @@ function isPositionTag(testTag: unknown): testTag is PositionTag {
     return typeof testTag === 'string' && validPositionTags.includes(testTag);
 }
 
+/**
+ * Type guard for valid type
+ * @param testType The type to be tested
+ */
 function isAirfoilType(testType: unknown): testType is AirfoilType {
     //@ts-expect-error
     return typeof testType === 'string' && validAirfoilTypes.includes(testType);
@@ -407,6 +409,6 @@ function getSurfaceNormal(vector: Vector, outline: Vector[]): Vector {
     return { x: 0, y: 0 };
 }
 
-function globalIndex(i: number, j: number, width: number) {
+function getIndex(i: number, j: number, width: number) {
     return (width * j) + i;
 }
