@@ -14,6 +14,14 @@ type SurfaceNormal = { position: Vector, normal: Vector };
 type TaggedPosition = { position: Vector, tag: PositionTag };
 
 type ResultsValues = { lift: number, drag: number, LTDRatio: number, liftCoefficient: number, dragCoefficient: number };
+type FluidProperties = {
+    localDensity: number[],
+    localVelocity: Vector[],
+    localPressure: number[],
+    pressureGradient: Vector[],
+    localCurl: number[],
+    solid: boolean[]
+};
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure', 'pressureGradient'] as const;
 type SimulationMode = typeof validSimulationModes[number];

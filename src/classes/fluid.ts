@@ -28,7 +28,7 @@ class Fluid {
     private barrierFx: number = 0;
     private barrierFy: number = 0;
 
-    private properties: FluidProperties;
+    private properties!: FluidProperties;
 
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
@@ -74,7 +74,8 @@ class Fluid {
         //#endregion
 
         //#region Local properties
-        this.properties = new FluidProperties(this.numCells, this.density);
+        //this.properties = new FluidProperties(this.numCells, this.density);
+        this.setupProperties();
         //#endregion
 
         //#region Image setup
@@ -110,6 +111,17 @@ class Fluid {
     }
 
     //#region Fluid setup + debug
+
+    private setupProperties(): void {
+        this.properties = {
+            localDensity: new Array(this.numCells).fill(this.density),
+            localVelocity: new Array(this.numCells).fill({ x: 0, y: 0 }),
+            localPressure: new Array(this.numCells).fill(0),
+            pressureGradient: new Array(this.numCells).fill({ x: 0, y: 0 }),
+            localCurl: new Array(this.numCells).fill(0),
+            solid: new Array(this.numCells).fill(false)
+        }
+    }
 
     private setupDistribution(): void {
         for (let dir = 0; dir < Object.keys(Directions).length / 2; dir++) {
