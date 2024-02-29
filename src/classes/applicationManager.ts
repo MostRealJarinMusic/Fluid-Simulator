@@ -52,6 +52,8 @@ class ApplicationManager {
         this.fluidManager = new FluidManager(this.FMCanvas, this.FMSimulationModeSelector, this.FMAngleOfAttackInput, this.FMFSVelocityInput);
         this.fluidManager.updateAirfoil(this.airfoilDesigner.ShapeOutline);
         this.fluidManager.initFluid();
+
+        //console.log(this.fluidManager.TaggedOutline);
     }
 
     setupResultsManager(): void {
@@ -96,7 +98,8 @@ class ApplicationManager {
             this.fluidManager.runMainLoop();
         }
         this.fluidManager.drawFluid();
-        this.resultsManager.calculateForce();
+        this.resultsManager.calculateResults();
         this.resultsManager.displayValues();
+        this.resultsManager.updateGraph();
     }
 }

@@ -342,7 +342,7 @@ class Fluid {
                     this.dWest[this.index(x - 1, y)] = this.dEast[i];
                     this.dNorthWest[this.index(x - 1, y + 1)] = this.dSouthEast[i];
 
-                    this.properties.localVelocity[i] = { x: 0, y: 0 };
+                    //this.properties.localVelocity[i] = { x: 0, y: 0 };
 
                     this.barrierFx += this.dEast[i] + this.dNorthEast[i] + this.dSouthEast[i] - this.dWest[i] - this.dNorthWest[i] - this.dSouthWest[i];
                     this.barrierFy += this.dNorth[i] + this.dNorthWest[i] + this.dNorthEast[i] - this.dSouth[i] - this.dSouthEast[i] - this.dSouthWest[i];
@@ -815,7 +815,7 @@ class Fluid {
     private drawStreamlines(): void {
         let velocityScale = 10;
         let simulationScale = this.pxPerNode;
-        this.context.strokeStyle = "#000000";
+        this.context.strokeStyle = "#202020";
         this.context.lineWidth = 1;
 
         for (let streamline of this.streamlines) {
@@ -844,7 +844,7 @@ class Fluid {
 
     private drawTracers(): void {
         let simulationScale = this.pxPerNode;
-        this.context.fillStyle = "rgb(40,42,54)";
+        this.context.fillStyle = "#282A36";
         for (let tracer of this.tracers) {
             let position = this.gridPosToImagePos(tracer.Position);
             this.context.fillRect(simulationScale * position.x, simulationScale * position.y, this.pxPerNode, this.pxPerNode);
