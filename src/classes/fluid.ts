@@ -588,7 +588,7 @@ class Fluid {
         let columns = 8;
         let xOffset = Math.round(this.width / columns);
         let yOffset = Math.round(this.height / rows);
-        let bounds: Bound = { lower: 0, upper: this.width };
+        let bounds: Bound = { lower: 1, upper: this.width };
 
         for (let x = 0; x < columns; x++) {
             for (let y = 0; y < rows; y++) {
@@ -917,10 +917,10 @@ class Tracer {
     }
 
     public resetPosition(): void {
-        this.position.x = 1;
+        this.position.x = this.xBounds.lower;
     }
 
-    move() {
+    public move(): void {
         this.position = addVectors(this.position, this.velocity);
 
         if (Math.round(this.position.x) >= this.xBounds.upper - 1) {

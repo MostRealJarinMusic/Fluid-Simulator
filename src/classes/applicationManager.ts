@@ -29,7 +29,10 @@ class ApplicationManager {
     }
 
     //#region Setup
-    setupAirfoilDesigner(): void {
+    /**
+     * Setting up the airfoil designer
+     */
+    private setupAirfoilDesigner(): void {
         //Airfoil graph
         this.airfoilGraphCanvas = document.getElementById('airfoilGraph') as HTMLCanvasElement;
 
@@ -41,7 +44,10 @@ class ApplicationManager {
         this.airfoilDesigner = new AirfoilDesigner(this.airfoilGraphCanvas, this.ADTypeSelector, this.ADParameterInputContainer, this.ADProfileNumText);
     }
 
-    setupSimulation(): void {
+    /**
+     * Setting up the fluid manager
+     */
+    private setupSimulation(): void {
         this.FMCanvas = document.getElementById("fluidSimulation") as HTMLCanvasElement;
         this.FMSimulationModeSelector = document.getElementById("simulationModeSelector") as HTMLSelectElement;
         this.FMTracersCheck = document.getElementById("fluidTracers") as HTMLInputElement;
@@ -52,11 +58,12 @@ class ApplicationManager {
         this.fluidManager = new FluidManager(this.FMCanvas, this.FMSimulationModeSelector, this.FMAngleOfAttackInput, this.FMFSVelocityInput);
         this.fluidManager.updateAirfoil(this.airfoilDesigner.ShapeOutline);
         this.fluidManager.initFluid();
-
-        //console.log(this.fluidManager.TaggedOutline);
     }
 
-    setupResultsManager(): void {
+    /**
+     * Setting up the results manager
+     */
+    private setupResultsManager(): void {
         this.RMCanvas = document.getElementById("dataGraph") as HTMLCanvasElement;
         this.RMValuesDisplay = document.getElementById("valuesDisplay") as HTMLDivElement;
         this.RMGraphingModeSelector = document.getElementById("resultsGraphModeSelector") as HTMLSelectElement;
@@ -66,7 +73,10 @@ class ApplicationManager {
         this.resultsManager.assignAirfoilDesigner(this.airfoilDesigner);
     }
 
-    setupListeners(): void {
+    /**
+     * Setting up listener events for the airfoil designer, fluid manager and results manager
+     */
+    private setupListeners(): void {
         this.FMTracersCheck.addEventListener('change', function () {
             applicationManager.fluidManager.ShowTracers = this.checked;
         });
@@ -93,7 +103,10 @@ class ApplicationManager {
     }
     //#endregion
 
-    update(): void {
+    /**
+     * Update function that is called every frame
+     */
+    public update(): void {
         for (let _ = 0; _ < stepsPerFrame; _++) {
             this.fluidManager.runMainLoop();
         }

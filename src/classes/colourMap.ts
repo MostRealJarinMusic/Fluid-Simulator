@@ -1,5 +1,3 @@
-
-//Credit???
 class ColourMap {
     private numColours: number;
     private colourMap: Colour[];
@@ -13,6 +11,10 @@ class ColourMap {
         this.generateColourMap();
     }
 
+    /**
+     * Generates a colour map
+     * Credit: 
+     */
     private generateColourMap(): void {
         for (let colourIndex = 0; colourIndex <= this.numColours; colourIndex++) {
             let r, g, b;

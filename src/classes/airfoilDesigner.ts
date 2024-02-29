@@ -26,7 +26,7 @@ class AirfoilDesigner {
         return this.shape.Outline;
     }
 
-    get ShapeType(): AirfoilType {
+    get ShapeType(): ShapeType {
         return this.shape.Type;
     }
     //#endregion 
@@ -36,6 +36,7 @@ class AirfoilDesigner {
      * Maps a parameter to a HTML element
      * @param parameterName The name of the parameter
      * @param parameterInfo The information of the parameter required for setup
+     * @returns The HTML element created
      */
     private mapParameter(parameterName: string, parameterInfo: ParameterInfo): HTMLInputElement {
         let parameterElement = document.createElement("input");
@@ -159,7 +160,7 @@ class AirfoilDesigner {
      * It then publishes any corrected parameter inputs and if necessary, adds a profile number
      */
     public updateAirfoil(): void {
-        let airfoilType = this.shape.Type as AirfoilType;
+        let airfoilType = this.shape.Type as ShapeType;
         let currentParameters = this.getParametersFromInput();
 
         switch (airfoilType) {
@@ -193,7 +194,7 @@ class AirfoilDesigner {
 
         this.shape.updateParameters(parameters);
 
-        let airfoilType = this.shape.Type as AirfoilType;
+        let airfoilType = this.shape.Type as ShapeType;
         if (airfoilType === "airfoil") {
             this.updateGraph();
         }
@@ -207,6 +208,7 @@ class AirfoilDesigner {
      */
     public changeAirfoil(): void {
         if (this.shape === undefined) {
+            //Default to airfoil
             this.shape = new Airfoil();
             this.setupParameterInputs();
             this.setupGraph();
@@ -215,8 +217,8 @@ class AirfoilDesigner {
             this.updateProfileNumber(currentParameters);
 
         } else {
-            let targetShape = this.airfoilSelector.value as AirfoilType;
-            let currentShape = this.shape.Type as AirfoilType;
+            let targetShape = this.airfoilSelector.value as ShapeType;
+            let currentShape = this.shape.Type as ShapeType;
 
             if (currentShape === targetShape) {
                 console.log("Same type");
@@ -244,7 +246,7 @@ class AirfoilDesigner {
      * Switches the airfoil type
      * @param newType The type to be switched to
      */
-    private switchAirfoil(newType: AirfoilType): void {
+    private switchAirfoil(newType: ShapeType): void {
         switch (newType) {
             case "airfoil":
                 this.shape = new Airfoil();
@@ -280,12 +282,6 @@ class AirfoilDesigner {
                 let p = Math.floor(currentParameters.p).toString()[0];
                 let t = Math.floor(currentParameters.t).toString();
                 t = currentParameters.t < 10 ? "0" + t : t;
-                /*
-                if (currentParameters.t < 10) {
-                    t = "0" + t;
-                }
-                */
-
                 numString = "Profile Number: " + m + p + t;
                 break;
             case "ellipse":
@@ -305,6 +301,7 @@ class AirfoilDesigner {
     //#region Parameter setup and handling functions
     /**
      * Takes the list of HTMLInputElements and gets the current values
+     * @returns A record of the parameters with their input values
      */
     private getParametersFromInput(): Record<string, number> {
         let parameters: Record<string, number> = {};

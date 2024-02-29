@@ -27,8 +27,8 @@ const validResultGraphModes = ['surfacePressure', 'velocity'] as const;
 type GraphingMode = typeof validResultGraphModes[number];
 const validPositionTags = ['upperSurface', 'lowerSurface', 'default'] as const;
 type PositionTag = typeof validPositionTags[number];
-const validAirfoilTypes = ['ellipse', 'line', 'rectangle', 'airfoil'] as const;
-type AirfoilType = typeof validAirfoilTypes[number];
+const validShapeTypes = ['ellipse', 'line', 'rectangle', 'airfoil'] as const;
+type ShapeType = typeof validShapeTypes[number];
 
 //#endregion
 
@@ -64,9 +64,9 @@ function isPositionTag(testTag: unknown): testTag is PositionTag {
  * Type guard for valid type
  * @param testType The type to be tested
  */
-function isAirfoilType(testType: unknown): testType is AirfoilType {
+function isAirfoilType(testType: unknown): testType is ShapeType {
     //@ts-expect-error
-    return typeof testType === 'string' && validAirfoilTypes.includes(testType);
+    return typeof testType === 'string' && validShapeTypes.includes(testType);
 }
 //#endregion
 
@@ -409,6 +409,6 @@ function getSurfaceNormal(vector: Vector, outline: Vector[]): Vector {
     return { x: 0, y: 0 };
 }
 
-function getIndex(i: number, j: number, width: number) {
+function getIndex(i: number, j: number, width: number): number {
     return (width * j) + i;
 }

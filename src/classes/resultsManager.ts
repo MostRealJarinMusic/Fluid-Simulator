@@ -43,6 +43,15 @@ class ResultsManager {
 
     //#region Graphs
 
+    private setupScatterGraph(): void {
+
+    }
+
+    private setupBarGraph(): void {
+
+    }
+
+
     private setupGraph(): void {
         //Bar graph for lift and drag
         //Scatter graph for against surface positions
@@ -84,10 +93,8 @@ class ResultsManager {
                             zeroLineColor: '#f8f8f2',
                         },
                         ticks: {
-                            /*
-                            min: -0.4,
-                            max: 0.4,
-                            */
+                            min: 0.3295,
+                            max: 0.3305,
                             fontFamily: "'REM', sans-serif",
                             fontSize: 8,
                             fontColor: '#f8f8f2',
@@ -122,14 +129,12 @@ class ResultsManager {
     private getDataForGraph(): void {
         let upperPoints: Vector[] = [];
         let lowerPoints: Vector[] = [];
-        //console.log(this.fluidManager.TaggedOutline);
         let taggedOutline = this.fluidManager.TaggedOutline;
         let field: number[] = [];
 
         switch (this.graphingMode) {
             case 'surfacePressure':
                 field = this.fluidManager.PressureField;
-                //console.log(field);
                 break;
             case 'velocity':
                 field = this.fluidManager.VelocityField.map((value) => absoluteVector(value));
@@ -140,7 +145,6 @@ class ResultsManager {
         }
 
         for (let taggedPosition of taggedOutline) {
-
             let position = roundVector(addVectors(taggedPosition.position, this.origin));
             //console.log(taggedPosition.tag);
             //console.log(taggedPosition.position);
@@ -167,7 +171,7 @@ class ResultsManager {
 
 
     public updateGraph(): void {
-        let airfoilType = this.airfoilDesigner.ShapeType as AirfoilType;
+        let airfoilType = this.airfoilDesigner.ShapeType as ShapeType;
 
         if (airfoilType === 'airfoil') {
             //graph!!!
@@ -175,6 +179,8 @@ class ResultsManager {
 
             this.graph.data.datasets = mapDatasets(this.datasets);
             this.graph.update();
+        } else {
+            //Disable graph???
         }
     }
 
@@ -187,8 +193,6 @@ class ResultsManager {
         } else {
             throw new Error("Error");
         }
-
-        console.log(this.graphingMode);
     }
 
     private resetGraph(): void {

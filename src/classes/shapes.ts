@@ -3,23 +3,23 @@ abstract class Shape {
     protected outline: TaggedPosition[] = [];
     protected graphDatasets: GraphDataset[] = [];
     protected parameters: Record<string, number> = {};
+    protected abstract parameterInfo: Record<string, ParameterInfo>;
 
-    abstract parameterInfo: Record<string, ParameterInfo>;
     /**
      * Takes a set of parameters and sets them to the shape's parameters.
      * Shapes can also enforce restrictions on the given parameters
      * @param newParameters The new parameters for the shape
      */
-    abstract updateParameters(newParameters: Record<string, number>): void;
+    public abstract updateParameters(newParameters: Record<string, number>): void;
     /**
      * Updates the set of position vectors representing the shape
      */
-    abstract updateOutline(): void;
+    protected abstract updateOutline(): void;
     /**
      * Returns the approximate area of the shape - implemented differently from shape to shape
      */
-    abstract get Area(): number;
-    abstract get Type(): AirfoilType;
+    public abstract get Area(): number;
+    abstract get Type(): ShapeType;
 
     //#region Getters
     get ParameterInfo(): Record<string, ParameterInfo> {
@@ -61,7 +61,7 @@ class Ellipse extends Shape {
         return Math.PI * (xRadius * yRadius);
     }
 
-    override get Type(): AirfoilType {
+    override get Type(): ShapeType {
         return 'ellipse';
     }
 
@@ -106,7 +106,7 @@ class Rectangle extends Shape {
         return this.parameters['width'] * this.parameters['height'];
     }
 
-    override get Type(): AirfoilType {
+    override get Type(): ShapeType {
         return 'rectangle';
     }
 
@@ -153,7 +153,7 @@ class Line extends Shape {
         return (nodeDistance) * this.parameters.lineLength;
     }
 
-    override get Type(): AirfoilType {
+    override get Type(): ShapeType {
         return 'line';
     }
 
@@ -220,7 +220,7 @@ class Airfoil extends Shape {
         return totalArea;
     }
 
-    override get Type(): AirfoilType {
+    override get Type(): ShapeType {
         return 'airfoil';
     }
 
