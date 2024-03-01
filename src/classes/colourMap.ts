@@ -3,53 +3,11 @@ class ColourMap {
     private colourMap: Colour[];
     private bounds: Bound;
 
-    constructor() {
-        let targetColours: Colour[] = [
-            getColour(0, 0, 0, 255),
-            getColour(255, 0, 0, 255),
-            getColour(255, 255, 0, 255),
-            getColour(255, 255, 255, 255)
-        ];
-
-        let steps: number[] = [200, 100, 100];
-
+    constructor(targetColours: Colour[], steps: number[]) {
         this.numColours = steps.reduce((acc, val) => acc + val);
         this.colourMap = new Array(this.numColours);
         this.bounds = { lower: 0, upper: this.numColours - 1 };
         this.colourMap = this.createFullTransition(targetColours, steps);
-    }
-
-    /**
-     * Generates a colour map
-     * Credit: 
-     */
-    private generateColourMap(): void {
-        for (let colourIndex = 0; colourIndex <= this.numColours; colourIndex++) {
-            let r, g, b;
-            if (colourIndex < this.numColours / 8) {
-                r = 0;
-                g = 0;
-                b = Math.round((255 * (colourIndex + this.numColours / 8)) / (this.numColours / 4));
-            } else if (colourIndex < (3 * this.numColours) / 8) {
-                r = 0;
-                g = Math.round((255 * (colourIndex - this.numColours / 8)) / (this.numColours / 4));
-                b = 255;
-            } else if (colourIndex < (5 * this.numColours) / 8) {
-                r = Math.round((255 * (colourIndex - (3 * this.numColours) / 8)) / (this.numColours / 4));
-                g = 255;
-                b = 255 - r;
-            } else if (colourIndex < (7 * this.numColours) / 8) {
-                r = 255;
-                g = Math.round((255 * ((7 * this.numColours) / 8 - colourIndex)) / (this.numColours / 4));
-                b = 0;
-            } else {
-                r = Math.round((255 * ((9 * this.numColours) / 8 - colourIndex)) / (this.numColours / 4));
-                g = 0;
-                b = 0;
-            }
-
-            this.colourMap[colourIndex] = { red: r, green: g, blue: b, alpha: 255 };
-        }
     }
 
     private createFullTransition(targetColours: Colour[], totalSteps: number[]): Colour[] {
@@ -102,7 +60,6 @@ class ColourMap {
     get NumColours(): number {
         return this.numColours;
     }
-
     get Map(): Colour[] {
         return this.colourMap;
     }

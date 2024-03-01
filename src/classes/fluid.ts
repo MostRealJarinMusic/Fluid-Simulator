@@ -33,7 +33,8 @@ class Fluid {
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
     private image: ImageData;
-    private colourMap: ColourMap;
+    //private colourMap: ColourMap;
+    private colourSchemes!: Record<string, ColourMap>;
     private pxPerNode: number;
 
     private airfoilGridPoints!: Vector[];
@@ -82,7 +83,8 @@ class Fluid {
         this.canvas = canvas;
         this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
         this.image = this.context.createImageData(this.canvas.width, this.canvas.height);
-        this.colourMap = new ColourMap();
+        //this.colourMap = new ColourMap();
+        this.setupColourSchemes();
         this.pxPerNode = 2;
         //#endregion
 
@@ -697,36 +699,64 @@ class Fluid {
         return { x: gridPosition.x, y: this.height - gridPosition.y - 1 }
     }
 
-    private getColourIndexFromMode(simulationMode: SimulationMode, index: number, contrast: number): number {
+    private setupColourSchemes(): void {
+        this.colourSchemes = {
+            fire: new ColourMap([
+                getColour(0, 0, 0, 255),
+                getColour(255, 0, 0, 255),
+                getColour(255, 255, 0, 255),
+                getColour(255, 255, 255, 255)],
+                [100, 50, 100]),
+            rainbow: new ColourMap([
+                getColour(0, 0, 128, 255),
+                getColour(0, 0, 255, 255),
+                getColour(0, 255, 255, 255),
+                getColour(255, 255, 0, 255),
+                getColour(255, 0, 0, 255),
+                getColour(128, 0, 0, 255)],
+                [50, 50, 50, 50, 50])
+        }
+    }
+
+    private getColourFromMode(simulationMode: SimulationMode, index: number, contrast: number): Colour {
         let colourIndex = 0;
+        let colourScheme: ColourMap = this.colourSchemes.fire;  //Default scheme
+
         //Different colouring modes and different graphing modes
         switch (simulationMode) {
             case 'velocity':
                 let velocityMagnitude = absoluteVector(this.properties.localVelocity[index]);
-                colourIndex = Math.round(this.colourMap.NumColours * (velocityMagnitude * 4 * contrast));
+                colourScheme = this.colourSchemes.fire;
+                colourIndex = Math.round(colourScheme.NumColours * (velocityMagnitude * 4 * contrast));
                 break;
             case 'density':
                 let density = this.properties.localDensity[index];
-                colourIndex = Math.round(this.colourMap.NumColours * ((density - this.density) * 10 * contrast + 0.5));
+                colourScheme = this.colourSchemes.fire;
+                colourIndex = Math.round(colourScheme.NumColours * ((density - this.density) * 10 * contrast + 0.5));
                 break;
             case 'curl':
                 let curl = this.properties.localCurl[index];
-                colourIndex = Math.round(this.colourMap.NumColours * (curl * 5 * contrast + 0.5));
+                colourScheme = this.colourSchemes.rainbow;
+                colourIndex = Math.round(colourScheme.NumColours * (curl * 5 * contrast + 0.5));
                 break;
             case 'pressure':
                 //Since pressure is directly proportional to density
                 let pressure = this.properties.localPressure[index];
-                colourIndex = Math.round(this.colourMap.NumColours * ((3 * pressure - this.density) * 5 * contrast + 0.5));
+                colourScheme = this.colourSchemes.fire;
+                colourIndex = Math.round(colourScheme.NumColours * ((3 * pressure - this.density) * 5 * contrast + 0.5));
                 break;
             case 'pressureGradient':
                 let pressureGradient = absoluteVector(this.properties.pressureGradient[index]);
-                colourIndex = Math.round(this.colourMap.NumColours * ((10 * pressureGradient) * 10 * contrast + 0.45));
+                colourScheme = this.colourSchemes.fire;
+                colourIndex = Math.round(colourScheme.NumColours * ((10 * pressureGradient) * 10 * contrast + 0.45));
                 break;
             default:
                 console.log("Error");
                 break;
         }
-        return colourIndex;
+
+        //Dealing with out of bounds errors
+        return colourScheme.Map[enforceBounds(colourIndex, colourScheme.Bounds)];
     }
 
     public drawFluid(simulationMode: SimulationMode) {
@@ -736,16 +766,13 @@ class Fluid {
             for (let x = 1; x < this.width - 1; x++) {
                 let index = this.index(x, y);
                 let colour: Colour = { red: 255, green: 255, blue: 255, alpha: 255 };
-                let colourIndex = 0;
                 let contrast = Math.pow(1.2, 1);
 
                 if (this.properties.solid[index]) {
                     //Solid
                     colour = { red: 98, green: 114, blue: 164, alpha: 255 };
                 } else {
-                    //Stop any out of bounds errors 
-                    colourIndex = enforceBounds(this.getColourIndexFromMode(simulationMode, index, contrast), this.colourMap.Bounds);
-                    colour = this.colourMap.Map[colourIndex];
+                    colour = this.getColourFromMode(simulationMode, index, contrast);
                 }
                 let position = { x: x, y: y };
                 this.colourPixel(position, colour);
