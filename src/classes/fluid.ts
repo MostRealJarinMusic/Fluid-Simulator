@@ -698,10 +698,11 @@ class Fluid {
         this.colourSchemes = {
             fire: new ColourMap([
                 getColour(0, 0, 0, 255),
+                getColour(127, 0, 0, 255),
                 getColour(255, 0, 0, 255),
                 getColour(255, 255, 0, 255),
                 getColour(255, 255, 255, 255)],
-                [100, 50, 100]),
+                [100, 100, 75, 75]),
             rainbow: new ColourMap([
                 getColour(0, 0, 128, 255),
                 getColour(0, 0, 255, 255),
@@ -709,7 +710,13 @@ class Fluid {
                 getColour(255, 255, 0, 255),
                 getColour(255, 0, 0, 255),
                 getColour(128, 0, 0, 255)],
-                [50, 50, 50, 50, 50])
+                [50, 50, 50, 50, 50]),
+            greyscale: new ColourMap([
+                getColour(0, 0, 0, 255),
+                getColour(100, 100, 100, 255),
+                getColour(155, 155, 155, 255),
+                getColour(255, 255, 255, 255)],
+                [200, 50, 200])
         }
     }
 
@@ -731,7 +738,7 @@ class Fluid {
                 break;
             case 'curl':
                 let curl = this.properties.localCurl[index];
-                colourScheme = this.colourSchemes.rainbow;
+                colourScheme = this.colourSchemes.greyscale;
                 colourIndex = Math.round(colourScheme.NumColours * (curl * 5 * contrast + 0.5));
                 break;
             case 'pressure':
@@ -742,8 +749,8 @@ class Fluid {
                 break;
             case 'pressureGradient':
                 let pressureGradient = absoluteVector(this.properties.pressureGradient[index]);
-                colourScheme = this.colourSchemes.fire;
-                colourIndex = Math.round(colourScheme.NumColours * ((10 * pressureGradient) * 10 * contrast + 0.45));
+                colourScheme = this.colourSchemes.rainbow;
+                colourIndex = Math.round(colourScheme.NumColours * ((5 * pressureGradient) * 10 * contrast + 0.45));
                 break;
             default:
                 console.log("Error");
