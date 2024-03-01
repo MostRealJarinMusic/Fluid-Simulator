@@ -707,7 +707,7 @@ class Fluid {
                 break;
             case 'density':
                 let density = this.properties.localDensity[index];
-                colourIndex = Math.round(this.colourMap.NumColours * ((density - 1) * 6 * contrast + 0.5));
+                colourIndex = Math.round(this.colourMap.NumColours * ((density - this.density) * 10 * contrast + 0.5));
                 break;
             case 'curl':
                 let curl = this.properties.localCurl[index];
@@ -716,11 +716,11 @@ class Fluid {
             case 'pressure':
                 //Since pressure is directly proportional to density
                 let pressure = this.properties.localPressure[index];
-                colourIndex = Math.round(this.colourMap.NumColours * ((2.9 * pressure - 1) * 5 * contrast + 0.5));
+                colourIndex = Math.round(this.colourMap.NumColours * ((3 * pressure - this.density) * 5 * contrast + 0.5));
                 break;
             case 'pressureGradient':
                 let pressureGradient = absoluteVector(this.properties.pressureGradient[index]);
-                colourIndex = Math.round(this.colourMap.NumColours * ((10 * pressureGradient) * 3 * contrast + 0.35));
+                colourIndex = Math.round(this.colourMap.NumColours * ((10 * pressureGradient) * 10 * contrast + 0.45));
                 break;
             default:
                 console.log("Error");

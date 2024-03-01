@@ -165,6 +165,17 @@ function create2DArrayFill(rows: number, columns: number, fill: number): number[
     return arr;
 }
 
+/**
+ * Returns a colour, from given RGBA values
+ * @param r Red value
+ * @param g Green value
+ * @param b Blue value
+ * @param a Alpha value
+ */
+function getColour(r: number, g: number, b: number, a: number): Colour {
+    return { red: r, green: g, blue: b, alpha: a };
+}
+
 //#region Vector functions
 /**
  * Checks if a given vector is contained within a list
