@@ -4,21 +4,19 @@ class ColourMap {
     private bounds: Bound;
 
     constructor() {
-        this.numColours = 400;
-        this.colourMap = new Array(this.numColours + 2);
-        this.bounds = { lower: 0, upper: this.numColours - 1 };
-
-        //this.generateColourMap();
-
         let targetColours: Colour[] = [
-            getColour(0, 0, 0, 255),
             getColour(0, 0, 0, 255),
             getColour(255, 0, 0, 255),
             getColour(255, 255, 0, 255),
             getColour(255, 255, 255, 255)
         ];
 
-        this.colourMap = this.createFullTransition(targetColours, this.numColours);
+        let steps: number[] = [200, 100, 100];
+
+        this.numColours = steps.reduce((acc, val) => acc + val);
+        this.colourMap = new Array(this.numColours);
+        this.bounds = { lower: 0, upper: this.numColours - 1 };
+        this.colourMap = this.createFullTransition(targetColours, steps);
     }
 
     /**
@@ -54,28 +52,27 @@ class ColourMap {
         }
     }
 
-
-
-    private createFullTransition(targetColours: Colour[], totalSteps: number): Colour[] {
+    private createFullTransition(targetColours: Colour[], totalSteps: number[]): Colour[] {
         //Recursive algorithm
-        if (targetColours.length === 2) {
-            //Base case
-            return this.transitionBetweenColour(targetColours[0], targetColours[1], totalSteps);
+        if (targetColours.length - 1 === totalSteps.length) {
+            //Requirement
+            if (targetColours.length === 2) {
+                //Base case
+                return this.transitionBetweenColour(targetColours[0], targetColours[1], totalSteps[0]);
+            } else {
+                //General case
+                let currentTransition: Colour[] = this.transitionBetweenColour(targetColours[0], targetColours[1], totalSteps[0]);
+
+                let remainingColours: Colour[] = targetColours.slice(1);
+                let remainingSteps: number[] = totalSteps.slice(1);
+                //Recursive step - getting the remaining transitions
+                let remainingTransition: Colour[] = this.createFullTransition(remainingColours, remainingSteps);
+
+                return currentTransition.concat(remainingTransition);
+            }
         } else {
-            //General case
-            let numTransition = targetColours.length - 1;
-            let stepsPerTransition = Math.floor(totalSteps / numTransition);
-            let remainingSteps = totalSteps - stepsPerTransition;
-            let currentColours: Colour[] = targetColours.slice(0, 2);
-            let remainingColours: Colour[] = targetColours.slice(1);
-            //console.log(transitions);
-            //console.log(stepsPerTransition);
-            //console.log(currentColours);
-            //console.log(remainingColours);
-            //console.log(remainingSteps);
-            let currentTransition: Colour[] = this.transitionBetweenColour(currentColours[0], currentColours[1], stepsPerTransition);
-            let remainingTransition: Colour[] = this.createFullTransition(remainingColours, remainingSteps);
-            return currentTransition.concat(remainingTransition);
+            console.log("Error");
+            return [];
         }
     }
 
@@ -100,7 +97,6 @@ class ColourMap {
 
         return gradient;
     }
-
 
     //#region Getters
     get NumColours(): number {
