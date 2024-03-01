@@ -33,7 +33,6 @@ class Fluid {
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
     private image: ImageData;
-    //private colourMap: ColourMap;
     private colourSchemes!: Record<string, ColourMap>;
     private pxPerNode: number;
 
@@ -75,7 +74,6 @@ class Fluid {
         //#endregion
 
         //#region Local properties
-        //this.properties = new FluidProperties(this.numCells, this.density);
         this.setupProperties();
         //#endregion
 
@@ -83,7 +81,6 @@ class Fluid {
         this.canvas = canvas;
         this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
         this.image = this.context.createImageData(this.canvas.width, this.canvas.height);
-        //this.colourMap = new ColourMap();
         this.setupColourSchemes();
         this.pxPerNode = 2;
         //#endregion
@@ -91,9 +88,7 @@ class Fluid {
         //#region Airfoil setup
         this.running = true;
         this.airfoilGridPoints = [];
-        let originX = Math.round(this.width / 3 + this.width / 10);
-        let originY = Math.round(this.height / 2);
-        this.origin = { x: originX, y: originY };
+        this.origin = { x: Math.round(this.width / 3 + this.width / 10), y: Math.round(this.height / 2) };
         //#endregion
 
         //#region Tracers and streamlines
