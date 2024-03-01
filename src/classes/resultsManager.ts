@@ -41,68 +41,12 @@ class ResultsManager {
         this.origin = this.fluidManager.Origin;
         this.fluidWidth = this.fluidManager.FluidWidth;
         this.setupGraph();
-        //this.setupBarGraph();
     }
     public assignAirfoilDesigner(airfoilDesigner: AirfoilDesigner) {
         this.airfoilDesigner = airfoilDesigner;
     }
 
     //#region Graphs
-    private setupBarGraph(): void {
-        this.graph = new Chart(this.context, {
-            type: 'bar',
-            data: {
-                labels: ["Lift", "Drag"],
-                datasets: [{
-                    label: "Simulation Data",
-                    data: [this.values.lift, this.values.drag],
-                    fill: true,
-                    backgroundColor: ["rgb(255, 121, 198)", "rgb(255, 85, 85)"],
-                    borderWidth: 0,
-                }]
-            },
-            options: {
-                responsive: false,
-                maintainAspectRatio: true,
-                scales: {
-                    yAxes: [{
-                        gridLines: {
-                            color: '#f8f8f2',
-                            zeroLineColor: '#f8f8f2',
-                        },
-                        ticks: {
-                            fontFamily: "'REM', sans-serif",
-                            fontSize: 8,
-                            fontColor: '#f8f8f2',
-                        },
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Force',
-                            fontFamily: "'REM', sans-serif",
-                            fontSize: 10,
-                            fontColor: '#f8f8f2',
-                        }
-                    }]
-                },
-                tooltips: {
-                    enabled: false
-                },
-                legend: {
-                    onClick: function (_event: any, _legendItem: any) {
-                        //Stops the default of getting hiding the dataset
-                    },
-                    labels: {
-                        fontColor: '#f8f8f2',
-                        fontFamily: "'REM', sans-serif",
-                        fontSize: 8,
-                    },
-                    position: 'bottom',
-                },
-            }
-        })
-    }
-
-
     private setupGraph(): void {
         //Bar graph for lift and drag
         //Scatter graph for against surface positions
@@ -234,18 +178,6 @@ class ResultsManager {
         } else {
             //Disable graph???
         }
-
-        /*
-        console.log(this.values.drag);
-        this.graph.data.datasets = [{
-            label: "Simulation Data",
-            data: [this.values.lift * 10, this.values.drag * 10],
-            fill: true,
-            backgroundColor: ["rgb(255, 121, 198)", "rgb(255, 85, 85)"],
-            borderWidth: 0,
-        }];
-        this.graph.update();
-        */
     }
 
     public updateGraphingMode(): void {
