@@ -148,7 +148,7 @@ class Fluid {
 
         //Skip iterations
 
-        for (let _ = 0; _ < 100; _++) {
+        for (let _ = 0; _ < 500; _++) {
             this.runMainLoop();
         }
     }
@@ -714,7 +714,7 @@ class Fluid {
             greyscale: new ColourMap([
                 getColour(0, 0, 0, 255),
                 getColour(100, 100, 100, 255),
-                getColour(155, 155, 155, 255),
+                getColour(170, 170, 170, 255),
                 getColour(255, 255, 255, 255)],
                 [200, 50, 200])
         }
@@ -734,7 +734,7 @@ class Fluid {
             case 'density':
                 let density = this.properties.localDensity[index];
                 colourScheme = this.colourSchemes.fire;
-                colourIndex = Math.round(colourScheme.NumColours * ((density - this.density) * 10 * contrast + 0.5));
+                colourIndex = Math.round(colourScheme.NumColours * ((density - this.density) * 8 * contrast + 0.5));
                 break;
             case 'curl':
                 let curl = this.properties.localCurl[index];
@@ -772,7 +772,7 @@ class Fluid {
 
                 if (this.properties.solid[index]) {
                     //Solid
-                    colour = { red: 98, green: 114, blue: 164, alpha: 255 };
+                    colour = { red: 68, green: 71, blue: 90, alpha: 255 };
                 } else {
                     colour = this.getColourFromMode(simulationMode, index, contrast);
                 }
@@ -785,8 +785,8 @@ class Fluid {
         this.context.putImageData(this.image, 0, 0);
         if (this.showTracers) this.drawTracers();
         if (this.showStreamlines) this.drawStreamlines();
-        this.drawForceArrow();
-        this.drawOtherForceArrow();
+        //this.drawForceArrow();
+        //this.drawOtherForceArrow();
     }
 
     private drawOtherForceArrow() {

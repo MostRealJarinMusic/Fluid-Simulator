@@ -3,7 +3,7 @@ class ResultsManager {
     private graphingMode: GraphingMode;
     private graph!: Chart;
     private datasets!: GraphDataset[];
-    private canvas!: HTMLCanvasElement;
+    //private canvas!: HTMLCanvasElement;
     private context!: CanvasRenderingContext2D;
 
     private values: Record<string, number>;
@@ -17,12 +17,13 @@ class ResultsManager {
     private fluidWidth!: number;
 
     private valuesDisplayContainer: HTMLDivElement;
+    private elements!: Record<string, HTMLParagraphElement>;
     private graphingModeSelector: HTMLSelectElement;
     //#endregion
 
 
     constructor(canvas: HTMLCanvasElement, graphingModeSelector: HTMLSelectElement, valueDisplay: HTMLDivElement) {
-        this.canvas = canvas;
+        //this.canvas = canvas;
         this.context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
         this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
@@ -40,19 +41,65 @@ class ResultsManager {
         this.origin = this.fluidManager.Origin;
         this.fluidWidth = this.fluidManager.FluidWidth;
         this.setupGraph();
+        //this.setupBarGraph();
     }
     public assignAirfoilDesigner(airfoilDesigner: AirfoilDesigner) {
         this.airfoilDesigner = airfoilDesigner;
     }
 
     //#region Graphs
-
-    private setupScatterGraph(): void {
-
-    }
-
     private setupBarGraph(): void {
-
+        this.graph = new Chart(this.context, {
+            type: 'bar',
+            data: {
+                labels: ["Lift", "Drag"],
+                datasets: [{
+                    label: "Simulation Data",
+                    data: [this.values.lift, this.values.drag],
+                    fill: true,
+                    backgroundColor: ["rgb(255, 121, 198)", "rgb(255, 85, 85)"],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: true,
+                scales: {
+                    yAxes: [{
+                        gridLines: {
+                            color: '#f8f8f2',
+                            zeroLineColor: '#f8f8f2',
+                        },
+                        ticks: {
+                            fontFamily: "'REM', sans-serif",
+                            fontSize: 8,
+                            fontColor: '#f8f8f2',
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Force',
+                            fontFamily: "'REM', sans-serif",
+                            fontSize: 10,
+                            fontColor: '#f8f8f2',
+                        }
+                    }]
+                },
+                tooltips: {
+                    enabled: false
+                },
+                legend: {
+                    onClick: function (_event: any, _legendItem: any) {
+                        //Stops the default of getting hiding the dataset
+                    },
+                    labels: {
+                        fontColor: '#f8f8f2',
+                        fontFamily: "'REM', sans-serif",
+                        fontSize: 8,
+                    },
+                    position: 'bottom',
+                },
+            }
+        })
     }
 
 
@@ -97,8 +144,8 @@ class ResultsManager {
                             zeroLineColor: '#f8f8f2',
                         },
                         ticks: {
-                            min: 0.3295,
-                            max: 0.3305,
+                            min: 0.404,
+                            max: 0.4045,
                             fontFamily: "'REM', sans-serif",
                             fontSize: 8,
                             fontColor: '#f8f8f2',
@@ -175,6 +222,7 @@ class ResultsManager {
 
 
     public updateGraph(): void {
+
         let airfoilType = this.airfoilDesigner.ShapeType as ShapeType;
 
         if (airfoilType === 'airfoil') {
@@ -186,6 +234,18 @@ class ResultsManager {
         } else {
             //Disable graph???
         }
+
+        /*
+        console.log(this.values.drag);
+        this.graph.data.datasets = [{
+            label: "Simulation Data",
+            data: [this.values.lift * 10, this.values.drag * 10],
+            fill: true,
+            backgroundColor: ["rgb(255, 121, 198)", "rgb(255, 85, 85)"],
+            borderWidth: 0,
+        }];
+        this.graph.update();
+        */
     }
 
     public updateGraphingMode(): void {
@@ -213,8 +273,6 @@ class ResultsManager {
         this.totals.dragTotal = 0;
     }
 
-
-
     public calculateResults(): void {
         this.calculateInstantForce();
         this.calculateAverageForce();
@@ -223,45 +281,30 @@ class ResultsManager {
         this.calculateLDRatio();
     }
 
-    //pressureGradient: Vector[], surfaceNormals: SurfaceNormal[], origin: Vector, fluidWidth: number
     private calculateInstantForce(): void {
         let pressureGradient = this.fluidManager.PressureGradient;
         let surfaceNormals = this.fluidManager.SurfaceNormals;
 
         //Iterate through each point at the surface normal
-        //this.values.lift = 0
-        //this.values.drag = 0;
         //x component is drag, y component is lift
         let forceVector: Vector = { x: 0, y: 0 };
         for (let pair of surfaceNormals) {
             let testPosition = roundVector(addVectors(pair.position, this.origin));
             let pressureAtPoint = pressureGradient[getIndex(testPosition.x, testPosition.y, this.fluidWidth)];
             let force = dotVectors(pressureAtPoint, pair.normal);
-            //this.values.lift += force * pair.normal.y;
-            //this.values.drag += force * pair.normal.x;
             forceVector = addVectors(forceVector, scaleVector(pair.normal, force))
         }
 
         //I have the force by the airfoil on the fluid
         //I want the force on the airfoil by the fluid - therefore by Newton's third law, flip the force
-        //this.values.lift *= -1;
-        //this.values.drag *= -1;
         forceVector = scaleVector(forceVector, -1);
-
-        //this.values.lift = forceVector.y;
-        //this.values.drag = forceVector.x;
-
         this.totals.liftTotal += forceVector.y;
         this.totals.dragTotal += forceVector.x;
-
-        //console.log(`TOTAL LIFT FORCE ${this.totals.liftTotal}`);
-        //console.log(`TOTAL DRAG FORCE ${this.totals.dragTotal}`);
     }
 
     private calculateAverageForce(): void {
         let currentTime = Date.now();
         let elapsedTime = (currentTime - this.startTime) / 1000;
-        //console.log(elapsedTime);
         this.values.lift = this.totals.liftTotal / elapsedTime;
         this.values.drag = this.totals.dragTotal / elapsedTime;
     }
@@ -288,7 +331,6 @@ class ResultsManager {
         let airfoilArea = this.airfoilDesigner.ShapeArea;
         let dynamicPressure = this.fluidManager.DynamicPressure;
         this.values.liftCoefficient = parseFloat(this.values.lift.toFixed(2)) / (10000 * airfoilArea * dynamicPressure);
-        //console.log(this.values.lift);
     }
 
     private calculateDragCoefficient() {
