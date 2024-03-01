@@ -87,21 +87,31 @@ class ApplicationManager {
             applicationManager.airfoilDesigner.changeAirfoil();
             applicationManager.fluidManager.resetParameters();
             applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeOutline);
+            applicationManager.resultsManager.resetTimer();
         });
         this.FMSimulationModeSelector.addEventListener('change', function () {
             applicationManager.fluidManager.updateSimulationMode();
         });
         this.FMAngleOfAttackInput.addEventListener('input', function () {
             applicationManager.fluidManager.updateAngleOfAttack();
+            applicationManager.resultsManager.resetTimer();
         });
         this.FMFSVelocityInput.addEventListener('change', function () {
             applicationManager.fluidManager.updateFreeStreamVelocity();
+            applicationManager.resultsManager.resetTimer();
         });
         this.RMGraphingModeSelector.addEventListener('change', function () {
             applicationManager.resultsManager.updateGraphingMode();
         });
     }
     //#endregion
+
+
+    public skipIterations(): void {
+        for (let _ = 0; _ < 100; _++) {
+            this.fluidManager.runMainLoop();
+        }
+    }
 
     /**
      * Update function that is called every frame

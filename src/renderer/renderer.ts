@@ -1,6 +1,6 @@
 //Front end
 //#region Constants for the simulation
-const nodesPerMeter: number = 60;
+const nodesPerMeter: number = 75;
 const nodeDistance: number = 1 / nodesPerMeter; //Defined 60 nodes as 1m
 const stepsPerFrame: number = 10;
 const latticeSpeedOfSound: number = 1 / Math.sqrt(3);
@@ -28,20 +28,24 @@ const latticeWeights = [
 //#endregion
 
 const applicationManager = new ApplicationManager();
+applicationManager.resultsManager.resetTimer();
 
 //#region Listener events
 function updateAirfoilParameters(): void {
     applicationManager.airfoilDesigner.updateAirfoil();
     applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeOutline);
+    applicationManager.resultsManager.resetTimer();
 }
 function resetAirfoilParameters(): void {
     applicationManager.airfoilDesigner.resetAirfoil();
     //applicationManager.fluidManager.resetParameters();
     applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeOutline);
+    applicationManager.resultsManager.resetTimer();
 }
 function resetFluidParameters(): void {
     applicationManager.fluidManager.resetParameters();
     applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeOutline);
+    applicationManager.resultsManager.resetTimer();
     resetGeneralFluidControls();
 }
 function resetGeneralFluidControls(): void {

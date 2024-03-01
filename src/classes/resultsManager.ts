@@ -7,6 +7,9 @@ class ResultsManager {
     private context!: CanvasRenderingContext2D;
 
     private values: Record<string, number>;
+    private totals: Record<string, number>;
+
+    private startTime: number;
 
     private airfoilDesigner!: AirfoilDesigner;
     private fluidManager!: FluidManager;
@@ -23,8 +26,9 @@ class ResultsManager {
         this.context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
         this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
+        this.totals = { liftTotal: 0, dragTotal: 0 };
 
-
+        this.startTime = Date.now();
 
         this.valuesDisplayContainer = valueDisplay;
         this.graphingMode = 'surfacePressure';
@@ -203,54 +207,94 @@ class ResultsManager {
 
 
     //#region Calculations
+    public resetTimer(): void {
+        this.startTime = Date.now();
+        this.totals.liftTotal = 0;
+        this.totals.dragTotal = 0;
+    }
+
+
 
     public calculateResults(): void {
-        this.calculateForce();
+        this.calculateInstantForce();
+        this.calculateAverageForce();
         this.calculateLiftCoefficient();
         this.calculateDragCoefficient();
         this.calculateLDRatio();
     }
 
     //pressureGradient: Vector[], surfaceNormals: SurfaceNormal[], origin: Vector, fluidWidth: number
-    private calculateForce(): void {
+    private calculateInstantForce(): void {
         let pressureGradient = this.fluidManager.PressureGradient;
         let surfaceNormals = this.fluidManager.SurfaceNormals;
 
         //Iterate through each point at the surface normal
-        this.values.lift = 0
-        this.values.drag = 0;
+        //this.values.lift = 0
+        //this.values.drag = 0;
+        //x component is drag, y component is lift
+        let forceVector: Vector = { x: 0, y: 0 };
         for (let pair of surfaceNormals) {
             let testPosition = roundVector(addVectors(pair.position, this.origin));
             let pressureAtPoint = pressureGradient[getIndex(testPosition.x, testPosition.y, this.fluidWidth)];
             let force = dotVectors(pressureAtPoint, pair.normal);
-            this.values.lift += force * pair.normal.y;
-            this.values.drag += force * pair.normal.x;
+            //this.values.lift += force * pair.normal.y;
+            //this.values.drag += force * pair.normal.x;
+            forceVector = addVectors(forceVector, scaleVector(pair.normal, force))
         }
 
         //I have the force by the airfoil on the fluid
         //I want the force on the airfoil by the fluid - therefore by Newton's third law, flip the force
-        this.values.lift *= -1;
-        this.values.drag *= -1;
+        //this.values.lift *= -1;
+        //this.values.drag *= -1;
+        forceVector = scaleVector(forceVector, -1);
+
+        //this.values.lift = forceVector.y;
+        //this.values.drag = forceVector.x;
+
+        this.totals.liftTotal += forceVector.y;
+        this.totals.dragTotal += forceVector.x;
+
+        //console.log(`TOTAL LIFT FORCE ${this.totals.liftTotal}`);
+        //console.log(`TOTAL DRAG FORCE ${this.totals.dragTotal}`);
+    }
+
+    private calculateAverageForce(): void {
+        let currentTime = Date.now();
+        let elapsedTime = (currentTime - this.startTime) / 1000;
+        //console.log(elapsedTime);
+        this.values.lift = this.totals.liftTotal / elapsedTime;
+        this.values.drag = this.totals.dragTotal / elapsedTime;
     }
 
     public displayValues(): void {
         let liftText = document.getElementById("liftValue") as HTMLParagraphElement;
         let dragText = document.getElementById("dragValue") as HTMLParagraphElement;
+        let LTDText = document.getElementById("LTDValue") as HTMLParagraphElement;
+        let liftCoefficientText = document.getElementById("liftCoefficientValue") as HTMLParagraphElement;
+        let dragCoefficientText = document.getElementById("dragCoefficientValue") as HTMLParagraphElement;
 
         liftText.innerHTML = `Lift: ${this.values.lift.toFixed(3)}`;
-        dragText.innerHTML = `Drag ${this.values.drag.toFixed(3)}`;
+        dragText.innerHTML = `Drag: ${this.values.drag.toFixed(3)}`;
+        LTDText.innerHTML = `L/D Ratio: ${this.values.LTDRatio.toFixed(3)}`;
+        liftCoefficientText.innerHTML = `Lift Coefficient: ${this.values.liftCoefficient.toFixed(2)}`;
+        dragCoefficientText.innerHTML = `Drag Coefficient: ${this.values.dragCoefficient.toFixed(2)}`;
     }
 
     private calculateLDRatio() {
-
+        this.values.LTDRatio = this.values.liftCoefficient / this.values.dragCoefficient;
     }
 
     private calculateLiftCoefficient() {
-
+        let airfoilArea = this.airfoilDesigner.ShapeArea;
+        let dynamicPressure = this.fluidManager.DynamicPressure;
+        this.values.liftCoefficient = parseFloat(this.values.lift.toFixed(2)) / (10000 * airfoilArea * dynamicPressure);
+        //console.log(this.values.lift);
     }
 
     private calculateDragCoefficient() {
-
+        let airfoilArea = this.airfoilDesigner.ShapeArea;
+        let dynamicPressure = this.fluidManager.DynamicPressure;
+        this.values.dragCoefficient = parseFloat(this.values.drag.toFixed(2)) / (10000 * airfoilArea * dynamicPressure);
     }
     //#endregion
 }

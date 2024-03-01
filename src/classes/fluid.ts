@@ -148,6 +148,12 @@ class Fluid {
                 this[field][nodeIndex] = this.getEquilibrium(latticeWeight, this.density, velocityVector, dir);
             }
         }
+
+        //Skip iterations
+
+        for (let _ = 0; _ < 100; _++) {
+            this.runMainLoop();
+        }
     }
 
     public showDebug(): void {
@@ -192,6 +198,12 @@ class Fluid {
     }
     get PressureField(): number[] {
         return this.properties.localPressure;
+    }
+    get FreeStreamVelocity(): number {
+        return this.freeStreamVelocity;
+    }
+    get Density(): number {
+        return this.density;
     }
     //#endregion
 

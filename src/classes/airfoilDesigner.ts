@@ -25,6 +25,9 @@ class AirfoilDesigner {
     get ShapeOutline(): TaggedPosition[] {
         return this.shape.Outline;
     }
+    get ShapeArea(): number {
+        return this.shape.Area;
+    }
 
     get ShapeType(): ShapeType {
         return this.shape.Type;

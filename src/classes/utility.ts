@@ -4,8 +4,8 @@
 
 //#region Types
 type Vector = { x: number; y: number; }
-type GridPoints = { points: Vector[]; }
-type GraphDataset = GridPoints & { label: string; colour: string; }
+//type GridPoints = { points: Vector[]; }
+type GraphDataset = { points: Vector[], label: string; colour: string; }
 type Bound = { lower: number, upper: number };
 type ParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: Bound; }
 type Colour = { red: number, green: number, blue: number, alpha: number };

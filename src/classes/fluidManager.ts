@@ -74,6 +74,9 @@ class FluidManager {
     get TaggedOutline(): TaggedPosition[] {
         return this.airfoilTaggedRotatedOutline;
     }
+    get DynamicPressure(): number {
+        return (1 / 2) * (this.fluid.Density) * (this.fluid.FreeStreamVelocity ** 2);
+    }
     //#endregion
 
     //#region Exposing fluid functions
