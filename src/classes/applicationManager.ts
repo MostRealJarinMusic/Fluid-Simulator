@@ -68,7 +68,29 @@ class ApplicationManager {
         this.RMValuesDisplay = document.getElementById("valuesDisplay") as HTMLDivElement;
         //this.RMGraphingModeSelector = document.getElementById("resultsGraphModeSelector") as HTMLSelectElement;
 
-        this.resultsManager = new ResultsManager(this.RMCanvas, this.RMValuesDisplay);
+        //let liftText = document.getElementById("liftValue") as HTMLParagraphElement;
+        //let dragText = document.getElementById("dragValue") as HTMLParagraphElement;
+        //let LTDText = document.getElementById("LTDValue") as HTMLParagraphElement;
+        //let liftCoefficientText = document.getElementById("liftCoefficientValue") as HTMLParagraphElement;
+        //let dragCoefficientText = document.getElementById("dragCoefficientValue") as HTMLParagraphElement;
+
+        let elements: Record<string, HTMLElement> = {
+            "liftText": document.getElementById("liftValue") as HTMLParagraphElement,
+            "dragText": document.getElementById("dragValue") as HTMLParagraphElement,
+            "LTDText": document.getElementById("LTDValue") as HTMLParagraphElement,
+            "liftCoefficientText": document.getElementById("liftCoefficientValue") as HTMLParagraphElement,
+            "dragCoefficientText": document.getElementById("dragCoefficientValue") as HTMLParagraphElement
+        }
+
+        let temp: LabelledElement[] = [
+            { name: "lift", element: document.getElementById("liftValue") as HTMLParagraphElement, label: "Lift: " },
+            { name: "drag", element: document.getElementById("dragValue") as HTMLParagraphElement, label: "Drag: " },
+            { name: "LTDRatio", element: document.getElementById("LTDValue") as HTMLParagraphElement, label: "L/D Ratio: " },
+            { name: "liftCoefficient", element: document.getElementById("liftCoefficientValue") as HTMLParagraphElement, label: "Lift Coefficient: " },
+            { name: "dragCoefficient", element: document.getElementById("dragCoefficientValue") as HTMLParagraphElement, label: "Drag Coefficient: " }
+        ];
+
+        this.resultsManager = new ResultsManager(this.RMCanvas, temp);
         this.resultsManager.assignFluidManager(this.fluidManager);
         this.resultsManager.assignAirfoilDesigner(this.airfoilDesigner);
     }

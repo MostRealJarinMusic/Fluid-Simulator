@@ -10,20 +10,17 @@ class ResultsManager extends GraphingComponent {
     private origin!: Vector;
     private fluidWidth!: number;
 
-    private valuesDisplayContainer: HTMLDivElement;
-    private elements!: Record<string, HTMLParagraphElement>;
+    private elements: LabelledElement[]//Record<string, HTMLElement>;
     //#endregion
 
 
-    constructor(canvas: HTMLCanvasElement, valueDisplay: HTMLDivElement) {
+    constructor(canvas: HTMLCanvasElement, elements: LabelledElement[]) {
         super(canvas);
-
         this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
         this.totals = { liftTotal: 0, dragTotal: 0 };
-
         this.startTime = Date.now();
-
-        this.valuesDisplayContainer = valueDisplay;
+        //this.elements = elements;
+        this.elements = elements;
     }
 
     //#region Setup functions
@@ -216,17 +213,16 @@ class ResultsManager extends GraphingComponent {
     }
 
     public displayValues(): void {
-        let liftText = document.getElementById("liftValue") as HTMLParagraphElement;
-        let dragText = document.getElementById("dragValue") as HTMLParagraphElement;
-        let LTDText = document.getElementById("LTDValue") as HTMLParagraphElement;
-        let liftCoefficientText = document.getElementById("liftCoefficientValue") as HTMLParagraphElement;
-        let dragCoefficientText = document.getElementById("dragCoefficientValue") as HTMLParagraphElement;
-
-        liftText.innerHTML = `Lift: ${this.values.lift.toFixed(3)}`;
-        dragText.innerHTML = `Drag: ${this.values.drag.toFixed(3)}`;
-        LTDText.innerHTML = `L/D Ratio: ${this.values.LTDRatio.toFixed(3)}`;
-        liftCoefficientText.innerHTML = `Lift Coefficient: ${this.values.liftCoefficient.toFixed(2)}`;
-        dragCoefficientText.innerHTML = `Drag Coefficient: ${this.values.dragCoefficient.toFixed(2)}`;
+        //this.elements.liftText.innerHTML = `Lift: ${this.values.lift.toFixed(3)}`;
+        //this.elements.dragText.innerHTML = `Drag: ${this.values.drag.toFixed(3)}`;
+        //this.elements.LTDText.innerHTML = `L/D Ratio: ${this.values.LTDRatio.toFixed(3)}`;
+        //this.elements.liftCoefficientText.innerHTML = `Lift Coefficient: ${this.values.liftCoefficient.toFixed(2)}`;
+        //this.elements.dragCoefficientText.innerHTML = `Drag Coefficient: ${this.values.dragCoefficient.toFixed(2)}`;
+        for (let element of this.elements) {
+            //let name = element.name;
+            let value = this.values[element.name].toFixed(3);
+            element.element.innerHTML = element.label + value;
+        }
     }
 
     private calculateLDRatio() {
