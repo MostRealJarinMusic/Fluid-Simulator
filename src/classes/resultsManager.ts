@@ -1,10 +1,10 @@
-class ResultsManager {
+class ResultsManager extends GraphingComponent {
     //#region Private variables
     //private graphingMode: GraphingMode;
-    private graph!: Chart;
-    private datasets!: GraphDataset[];
+    //private graph!: Chart;
+    //private datasets!: GraphDataset[];
     //private canvas!: HTMLCanvasElement;
-    private context!: CanvasRenderingContext2D;
+    //private context!: CanvasRenderingContext2D;
 
     private values: Record<string, number>;
     private totals: Record<string, number>;
@@ -23,7 +23,8 @@ class ResultsManager {
 
 
     constructor(canvas: HTMLCanvasElement, valueDisplay: HTMLDivElement) {
-        this.context = canvas.getContext('2d') as CanvasRenderingContext2D;
+        super(canvas);
+        //this.context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
         this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
         this.totals = { liftTotal: 0, dragTotal: 0 };
@@ -48,7 +49,7 @@ class ResultsManager {
     //#endregion
 
     //#region Graphs
-    private setupGraph(): void {
+    override setupGraph(): void {
         this.getDataForGraph();
 
         this.graph = new Chart(this.context, {
@@ -175,8 +176,8 @@ class ResultsManager {
     }
 
 
-    public updateGraph(): void {
-        let airfoilType = this.airfoilDesigner.ShapeType as ShapeType;
+    override updateGraph(): void {
+        //let airfoilType = this.airfoilDesigner.ShapeType as ShapeType;
 
         //if (airfoilType === 'airfoil') {
         //graph!!!
@@ -201,10 +202,11 @@ class ResultsManager {
         }
     }
     */
-
-    private resetGraph(): void {
+    /*
+    override resetGraph(): void {
 
     }
+    */
 
     //#endregion
 

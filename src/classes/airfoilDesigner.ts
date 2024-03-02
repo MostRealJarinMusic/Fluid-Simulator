@@ -1,8 +1,8 @@
-class AirfoilDesigner {
+class AirfoilDesigner extends GraphingComponent {
     //#region Private variables
-    private graph!: Chart;
-    private canvas: HTMLCanvasElement;
-    private context: CanvasRenderingContext2D;
+    //private graph!: Chart;
+    //private canvas: HTMLCanvasElement;
+    //private context: CanvasRenderingContext2D;
     private shape!: Shape;
     private parameterCache!: Record<string, number>
     private parameterInputContainer: HTMLDivElement;
@@ -12,8 +12,9 @@ class AirfoilDesigner {
     //#endregion
 
     constructor(canvas: HTMLCanvasElement, typeSelector: HTMLSelectElement, parameterInputContainer: HTMLDivElement, airfoilProfileNumText: HTMLParagraphElement) {
-        this.canvas = canvas;
-        this.context = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+        super(canvas);
+        //this.canvas = canvas;
+        //this.context = this.canvas.getContext('2d') as CanvasRenderingContext2D;
         this.airfoilSelector = typeSelector;
         this.parameterInputContainer = parameterInputContainer
         this.airfoilProfileNumText = airfoilProfileNumText;
@@ -60,7 +61,7 @@ class AirfoilDesigner {
     /**
      * Sets up the graph
      */
-    private setupGraph(): void {
+    override setupGraph(): void {
         let datasets = this.shape.GraphDatasets;
 
         this.graph = new Chart(this.context, {
@@ -135,9 +136,9 @@ class AirfoilDesigner {
     /**
      * Updates the graph, with a new graph dataset
      */
-    private updateGraph(): void {
-        let datasets = this.shape.GraphDatasets;
-        this.graph.data.datasets = mapDatasets(datasets);
+    override updateGraph(): void {
+        this.datasets = this.shape.GraphDatasets;
+        this.graph.data.datasets = mapDatasets(this.datasets);
         this.graph.update();
     }
 
