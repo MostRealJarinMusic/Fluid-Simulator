@@ -77,6 +77,9 @@ class FluidManager {
     get DynamicPressure(): number {
         return (1 / 2) * (this.fluid.Density) * (this.fluid.FreeStreamVelocity ** 2);
     }
+    get Solid(): boolean[] {
+        return this.fluid.Solid;
+    }
     //#endregion
 
     //#region Exposing fluid functions
@@ -118,7 +121,6 @@ class FluidManager {
         this.airfoilOutline = untagPositions(this.airfoilTaggedOutline);
 
         let centroid: Vector = getCentroid(roundAll(this.airfoilOutline));
-        //let tempTaggedRotated
         this.airfoilTaggedRotatedOutline = this.removeDuplicateVectors(
             this.airfoilTaggedOutline.map((taggedPosition) => {
                 return {
@@ -129,14 +131,6 @@ class FluidManager {
         );
 
         let tempRotated = untagPositions(this.airfoilTaggedRotatedOutline);
-
-        //let test = getSurfaceNormal(this.airfoilOutline[0], this.airfoilOutline);
-        /*
-        for (let i = 0; i < this.airfoilOutline.length; i++) {
-            let test = getSurfaceNormal(this.airfoilOutline[i], this.airfoilOutline);
-            console.log(`${this.airfoilOutline[i].x},${this.airfoilOutline[i].y} -> NORMAL: ${test.x},${test.y}`)
-        }
-        */
         this.airfoilSurfaceNormals = getAllSurfaceNormals(tempRotated);
         this.airfoilGridPoints = getFullShape(tempRotated);
         this.fluid.SurfaceNormals = this.airfoilSurfaceNormals;

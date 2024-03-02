@@ -147,10 +147,11 @@ class Fluid {
         }
 
         //Skip iterations
-
+        /*
         for (let _ = 0; _ < 500; _++) {
             this.runMainLoop();
         }
+        */
     }
 
     public showDebug(): void {
@@ -201,6 +202,9 @@ class Fluid {
     }
     get Density(): number {
         return this.density;
+    }
+    get Solid(): boolean[] {
+        return this.properties.solid;
     }
     //#endregion
 
@@ -351,7 +355,7 @@ class Fluid {
                     this.dWest[this.index(x - 1, y)] = this.dEast[i];
                     this.dNorthWest[this.index(x - 1, y + 1)] = this.dSouthEast[i];
 
-                    //this.properties.localVelocity[i] = { x: 0, y: 0 };
+                    this.properties.localVelocity[i] = { x: 0, y: 0 };
 
                     this.barrierFx += this.dEast[i] + this.dNorthEast[i] + this.dSouthEast[i] - this.dWest[i] - this.dNorthWest[i] - this.dSouthWest[i];
                     this.barrierFy += this.dNorth[i] + this.dNorthWest[i] + this.dNorthEast[i] - this.dSouth[i] - this.dSouthEast[i] - this.dSouthWest[i];
@@ -487,22 +491,24 @@ class Fluid {
 
     private computeEquilibrium(): void {
         for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
-            for (let i in latticeIndices) {
+            for (let i of latticeIndices) {
                 let localDensity = this.properties.localDensity[nodeIndex];
                 let localVelocity: Vector = this.properties.localVelocity[nodeIndex];
-                let weight = latticeWeights[i];
-                let latticeVector: Vector = { x: latticeXs[i], y: latticeYs[i] };
-                let latticeDotU = dotVectors(localVelocity, latticeVector) //Pre-calculations
-                let uDotU = dotVectors(localVelocity, localVelocity);
+                let latticeWeight = latticeWeights[i];
+                //let latticeVector: Vector = { x: latticeXs[i], y: latticeYs[i] };
+                //let latticeDotU = dotVectors(localVelocity, latticeVector) //Pre-calculations
+                //let uDotU = dotVectors(localVelocity, localVelocity);
 
+                /*
                 this.equilibriumDistribution[nodeIndex][i] =
                     weight * localDensity *
                     (1 +
                         3 * latticeDotU +
                         (9 / 2) * latticeDotU ** 2 -
                         (3 / 2) * uDotU);
+                        */
 
-                //this.equilibriumDistribution[this.index(x, y)][i] = this.getEquilibrium(weight, localDensity, [localUX, localUY], parseInt(i));
+                this.equilibriumDistribution[nodeIndex][i] = this.getEquilibrium(latticeWeight, localDensity, localVelocity, i);
             }
         }
     }
@@ -702,7 +708,7 @@ class Fluid {
                 getColour(255, 0, 0, 255),
                 getColour(255, 255, 0, 255),
                 getColour(255, 255, 255, 255)],
-                [100, 100, 75, 75]),
+                [200, 50, 75, 50]),
             rainbow: new ColourMap([
                 getColour(0, 0, 128, 255),
                 getColour(0, 0, 255, 255),
@@ -750,7 +756,7 @@ class Fluid {
             case 'pressureGradient':
                 let pressureGradient = absoluteVector(this.properties.pressureGradient[index]);
                 colourScheme = this.colourSchemes.rainbow;
-                colourIndex = Math.round(colourScheme.NumColours * ((5 * pressureGradient) * 10 * contrast + 0.45));
+                colourIndex = Math.round(colourScheme.NumColours * ((5 * pressureGradient) * 10 * contrast + 0.35));
                 break;
             default:
                 console.log("Error");

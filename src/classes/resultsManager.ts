@@ -23,7 +23,6 @@ class ResultsManager {
 
 
     constructor(canvas: HTMLCanvasElement, graphingModeSelector: HTMLSelectElement, valueDisplay: HTMLDivElement) {
-        //this.canvas = canvas;
         this.context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
         this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
@@ -36,6 +35,7 @@ class ResultsManager {
         this.graphingModeSelector = graphingModeSelector;
     }
 
+    //#region Setup functions
     public assignFluidManager(fluidManager: FluidManager) {
         this.fluidManager = fluidManager;
         this.origin = this.fluidManager.Origin;
@@ -45,11 +45,10 @@ class ResultsManager {
     public assignAirfoilDesigner(airfoilDesigner: AirfoilDesigner) {
         this.airfoilDesigner = airfoilDesigner;
     }
+    //#endregion
 
     //#region Graphs
     private setupGraph(): void {
-        //Bar graph for lift and drag
-        //Scatter graph for against surface positions
         this.getDataForGraph();
 
         this.graph = new Chart(this.context, {
@@ -88,8 +87,8 @@ class ResultsManager {
                             zeroLineColor: '#f8f8f2',
                         },
                         ticks: {
-                            min: 0.404,
-                            max: 0.4045,
+                            //min: 0.404,
+                            //max: 0.4045,
                             fontFamily: "'REM', sans-serif",
                             fontSize: 8,
                             fontColor: '#f8f8f2',
@@ -108,7 +107,7 @@ class ResultsManager {
                 },
                 legend: {
                     onClick: function (_event: any, _legendItem: any) {
-                        //Stops the default of getting hiding the dataset
+                        //Stops the default of getting the dataset
                     },
                     labels: {
                         fontColor: '#f8f8f2',
@@ -121,36 +120,61 @@ class ResultsManager {
         });
     }
 
+    private samplePoint(position: Vector, field: number[]): number {
+        //Get average value around a point
+        let returnValue = 0;
+        switch (this.graphingMode) {
+            case 'surfacePressure':
+                let pressureSample = latticeIndices.map((value) => {
+                    let sampleIndex = getIndex(position.x + latticeXs[value], position.y + latticeYs[value], this.fluidWidth);
+                    return field[sampleIndex];
+                })
+                returnValue = pressureSample.reduce((acc, val) => acc + val) / latticeIndices.length;
+                break;
+            case 'velocity':
+                let velocitySample = latticeIndices.map((value) => {
+                    let sampleIndex = getIndex(position.x + latticeXs[value], position.y + latticeYs[value], this.fluidWidth);
+                    return field[sampleIndex];
+                })
+                let validNodes = latticeIndices.map((value) => {
+                    let sampleIndex = getIndex(position.x + latticeXs[value], position.y + latticeYs[value], this.fluidWidth);
+                    return this.fluidManager.Solid[sampleIndex] ? 0 : 1 as number;
+                }).reduce((acc, val) => acc + val);
+
+                returnValue = velocitySample.reduce((acc, val) => acc + val) / validNodes;
+                break;
+            default:
+                returnValue = 0;
+                break;
+        }
+        return returnValue;
+    }
+
+    private getField(mode: GraphingMode): number[] {
+        switch (mode) {
+            case 'surfacePressure':
+                return this.fluidManager.PressureField;
+            case 'velocity':
+                return this.fluidManager.VelocityField.map((value) => absoluteVector(value));
+            default:
+                console.log("Error");
+                return [];
+        }
+    }
+
     private getDataForGraph(): void {
         let upperPoints: Vector[] = [];
         let lowerPoints: Vector[] = [];
         let taggedOutline = this.fluidManager.TaggedOutline;
-        let field: number[] = [];
-
-        switch (this.graphingMode) {
-            case 'surfacePressure':
-                field = this.fluidManager.PressureField;
-                break;
-            case 'velocity':
-                field = this.fluidManager.VelocityField.map((value) => absoluteVector(value));
-                break;
-            default:
-                console.log("Error");
-                break;
-        }
+        let field: number[] = this.getField(this.graphingMode);
 
         for (let taggedPosition of taggedOutline) {
             let position = roundVector(addVectors(taggedPosition.position, this.origin));
-            //console.log(taggedPosition.tag);
-            //console.log(taggedPosition.position);
-            //console.log(position);
 
             let graphPoint: Vector = {
                 x: (taggedPosition.position.x + Math.round(nodesPerMeter / 2)) * nodeDistance,
-                y: field[getIndex(position.x, position.y, this.fluidWidth)]
+                y: this.samplePoint(position, field)
             };
-
-            //console.log(graphPoint);
 
             if (taggedPosition.tag === 'lowerSurface') {
                 lowerPoints.push(graphPoint);
@@ -166,7 +190,6 @@ class ResultsManager {
 
 
     public updateGraph(): void {
-
         let airfoilType = this.airfoilDesigner.ShapeType as ShapeType;
 
         if (airfoilType === 'airfoil') {
@@ -196,7 +219,6 @@ class ResultsManager {
     }
 
     //#endregion
-
 
     //#region Calculations
     public resetTimer(): void {

@@ -119,7 +119,7 @@ class AirfoilDesigner {
                 },
                 legend: {
                     onClick: function (_event: any, _legendItem: any) {
-                        //Stops the default of getting hiding the dataset
+                        //Stops the default of getting the dataset
                     },
                     labels: {
                         fontColor: '#f8f8f2',
