@@ -1,6 +1,6 @@
 class ResultsManager {
     //#region Private variables
-    private graphingMode: GraphingMode;
+    //private graphingMode: GraphingMode;
     private graph!: Chart;
     private datasets!: GraphDataset[];
     //private canvas!: HTMLCanvasElement;
@@ -18,11 +18,11 @@ class ResultsManager {
 
     private valuesDisplayContainer: HTMLDivElement;
     private elements!: Record<string, HTMLParagraphElement>;
-    private graphingModeSelector: HTMLSelectElement;
+    //private graphingModeSelector: HTMLSelectElement;
     //#endregion
 
 
-    constructor(canvas: HTMLCanvasElement, graphingModeSelector: HTMLSelectElement, valueDisplay: HTMLDivElement) {
+    constructor(canvas: HTMLCanvasElement, valueDisplay: HTMLDivElement) {
         this.context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
         this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
@@ -31,8 +31,8 @@ class ResultsManager {
         this.startTime = Date.now();
 
         this.valuesDisplayContainer = valueDisplay;
-        this.graphingMode = 'surfacePressure';
-        this.graphingModeSelector = graphingModeSelector;
+        //this.graphingMode = 'surfacePressure';
+        //this.graphingModeSelector = graphingModeSelector;
     }
 
     //#region Setup functions
@@ -122,6 +122,12 @@ class ResultsManager {
 
     private samplePoint(position: Vector, field: number[]): number {
         //Get average value around a point
+        let pressureSample: number = latticeIndices.map((value) => {
+            let sampleIndex = getIndex(position.x + latticeXs[value], position.y + latticeYs[value], this.fluidWidth);
+            return field[sampleIndex];
+        }).reduce((acc, val) => acc + val);
+        return pressureSample / latticeIndices.length;
+        /*
         let returnValue = 0;
         switch (this.graphingMode) {
             case 'surfacePressure':
@@ -147,9 +153,11 @@ class ResultsManager {
                 returnValue = 0;
                 break;
         }
-        return returnValue;
+        */
+        //return returnValue;
     }
 
+    /*
     private getField(mode: GraphingMode): number[] {
         switch (mode) {
             case 'surfacePressure':
@@ -161,12 +169,14 @@ class ResultsManager {
                 return [];
         }
     }
+    */
 
     private getDataForGraph(): void {
         let upperPoints: Vector[] = [];
         let lowerPoints: Vector[] = [];
+        let defaultPoints: Vector[] = [];
         let taggedOutline = this.fluidManager.TaggedOutline;
-        let field: number[] = this.getField(this.graphingMode);
+        let field: number[] = this.fluidManager.PressureField; //this.getField(this.graphingMode);
 
         for (let taggedPosition of taggedOutline) {
             let position = roundVector(addVectors(taggedPosition.position, this.origin));
@@ -178,31 +188,35 @@ class ResultsManager {
 
             if (taggedPosition.tag === 'lowerSurface') {
                 lowerPoints.push(graphPoint);
-            } else {
+            } else if (taggedPosition.tag === 'upperSurface') {
                 upperPoints.push(graphPoint);
+            } else {
+                defaultPoints.push(graphPoint);
             }
         }
 
         let upperDataset: GraphDataset = { label: "Upper Airfoil Surface", points: upperPoints, colour: 'rgba(139,233,253,1)' }
         let lowerDataset: GraphDataset = { label: "Lower Airfoil Surface", points: lowerPoints, colour: 'rgba(241,250,140,1)' }
-        this.datasets = [upperDataset, lowerDataset];
+        let defaultDataset: GraphDataset = { label: "Default Surface", points: defaultPoints, colour: 'rgba(255,85,85,1)' }
+        this.datasets = [upperDataset, lowerDataset, defaultDataset];
     }
 
 
     public updateGraph(): void {
         let airfoilType = this.airfoilDesigner.ShapeType as ShapeType;
 
-        if (airfoilType === 'airfoil') {
-            //graph!!!
-            this.getDataForGraph();
+        //if (airfoilType === 'airfoil') {
+        //graph!!!
+        this.getDataForGraph();
 
-            this.graph.data.datasets = mapDatasets(this.datasets);
-            this.graph.update();
-        } else {
-            //Disable graph???
-        }
+        this.graph.data.datasets = mapDatasets(this.datasets);
+        this.graph.update();
+        //} else {
+        //Disable graph???
+        //}
     }
 
+    /*
     public updateGraphingMode(): void {
         let currentMode: GraphingMode = this.graphingMode;
         let newMode = this.graphingModeSelector.value;
@@ -213,6 +227,7 @@ class ResultsManager {
             throw new Error("Error");
         }
     }
+    */
 
     private resetGraph(): void {
 

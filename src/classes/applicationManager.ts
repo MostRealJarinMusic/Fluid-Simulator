@@ -16,7 +16,7 @@ class ApplicationManager {
 
     private RMCanvas!: HTMLCanvasElement;
     private RMValuesDisplay!: HTMLDivElement;
-    private RMGraphingModeSelector!: HTMLSelectElement;
+    //private RMGraphingModeSelector!: HTMLSelectElement;
     public resultsManager!: ResultsManager;
     //#endregion
 
@@ -66,9 +66,9 @@ class ApplicationManager {
     private setupResultsManager(): void {
         this.RMCanvas = document.getElementById("dataGraph") as HTMLCanvasElement;
         this.RMValuesDisplay = document.getElementById("valuesDisplay") as HTMLDivElement;
-        this.RMGraphingModeSelector = document.getElementById("resultsGraphModeSelector") as HTMLSelectElement;
+        //this.RMGraphingModeSelector = document.getElementById("resultsGraphModeSelector") as HTMLSelectElement;
 
-        this.resultsManager = new ResultsManager(this.RMCanvas, this.RMGraphingModeSelector, this.RMValuesDisplay);
+        this.resultsManager = new ResultsManager(this.RMCanvas, this.RMValuesDisplay);
         this.resultsManager.assignFluidManager(this.fluidManager);
         this.resultsManager.assignAirfoilDesigner(this.airfoilDesigner);
     }
@@ -100,9 +100,11 @@ class ApplicationManager {
             applicationManager.fluidManager.updateFreeStreamVelocity();
             applicationManager.resultsManager.resetTimer();
         });
+        /*
         this.RMGraphingModeSelector.addEventListener('change', function () {
             applicationManager.resultsManager.updateGraphingMode();
         });
+        */
     }
     //#endregion
 

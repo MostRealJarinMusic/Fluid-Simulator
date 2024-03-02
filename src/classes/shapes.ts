@@ -1,9 +1,15 @@
 //#region Shape parent class
 abstract class Shape {
-    protected outline: TaggedPosition[] = [];
-    protected graphDatasets: GraphDataset[] = [];
-    protected parameters: Record<string, number> = {};
+    protected outline: TaggedPosition[];
+    protected graphDatasets: GraphDataset[];
+    protected parameters: Record<string, number>;
     protected abstract parameterInfo: Record<string, ParameterInfo>;
+
+    constructor() {
+        this.outline = [];
+        this.graphDatasets = []
+        this.parameters = {};
+    }
 
     /**
      * Takes a set of parameters and sets them to the shape's parameters.
