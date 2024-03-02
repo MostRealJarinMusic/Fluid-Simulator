@@ -4,7 +4,6 @@
 
 //#region Types
 type Vector = { x: number; y: number; }
-//type GridPoints = { points: Vector[]; }
 type GraphDataset = { points: Vector[], label: string; colour: string; }
 type Bound = { lower: number, upper: number };
 type ParameterInfo = { name: string; labelText: string; defaultValue: number; bounds: Bound; }
@@ -23,8 +22,6 @@ type FluidProperties = {
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure', 'pressureGradient'] as const;
 type SimulationMode = typeof validSimulationModes[number];
-//const validResultGraphModes = ['surfacePressure', 'velocity'] as const;
-//type GraphingMode = typeof validResultGraphModes[number];
 const validPositionTags = ['upperSurface', 'lowerSurface', 'default'] as const;
 type PositionTag = typeof validPositionTags[number];
 const validShapeTypes = ['ellipse', 'line', 'rectangle', 'airfoil'] as const;
@@ -41,17 +38,6 @@ function isSimulationMode(testMode: unknown): testMode is SimulationMode {
     // @ts-expect-error
     return typeof testMode === 'string' && validSimulationModes.includes(testMode);
 }
-
-/**
- * Type guard for a valid graphing mode
- * @param testMode The mode to be tested
- */
-/*
-function isGraphingMode(testMode: unknown): testMode is GraphingMode {
-    // @ts-expect-error
-    return typeof testMode === 'string' && validResultGraphModes.includes(testMode);
-}
-*/
 
 /**
  * Type guard for a valid tag

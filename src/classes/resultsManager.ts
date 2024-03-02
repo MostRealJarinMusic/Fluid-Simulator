@@ -1,11 +1,5 @@
 class ResultsManager extends GraphingComponent {
     //#region Private variables
-    //private graphingMode: GraphingMode;
-    //private graph!: Chart;
-    //private datasets!: GraphDataset[];
-    //private canvas!: HTMLCanvasElement;
-    //private context!: CanvasRenderingContext2D;
-
     private values: Record<string, number>;
     private totals: Record<string, number>;
 
@@ -18,13 +12,11 @@ class ResultsManager extends GraphingComponent {
 
     private valuesDisplayContainer: HTMLDivElement;
     private elements!: Record<string, HTMLParagraphElement>;
-    //private graphingModeSelector: HTMLSelectElement;
     //#endregion
 
 
     constructor(canvas: HTMLCanvasElement, valueDisplay: HTMLDivElement) {
         super(canvas);
-        //this.context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
         this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
         this.totals = { liftTotal: 0, dragTotal: 0 };
@@ -32,8 +24,6 @@ class ResultsManager extends GraphingComponent {
         this.startTime = Date.now();
 
         this.valuesDisplayContainer = valueDisplay;
-        //this.graphingMode = 'surfacePressure';
-        //this.graphingModeSelector = graphingModeSelector;
     }
 
     //#region Setup functions
@@ -175,39 +165,11 @@ class ResultsManager extends GraphingComponent {
         return [upperDataset, lowerDataset, defaultDataset].filter((value) => value.points.length > 0);;
     }
 
-
     override updateGraph(): void {
-        //let airfoilType = this.airfoilDesigner.ShapeType as ShapeType;
-
-        //if (airfoilType === 'airfoil') {
-        //graph!!!
         this.getDataForGraph();
-
         this.graph.data.datasets = mapDatasets(this.datasets);
         this.graph.update();
-        //} else {
-        //Disable graph???
-        //}
     }
-
-    /*
-    public updateGraphingMode(): void {
-        let currentMode: GraphingMode = this.graphingMode;
-        let newMode = this.graphingModeSelector.value;
-
-        if (currentMode !== newMode && isGraphingMode(newMode)) {
-            this.graphingMode = newMode;
-        } else {
-            throw new Error("Error");
-        }
-    }
-    */
-    /*
-    override resetGraph(): void {
-
-    }
-    */
-
     //#endregion
 
     //#region Calculations

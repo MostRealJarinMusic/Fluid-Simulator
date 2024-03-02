@@ -11,5 +11,4 @@ abstract class GraphingComponent {
 
     protected abstract setupGraph(): void;
     protected abstract updateGraph(): void;
-    //public abstract resetGraph(): void;
 }

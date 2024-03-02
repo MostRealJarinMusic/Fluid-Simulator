@@ -1,8 +1,5 @@
 class AirfoilDesigner extends GraphingComponent {
     //#region Private variables
-    //private graph!: Chart;
-    //private canvas: HTMLCanvasElement;
-    //private context: CanvasRenderingContext2D;
     private shape!: Shape;
     private parameterCache!: Record<string, number>
     private parameterInputContainer: HTMLDivElement;
@@ -13,8 +10,6 @@ class AirfoilDesigner extends GraphingComponent {
 
     constructor(canvas: HTMLCanvasElement, typeSelector: HTMLSelectElement, parameterInputContainer: HTMLDivElement, airfoilProfileNumText: HTMLParagraphElement) {
         super(canvas);
-        //this.canvas = canvas;
-        //this.context = this.canvas.getContext('2d') as CanvasRenderingContext2D;
         this.airfoilSelector = typeSelector;
         this.parameterInputContainer = parameterInputContainer
         this.airfoilProfileNumText = airfoilProfileNumText;
@@ -57,7 +52,6 @@ class AirfoilDesigner extends GraphingComponent {
     //#endregion
 
     //#region Graphs
-
     /**
      * Sets up the graph
      */
