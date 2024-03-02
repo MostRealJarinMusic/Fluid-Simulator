@@ -10,7 +10,7 @@ class ResultsManager extends GraphingComponent {
     private origin!: Vector;
     private fluidWidth!: number;
 
-    private elements: LabelledElement[]//Record<string, HTMLElement>;
+    private elements: LabelledElement[];
     //#endregion
 
 
@@ -19,7 +19,6 @@ class ResultsManager extends GraphingComponent {
         this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
         this.totals = { liftTotal: 0, dragTotal: 0 };
         this.startTime = Date.now();
-        //this.elements = elements;
         this.elements = elements;
     }
 
@@ -213,13 +212,7 @@ class ResultsManager extends GraphingComponent {
     }
 
     public displayValues(): void {
-        //this.elements.liftText.innerHTML = `Lift: ${this.values.lift.toFixed(3)}`;
-        //this.elements.dragText.innerHTML = `Drag: ${this.values.drag.toFixed(3)}`;
-        //this.elements.LTDText.innerHTML = `L/D Ratio: ${this.values.LTDRatio.toFixed(3)}`;
-        //this.elements.liftCoefficientText.innerHTML = `Lift Coefficient: ${this.values.liftCoefficient.toFixed(2)}`;
-        //this.elements.dragCoefficientText.innerHTML = `Drag Coefficient: ${this.values.dragCoefficient.toFixed(2)}`;
         for (let element of this.elements) {
-            //let name = element.name;
             let value = this.values[element.name].toFixed(3);
             element.element.innerHTML = element.label + value;
         }
@@ -232,13 +225,13 @@ class ResultsManager extends GraphingComponent {
     private calculateLiftCoefficient() {
         let airfoilArea = this.airfoilDesigner.ShapeArea;
         let dynamicPressure = this.fluidManager.DynamicPressure;
-        this.values.liftCoefficient = parseFloat(this.values.lift.toFixed(2)) / (10000 * airfoilArea * dynamicPressure);
+        this.values.liftCoefficient = parseFloat(this.values.lift.toFixed(4)) / (10000 * airfoilArea * dynamicPressure);
     }
 
     private calculateDragCoefficient() {
         let airfoilArea = this.airfoilDesigner.ShapeArea;
         let dynamicPressure = this.fluidManager.DynamicPressure;
-        this.values.dragCoefficient = parseFloat(this.values.drag.toFixed(2)) / (10000 * airfoilArea * dynamicPressure);
+        this.values.dragCoefficient = parseFloat(this.values.drag.toFixed(4)) / (10000 * airfoilArea * dynamicPressure);
     }
     //#endregion
 }

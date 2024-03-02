@@ -27,7 +27,6 @@ const validPositionTags = ['upperSurface', 'lowerSurface', 'default'] as const;
 type PositionTag = typeof validPositionTags[number];
 const validShapeTypes = ['ellipse', 'line', 'rectangle', 'airfoil'] as const;
 type ShapeType = typeof validShapeTypes[number];
-
 //#endregion
 
 //#region Type Guards
@@ -81,12 +80,6 @@ enum OppositeDirections {
     NorthEast,
     East,
     SouthEast
-}
-
-enum Orientation {
-    CounterClockwise = -1,
-    Colinear = 0,
-    Clockwise = 1
 }
 //#endregion
 
@@ -291,13 +284,6 @@ function getFullShape(outline: Vector[]): Vector[] {
     return fullShape;
 }
 
-function getOrientation(p: Vector, q: Vector, r: Vector): Orientation {
-    let value = ((q.y - p.y) * (r.x - p.x)) - ((r.y - p.y) * (q.x - p.x));
-    if (value === 0) return Orientation.Colinear;
-    return (value > 0) ? Orientation.Clockwise : Orientation.CounterClockwise;
-}
-
-
 function getCentroid(fullShape: Vector[]): Vector {
     let summation = fullShape.reduce((acc, { x, y }) => ({ x: acc.x + x, y: acc.y + y }), { x: 0, y: 0 });
     return scaleVector(summation, 1 / fullShape.length);
@@ -306,29 +292,6 @@ function getCentroid(fullShape: Vector[]): Vector {
 function roundAll(vectorSet: Vector[]): Vector[] {
     return vectorSet.map((vector) => roundVector(vector));
 }
-
-function sortVectorsAntiClockwise(outline: Vector[]): Vector[] {
-    let centroid: Vector = { x: 0, y: 0 }//roundVector(getCentroid(outline));
-    let translatedOutline = outline.map((value) => subVectors(value, centroid));
-    let sorted = translatedOutline.sort((a, b) => {
-        let angleA = getAngle(a);
-        let angleB = getAngle(b);
-        if (angleA < angleB) return -1;
-        if ((angleA === angleB) && (absoluteVector(a) < absoluteVector(b))) return -1;
-        return 1;
-    });
-
-    return sorted.map((value) => addVectors(value, centroid));
-}
-
-function getAngle(vector: Vector): number {
-    let angle = Math.atan2(vector.y, vector.x);
-    if (angle <= 0) {
-        angle += 2 * Math.PI;
-    }
-    return angle;
-}
-
 
 function sortClosestToVector(vector: Vector, outline: Vector[]): Vector[] {
     outline = outline.filter((value) => {
@@ -360,49 +323,14 @@ function getAllSurfaceNormals(outline: Vector[]): SurfaceNormal[] {
 
 
 function getSurfaceNormal(vector: Vector, outline: Vector[]): Vector {
-    //console.log(outline);
     if (checkInVectorList(outline, vector)) {
-        //console.log(`LOOKING FOR NORMAL VECTOR FOR ${vector.x},${vector.y}`);
         let sortedOutline = sortClosestToVector(vector, outline);
-        /*
-        let nearest: Vector[] = sortedOutline.slice(0, 4)
-        nearest.push(vector)
-        console.log(nearest);
-        let meanX = nearest.map((value) => value.x).reduce((acc, val) => acc + val, 0);
-        let meanY = nearest.map((value) => value.y).reduce((acc, val) => acc + val, 0);
-        let xDifferences = nearest.map((value) => value.x - meanX).reduce((acc, val) => acc + val, 0);
-        let productDifferences = nearest.map((value) => (value.x - meanX) * (value.y - meanY)).reduce((acc, val) => acc + val, 0);
-        let newTangent = (productDifferences) / (xDifferences ** 2);
-
-        console.log(newTangent);
-        console.log(- (1 / newTangent));
-        */
-
         let vector1 = sortedOutline[0];
         let vector2 = sortedOutline[1];
-        //console.log(`VECTOR1 ${vector1.x},${vector1.y}`);
-        //console.log(`VECTOR2 ${vector2.x},${vector2.y}`);
 
         let tangent = { x: vector1.x - vector2.x, y: vector1.y - vector2.y };
         //More accurate then rotate function, which introduces some rounding errors
-        let normal = normaliseVector({ x: -tangent.y, y: tangent.x })///rotateVector(tangent, Math.PI / 2);
-
-        /*
-        let testPoint = roundVector(addVectors(currentVector, normal));
-
-        if (!checkInVectorList(getFullShape(outline), testPoint)) {
-            //the normal is facing outwards
-            //console.log("NORMAL FACING OUTWARDS");
-        } else {
-            //console.log("NORMAL FACING INWARDS");
-            normal = scaleVector(normal, -1);//rotateVector(normal, Math.PI);
-        }
-        */
-
-        //normal = normaliseVector(normal);
-        //console.log(normal);
-
-        return normal;
+        return normaliseVector({ x: -tangent.y, y: tangent.x });;
     }
 
     console.log("Error");

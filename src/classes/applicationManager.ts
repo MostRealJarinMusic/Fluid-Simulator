@@ -15,8 +15,6 @@ class ApplicationManager {
     public fluidManager!: FluidManager;
 
     private RMCanvas!: HTMLCanvasElement;
-    private RMValuesDisplay!: HTMLDivElement;
-    //private RMGraphingModeSelector!: HTMLSelectElement;
     public resultsManager!: ResultsManager;
     //#endregion
 
@@ -65,24 +63,8 @@ class ApplicationManager {
      */
     private setupResultsManager(): void {
         this.RMCanvas = document.getElementById("dataGraph") as HTMLCanvasElement;
-        this.RMValuesDisplay = document.getElementById("valuesDisplay") as HTMLDivElement;
-        //this.RMGraphingModeSelector = document.getElementById("resultsGraphModeSelector") as HTMLSelectElement;
 
-        //let liftText = document.getElementById("liftValue") as HTMLParagraphElement;
-        //let dragText = document.getElementById("dragValue") as HTMLParagraphElement;
-        //let LTDText = document.getElementById("LTDValue") as HTMLParagraphElement;
-        //let liftCoefficientText = document.getElementById("liftCoefficientValue") as HTMLParagraphElement;
-        //let dragCoefficientText = document.getElementById("dragCoefficientValue") as HTMLParagraphElement;
-
-        let elements: Record<string, HTMLElement> = {
-            "liftText": document.getElementById("liftValue") as HTMLParagraphElement,
-            "dragText": document.getElementById("dragValue") as HTMLParagraphElement,
-            "LTDText": document.getElementById("LTDValue") as HTMLParagraphElement,
-            "liftCoefficientText": document.getElementById("liftCoefficientValue") as HTMLParagraphElement,
-            "dragCoefficientText": document.getElementById("dragCoefficientValue") as HTMLParagraphElement
-        }
-
-        let temp: LabelledElement[] = [
+        let elements: LabelledElement[] = [
             { name: "lift", element: document.getElementById("liftValue") as HTMLParagraphElement, label: "Lift: " },
             { name: "drag", element: document.getElementById("dragValue") as HTMLParagraphElement, label: "Drag: " },
             { name: "LTDRatio", element: document.getElementById("LTDValue") as HTMLParagraphElement, label: "L/D Ratio: " },
@@ -90,7 +72,7 @@ class ApplicationManager {
             { name: "dragCoefficient", element: document.getElementById("dragCoefficientValue") as HTMLParagraphElement, label: "Drag Coefficient: " }
         ];
 
-        this.resultsManager = new ResultsManager(this.RMCanvas, temp);
+        this.resultsManager = new ResultsManager(this.RMCanvas, elements);
         this.resultsManager.assignFluidManager(this.fluidManager);
         this.resultsManager.assignAirfoilDesigner(this.airfoilDesigner);
     }
@@ -122,11 +104,6 @@ class ApplicationManager {
             applicationManager.fluidManager.updateFreeStreamVelocity();
             applicationManager.resultsManager.resetTimer();
         });
-        /*
-        this.RMGraphingModeSelector.addEventListener('change', function () {
-            applicationManager.resultsManager.updateGraphingMode();
-        });
-        */
     }
     //#endregion
 
