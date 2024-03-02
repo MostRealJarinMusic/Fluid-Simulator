@@ -127,78 +127,51 @@ class ResultsManager {
             return field[sampleIndex];
         }).reduce((acc, val) => acc + val);
         return pressureSample / latticeIndices.length;
-        /*
-        let returnValue = 0;
-        switch (this.graphingMode) {
-            case 'surfacePressure':
-                let pressureSample = latticeIndices.map((value) => {
-                    let sampleIndex = getIndex(position.x + latticeXs[value], position.y + latticeYs[value], this.fluidWidth);
-                    return field[sampleIndex];
-                })
-                returnValue = pressureSample.reduce((acc, val) => acc + val) / latticeIndices.length;
-                break;
-            case 'velocity':
-                let velocitySample = latticeIndices.map((value) => {
-                    let sampleIndex = getIndex(position.x + latticeXs[value], position.y + latticeYs[value], this.fluidWidth);
-                    return field[sampleIndex];
-                })
-                let validNodes = latticeIndices.map((value) => {
-                    let sampleIndex = getIndex(position.x + latticeXs[value], position.y + latticeYs[value], this.fluidWidth);
-                    return this.fluidManager.Solid[sampleIndex] ? 0 : 1 as number;
-                }).reduce((acc, val) => acc + val);
-
-                returnValue = velocitySample.reduce((acc, val) => acc + val) / validNodes;
-                break;
-            default:
-                returnValue = 0;
-                break;
-        }
-        */
-        //return returnValue;
     }
-
-    /*
-    private getField(mode: GraphingMode): number[] {
-        switch (mode) {
-            case 'surfacePressure':
-                return this.fluidManager.PressureField;
-            case 'velocity':
-                return this.fluidManager.VelocityField.map((value) => absoluteVector(value));
-            default:
-                console.log("Error");
-                return [];
-        }
-    }
-    */
 
     private getDataForGraph(): void {
-        let upperPoints: Vector[] = [];
-        let lowerPoints: Vector[] = [];
-        let defaultPoints: Vector[] = [];
+        let data: TaggedPosition[] = [];
         let taggedOutline = this.fluidManager.TaggedOutline;
         let field: number[] = this.fluidManager.PressureField; //this.getField(this.graphingMode);
 
         for (let taggedPosition of taggedOutline) {
             let position = roundVector(addVectors(taggedPosition.position, this.origin));
 
-            let graphPoint: Vector = {
-                x: (taggedPosition.position.x + Math.round(nodesPerMeter / 2)) * nodeDistance,
-                y: this.samplePoint(position, field)
+            let graphPoint: TaggedPosition = {
+                position: {
+                    x: (taggedPosition.position.x + Math.round(nodesPerMeter / 2)) * nodeDistance,
+                    y: this.samplePoint(position, field)
+                },
+                tag: taggedPosition.tag
             };
-
-            if (taggedPosition.tag === 'lowerSurface') {
-                lowerPoints.push(graphPoint);
-            } else if (taggedPosition.tag === 'upperSurface') {
-                upperPoints.push(graphPoint);
-            } else {
-                defaultPoints.push(graphPoint);
-            }
+            data.push(graphPoint);
         }
 
+        this.datasets = this.convertDataToDatasets(data);
+    }
+
+    private convertDataToDatasets(data: TaggedPosition[]): GraphDataset[] {
+        let upperPoints: Vector[] = [];
+        let lowerPoints: Vector[] = [];
+        let defaultPoints: Vector[] = [];
+
+        for (let taggedGraphPoint of data) {
+            switch (taggedGraphPoint.tag) {
+                case 'upperSurface':
+                    upperPoints.push(taggedGraphPoint.position);
+                    break;
+                case 'lowerSurface':
+                    lowerPoints.push(taggedGraphPoint.position);
+                    break;
+                default:
+                    defaultPoints.push(taggedGraphPoint.position);
+            }
+        }
         let upperDataset: GraphDataset = { label: "Upper Airfoil Surface", points: upperPoints, colour: 'rgba(139,233,253,1)' }
         let lowerDataset: GraphDataset = { label: "Lower Airfoil Surface", points: lowerPoints, colour: 'rgba(241,250,140,1)' }
         let defaultDataset: GraphDataset = { label: "Default Surface", points: defaultPoints, colour: 'rgba(255,85,85,1)' }
-        this.datasets = [upperDataset, lowerDataset, defaultDataset];
+
+        return [upperDataset, lowerDataset, defaultDataset].filter((value) => value.points.length > 0);;
     }
 
 

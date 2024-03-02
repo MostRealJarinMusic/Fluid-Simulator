@@ -1,7 +1,7 @@
 //Front end
 //#region Constants for the simulation
 const nodesPerMeter: number = 75;
-const nodeDistance: number = 1 / nodesPerMeter; //Defined 60 nodes as 1m
+const nodeDistance: number = 1 / nodesPerMeter;
 const stepsPerFrame: number = 10;
 const latticeSpeedOfSound: number = 1 / Math.sqrt(3);
 
