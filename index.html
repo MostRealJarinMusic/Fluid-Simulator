@@ -5,14 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net" />
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
-    <!--
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.0"></script>
-    -->
-
     <title>Fluid Simulator</title>
-
     <link href="src/renderer/css/style.css" rel="stylesheet" type="text/css" />
 </head>
 
@@ -99,30 +93,13 @@
 
         <div class="column">
             <div class="moduleContainer" id="dataGraphContainer">
-                <h1>Graphs. </h1>
+                <h1>Results. </h1>
 
                 <canvas class="graphs" id="dataGraph" width="300" height="300">
                     <p>Your browser doesn't support the canvas tag - please use one that does.</p>
                 </canvas>
 
-                <!--
-
-                
                 <div class="separator"></div>
-
-                <div class="generalControls" id="resultsManagerGeneralControls">
-                    <select name="Graphing Mode" id="resultsGraphModeSelector">
-                        <option value="surfacePressure" selected>Plot Surface Pressure against X</option>
-                        <option value="velocity">Plot Velocity against X</option>
-                    </select>
-                </div>
-
-                -->
-
-                <div class="separator"></div>
-
-                <div class="parameterContainer" id="dataGraphParameters">
-                </div>
 
                 <div class="valuesContainer" id="resultsValueContainer">
                     <p id="liftValue">Lift:</p>
@@ -138,7 +115,6 @@
 
     </div>
 
-
     <script src="dist/classes/applicationManager.js"></script>
     <script src="dist/classes/graphingComponent.js"></script>
     <script src="dist/classes/colourMap.js"></script>
@@ -146,8 +122,6 @@
     <script src="dist/classes/shapes.js"></script>
     <script src="dist/classes/fluid.js"></script>
     <script src="dist/classes/distribution.js"></script>
-    <script src="dist/classes/fluidProperties.js"></script>
-    <script src="dist/classes/resultsValues.js"></script>
 
     <script src="dist/classes/airfoilDesigner.js"></script>
     <script src="dist/classes/fluidManager.js"></script>

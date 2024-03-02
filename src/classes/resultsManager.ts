@@ -74,8 +74,8 @@ class ResultsManager extends GraphingComponent {
                             zeroLineColor: '#f8f8f2',
                         },
                         ticks: {
-                            //min: 0.404,
-                            //max: 0.4045,
+                            min: 0,
+                            max: 0.001,
                             fontFamily: "'REM', sans-serif",
                             fontSize: 8,
                             fontColor: '#f8f8f2',
@@ -119,14 +119,15 @@ class ResultsManager extends GraphingComponent {
     private getDataForGraph(): void {
         let data: TaggedPosition[] = [];
         let taggedOutline = this.fluidManager.TaggedOutline;
-        let field: number[] = this.fluidManager.PressureField; //this.getField(this.graphingMode);
+        let field: number[] = this.fluidManager.PressureGradient.map((value) => absoluteVector(value));
+        let outline = untagPositions(taggedOutline);
+        let minX = filterVectors(outline, "x", "least");
 
         for (let taggedPosition of taggedOutline) {
             let position = roundVector(addVectors(taggedPosition.position, this.origin));
-
             let graphPoint: TaggedPosition = {
                 position: {
-                    x: (taggedPosition.position.x + Math.round(nodesPerMeter / 2)) * nodeDistance,
+                    x: (taggedPosition.position.x - minX) * nodeDistance,
                     y: this.samplePoint(position, field)
                 },
                 tag: taggedPosition.tag
@@ -164,7 +165,42 @@ class ResultsManager extends GraphingComponent {
     override updateGraph(): void {
         this.getDataForGraph();
         this.graph.data.datasets = mapDatasets(this.datasets);
+        this.adjustGraphBounds();
         this.graph.update();
+    }
+
+    private adjustGraphBounds(): void {
+        //Bound the x-axis depending on the graph
+        let outline = untagPositions(this.fluidManager.TaggedOutline);
+        let minX = filterVectors(outline, "x", "least") * nodeDistance;
+        let maxX = filterVectors(outline, "x", "most") * nodeDistance;
+        let xRange = maxX - minX;
+
+        //@ts-expect-error
+        this.graph.options.scales.xAxes[0].ticks.min = -xRange * 0.1;
+        //@ts-expect-error
+        this.graph.options.scales.xAxes[0].ticks.max = maxX - minX + (xRange * 0.1);
+
+        let minY: number[] = this.datasets.map((value) => filterVectors(value.points, "y", "least"));
+        //let maxY: number = minY + 0.01//Math.max(...this.datasets.map((value) => filterVectors(value.points, "y", "most")));
+        let yRange = 0.01//maxY - minY;
+
+        console.log("Start")
+        console.log(this.datasets)
+        console.log("Min Y" + minY)
+        console.log(this.graph.data.datasets)
+
+        console.log("End")
+        //console.log(maxY);
+        //console.log(this.datasets);
+        /*
+        //@ts-expect-error
+        this.graph.options.scales.yAxes[0].ticks.min = minY - (0.5 * yRange);
+        //@ts-expect-error
+        this.graph.options.scales.yAxes[0].ticks.max = minY;
+        */
+
+
     }
     //#endregion
 
@@ -218,17 +254,17 @@ class ResultsManager extends GraphingComponent {
         }
     }
 
-    private calculateLDRatio() {
+    private calculateLDRatio(): void {
         this.values.LTDRatio = this.values.liftCoefficient / this.values.dragCoefficient;
     }
 
-    private calculateLiftCoefficient() {
+    private calculateLiftCoefficient(): void {
         let airfoilArea = this.airfoilDesigner.ShapeArea;
         let dynamicPressure = this.fluidManager.DynamicPressure;
         this.values.liftCoefficient = parseFloat(this.values.lift.toFixed(4)) / (10000 * airfoilArea * dynamicPressure);
     }
 
-    private calculateDragCoefficient() {
+    private calculateDragCoefficient(): void {
         let airfoilArea = this.airfoilDesigner.ShapeArea;
         let dynamicPressure = this.fluidManager.DynamicPressure;
         this.values.dragCoefficient = parseFloat(this.values.drag.toFixed(4)) / (10000 * airfoilArea * dynamicPressure);

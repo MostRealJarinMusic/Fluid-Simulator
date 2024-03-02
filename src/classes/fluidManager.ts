@@ -116,7 +116,7 @@ class FluidManager {
     }
 
     private rotateAirfoil() {
-        const untagPositions = (taggedPositions: TaggedPosition[]) => taggedPositions.map((value) => value.position);
+        //const untagPositions = (taggedPositions: TaggedPosition[]) => taggedPositions.map((value) => value.position);
 
         this.airfoilOutline = untagPositions(this.airfoilTaggedOutline);
 
