@@ -139,6 +139,7 @@ class AirfoilDesigner extends GraphingComponent {
     /**
      * 'Disables' the graph by changing the background colour
      */
+    /*
     private disableGraph(): void {
         //Change background colour
         let datasets: Chart.ChartDataSets[] = this.graph.data.datasets as Chart.ChartDataSets[];
@@ -150,6 +151,7 @@ class AirfoilDesigner extends GraphingComponent {
 
         this.graph.update();
     }
+    */
     //#endregion
 
     //#region Airfoil functions
