@@ -82,7 +82,7 @@ class ResultsManager extends GraphingComponent {
                         },
                         scaleLabel: {
                             display: true,
-                            labelString: 'Surface Pressure',
+                            labelString: 'Pressure Gradient',
                             fontFamily: "'REM', sans-serif",
                             fontSize: 10,
                             fontColor: '#f8f8f2',

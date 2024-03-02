@@ -23,10 +23,6 @@ class Fluid {
     private dNorthWest!: number[];
 
     private distribution: number[][];
-    private equilibriumDistribution: number[][];
-
-    private barrierFx: number = 0;
-    private barrierFy: number = 0;
 
     private properties!: FluidProperties;
 
@@ -37,7 +33,6 @@ class Fluid {
     private pxPerNode: number;
 
     private airfoilGridPoints!: Vector[];
-    private surfaceNormals!: SurfaceNormal[];
     private running: boolean;
 
     private showTracers: boolean;
@@ -61,11 +56,6 @@ class Fluid {
 
         //#region Distribution function
         this.distribution = create2DArrayFill(
-            this.numCells,
-            discreteVelocities,
-            1,
-        );
-        this.equilibriumDistribution = create2DArrayFill(
             this.numCells,
             discreteVelocities,
             1,
@@ -108,7 +98,6 @@ class Fluid {
     }
 
     //#region Fluid setup + debug
-
     private setupProperties(): void {
         this.properties = {
             localDensity: new Array(this.numCells).fill(this.density),
@@ -137,6 +126,7 @@ class Fluid {
             }
             */
 
+
             for (let dir = 0; dir < Object.keys(Directions).length / 2; dir++) {
                 let latticeWeight = latticeWeights[dir];
                 let direction = Directions[dir]
@@ -144,6 +134,7 @@ class Fluid {
                 // @ts-expect-error
                 this[field][nodeIndex] = this.getEquilibrium(latticeWeight, this.density, velocityVector, dir);
             }
+
         }
 
         //Skip iterations
@@ -158,7 +149,7 @@ class Fluid {
         console.log("Distribution")
         console.log(this.distribution)
         console.log("Equilibrium Distribution")
-        console.log(this.equilibriumDistribution)
+        //console.log(this.equilibriumDistribution)
     }
 
     public runMainLoop(): void {
@@ -166,19 +157,16 @@ class Fluid {
             /*
             this.computeMoments();
             this.applyBoundaryConditions();
-            this.computeEquilibrium();
+            //this.computeEquilibrium();
             this.collideLocally();
             this.stream();
             */
-
-
             this.newComputeMoments();
             this.newCollide();
             this.newStream();
             this.newApplyBoundaryConditions();
 
             this.computePressureGradient();
-
             if (this.showTracers) this.moveTracers();
         }
     }
@@ -211,20 +199,14 @@ class Fluid {
     //#region Setters
     set ShowTracers(value: boolean) {
         this.showTracers = value;
-        //console.log(`Show Tracers: ${this.showTracers}`)
     }
     set ShowStreamlines(value: boolean) {
         this.showStreamlines = value;
-        //console.log(`Show Streamlines: ${this.showStreamlines}`)
     }
-
     set FreeStreamVelocity(value: number) {
         //Set the free stream velocity
         this.freeStreamVelocity = value;
         this.initFluid();
-    }
-    set SurfaceNormals(value: SurfaceNormal[]) {
-        this.surfaceNormals = value;
     }
     //#endregion
 
@@ -333,8 +315,6 @@ class Fluid {
     }
 
     private newApplyBoundaryConditions() {
-        this.barrierFx = 0;
-        this.barrierFy = 0;
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
                 let i = this.index(x, y);
@@ -356,9 +336,6 @@ class Fluid {
                     this.dNorthWest[this.index(x - 1, y + 1)] = this.dSouthEast[i];
 
                     this.properties.localVelocity[i] = { x: 0, y: 0 };
-
-                    this.barrierFx += this.dEast[i] + this.dNorthEast[i] + this.dSouthEast[i] - this.dWest[i] - this.dNorthWest[i] - this.dSouthWest[i];
-                    this.barrierFy += this.dNorth[i] + this.dNorthWest[i] + this.dNorthEast[i] - this.dSouth[i] - this.dSouthEast[i] - this.dSouthWest[i];
                 }
             }
         }
@@ -440,35 +417,23 @@ class Fluid {
 
     private computeMoments(): void {
         for (let i = 0; i < this.numCells; i++) {
-            //Functions
+            //Arrow functions
             const summation = (arr: number[]) => arr.reduce((acc, val) => acc + val, 0);
             const mapToLat = (arr: number[], lat: number[]) => arr.map((val, i) => val * lat[i]);
 
             let nodeDist = this.distribution[i];
-            let nodeDensity = nodeDist[0] + nodeDist[1] + nodeDist[2] + nodeDist[3]
-                + nodeDist[4] + nodeDist[5] + nodeDist[6] + nodeDist[7]
-                + nodeDist[8];
-            //summation(nodeDist);
+            let nodeDensity = summation(nodeDist);
 
             //Velocity
-            /*
             this.properties.localVelocity[i] = {
-                x: summation(mapToLat(nodeDist, this.latticeXs)) / nodeDensity,
-                y: summation(mapToLat(nodeDist, this.latticeYs)) / nodeDensity
-            }
-            */
-
-            this.properties.localVelocity[i] = {
-                x: (nodeDist[2] + nodeDist[3] + nodeDist[4] - nodeDist[6]
-                    - nodeDist[7] - nodeDist[8]) / nodeDensity,
-                y: (nodeDist[1] + nodeDist[2] + nodeDist[8] - nodeDist[4]
-                    - nodeDist[5] - nodeDist[6]) / nodeDensity
+                x: summation(mapToLat(nodeDist, latticeXs)) / nodeDensity,
+                y: summation(mapToLat(nodeDist, latticeYs)) / nodeDensity
             }
 
             //Density
             this.properties.localDensity[i] = nodeDensity;
 
-            //Pressure????
+            //Pressure
             this.properties.localPressure[i] = (latticeSpeedOfSound ** 2) * nodeDensity;
         }
     }
@@ -488,40 +453,32 @@ class Fluid {
             }
         }
     }
-
+    /*
     private computeEquilibrium(): void {
         for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
             for (let i of latticeIndices) {
                 let localDensity = this.properties.localDensity[nodeIndex];
                 let localVelocity: Vector = this.properties.localVelocity[nodeIndex];
                 let latticeWeight = latticeWeights[i];
-                //let latticeVector: Vector = { x: latticeXs[i], y: latticeYs[i] };
-                //let latticeDotU = dotVectors(localVelocity, latticeVector) //Pre-calculations
-                //let uDotU = dotVectors(localVelocity, localVelocity);
-
-                /*
-                this.equilibriumDistribution[nodeIndex][i] =
-                    weight * localDensity *
-                    (1 +
-                        3 * latticeDotU +
-                        (9 / 2) * latticeDotU ** 2 -
-                        (3 / 2) * uDotU);
-                        */
-
                 this.equilibriumDistribution[nodeIndex][i] = this.getEquilibrium(latticeWeight, localDensity, localVelocity, i);
             }
         }
     }
+    */
 
     private collideLocally(): void {
         for (let index = 0; index < this.numCells; index++) {
             //Slows down computation???
-            for (let i in latticeIndices) {
+            for (let i of latticeIndices) {
+                let localDensity = this.properties.localDensity[index];
+                let localVelocity: Vector = this.properties.localVelocity[index];
+                let latticeWeight = latticeWeights[i];
+
                 this.distribution[index][i] =
                     this.distribution[index][i] -
                     (1 / this.timescale) *
                     (this.distribution[index][i] -
-                        this.equilibriumDistribution[index][i]);
+                        this.getEquilibrium(latticeWeight, localDensity, localVelocity, i));
             }
         }
     }
@@ -533,14 +490,9 @@ class Fluid {
                 //nw
                 this.distribution[this.index(x, y)][8] =
                     this.distribution[this.index(x + 1, y - 1)][8];
-
-
-                //this.dNorthWest[this.index(x, y)] = this.dNorthWest[this.index(x + 1, y - 1)]
                 //n
                 this.distribution[this.index(x, y)][1] =
                     this.distribution[this.index(x, y - 1)][1];
-
-                //this.dNorth[this.index(x, y)] = this.dNorth[this.index(x, y - 1)]
             }
         }
 
@@ -550,13 +502,9 @@ class Fluid {
                 //ne
                 this.distribution[this.index(x, y)][2] =
                     this.distribution[this.index(x - 1, y - 1)][2];
-
-                //this.dNorthEast[this.index(x, y)] = this.dNorthEast[this.index(x - 1, y - 1)]
                 //e
                 this.distribution[this.index(x, y)][3] =
                     this.distribution[this.index(x - 1, y)][3];
-
-                //this.dEast[this.index(x, y)] = this.dEast[this.index(x - 1, y)];
             }
         }
 
@@ -566,14 +514,9 @@ class Fluid {
                 //se
                 this.distribution[this.index(x, y)][4] =
                     this.distribution[this.index(x - 1, y + 1)][4];
-
-                //this.dSouthEast[this.index(x, y)] = this.dSouthEast[this.index(x - 1, y + 1)];
-
                 //s
                 this.distribution[this.index(x, y)][5] =
                     this.distribution[this.index(x, y + 1)][5];
-
-                //this.dSouth[this.index(x, y)] = this.dSouth[this.index(x, y + 1)];
 
             }
         }
@@ -584,14 +527,9 @@ class Fluid {
                 //sw
                 this.distribution[this.index(x, y)][6] =
                     this.distribution[this.index(x + 1, y + 1)][6];
-
-                //this.dSouthWest[this.index(x, y)] = this.dSouthWest[this.index(x + 1, y + 1)];
-
                 //w
                 this.distribution[this.index(x, y)][7] =
                     this.distribution[this.index(x + 1, y)][7];
-
-                //this.dWest[this.index(x, y)] = this.dWest[this.index(x + 1, y)];
             }
         }
     }
@@ -791,72 +729,6 @@ class Fluid {
         this.context.putImageData(this.image, 0, 0);
         if (this.showTracers) this.drawTracers();
         if (this.showStreamlines) this.drawStreamlines();
-        //this.drawForceArrow();
-        //this.drawOtherForceArrow();
-    }
-
-    private drawOtherForceArrow() {
-        let centroid = this.gridPosToImagePos(addVectors(getCentroid(this.airfoilGridPoints), this.origin));
-        //console.log(centroid);
-        let pxPerSquare = this.pxPerNode
-
-        this.context.fillStyle = "rgba(50,50,255,255)";
-        this.context.translate((centroid.x + 0.5) * pxPerSquare, (centroid.y + 0.5) * pxPerSquare);
-        var magF = Math.sqrt(this.barrierFy ** 2 + this.barrierFx ** 2);
-        this.context.scale(5 * magF, 5 * magF);
-        this.context.rotate(Math.atan2(-this.barrierFy, this.barrierFx));
-        this.context.beginPath();
-        this.context.moveTo(0, 3);
-        this.context.lineTo(100, 3);
-        this.context.lineTo(100, 12);
-        this.context.lineTo(130, 0);
-        this.context.lineTo(100, -12);
-        this.context.lineTo(100, -3);
-        this.context.lineTo(0, -3);
-        this.context.lineTo(0, 3);
-        this.context.fill();
-        this.context.setTransform(1, 0, 0, 1, 0, 0);
-    }
-
-    private drawForceArrow() {
-        let lift = 0
-        let drag = 0;
-        for (let pair of this.surfaceNormals) {
-            let testPosition = roundVector(addVectors(pair.position, this.origin));
-            //console.log(testPosition);
-            let pressureAtPoint = this.properties.pressureGradient[this.index(testPosition.x, testPosition.y)];
-            //console.log(`At position: ${testPosition.x},${testPosition.y} -> pressureGrad: ${pressureAtPoint.x},${pressureAtPoint.y}`);
-            let force = dotVectors(pressureAtPoint, pair.normal);
-            //console.log(`Force at point ${force}`);
-            //totalForce += force;
-            lift += force * pair.normal.y;
-            drag += force * pair.normal.x;
-        }
-
-        lift *= -1;
-        drag *= -1;
-        //console.log(lift);
-        //console.log(drag);
-        let centroid = this.gridPosToImagePos(addVectors(getCentroid(this.airfoilGridPoints), this.origin));
-        //console.log(centroid);
-        let pxPerSquare = this.pxPerNode
-
-        this.context.fillStyle = "rgba(255,50,50,255)";
-        this.context.translate((centroid.x + 0.5) * pxPerSquare, (centroid.y + 0.5) * pxPerSquare);
-        var magF = Math.sqrt(lift ** 2 + drag ** 2);
-        this.context.scale(5 * magF, 5 * magF);
-        this.context.rotate(Math.atan2(-lift, drag));
-        this.context.beginPath();
-        this.context.moveTo(0, 3);
-        this.context.lineTo(100, 3);
-        this.context.lineTo(100, 12);
-        this.context.lineTo(130, 0);
-        this.context.lineTo(100, -12);
-        this.context.lineTo(100, -3);
-        this.context.lineTo(0, -3);
-        this.context.lineTo(0, 3);
-        this.context.fill();
-        this.context.setTransform(1, 0, 0, 1, 0, 0);
     }
 
     private drawStreamlines(): void {

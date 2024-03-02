@@ -133,7 +133,6 @@ class FluidManager {
         let tempRotated = untagPositions(this.airfoilTaggedRotatedOutline);
         this.airfoilSurfaceNormals = getAllSurfaceNormals(tempRotated);
         this.airfoilGridPoints = getFullShape(tempRotated);
-        this.fluid.SurfaceNormals = this.airfoilSurfaceNormals;
     }
 
     //#region Angle of Attack and Free Stream Velocity
