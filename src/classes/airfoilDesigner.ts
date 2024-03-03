@@ -22,11 +22,11 @@ class AirfoilDesigner extends GraphingComponent {
         return this.shape.Outline;
     }
     get ShapeArea(): number {
-        return this.shape.Area;
+        return this.shape.getArea();
     }
 
     get ShapeType(): ShapeType {
-        return this.shape.Type;
+        return this.shape.getType();
     }
     //#endregion 
 
@@ -160,7 +160,7 @@ class AirfoilDesigner extends GraphingComponent {
      * It then publishes any corrected parameter inputs and if necessary, adds a profile number
      */
     public updateAirfoil(): void {
-        let airfoilType = this.shape.Type as ShapeType;
+        let airfoilType = this.shape.getType() as ShapeType;
         let currentParameters = this.getParametersFromInput();
 
         switch (airfoilType) {
@@ -194,7 +194,7 @@ class AirfoilDesigner extends GraphingComponent {
 
         this.shape.updateParameters(parameters);
 
-        let airfoilType = this.shape.Type as ShapeType;
+        let airfoilType = this.shape.getType() as ShapeType;
         if (airfoilType === "airfoil") {
             this.updateGraph();
         }
@@ -218,7 +218,7 @@ class AirfoilDesigner extends GraphingComponent {
 
         } else {
             let targetShape = this.airfoilSelector.value as ShapeType;
-            let currentShape = this.shape.Type as ShapeType;
+            let currentShape = this.shape.getType() as ShapeType;
 
             if (currentShape === targetShape) {
                 console.log("Same type");
@@ -271,7 +271,7 @@ class AirfoilDesigner extends GraphingComponent {
      * @param currentParameters The parameters of the shape, used to generate the profile number
      */
     private updateProfileNumber(currentParameters: Record<string, number>): void {
-        let shapeType = this.shape.Type;
+        let shapeType = this.shape.getType();
         let numString = "";
 
         //While I could use an if statement since there is only one different case

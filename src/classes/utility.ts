@@ -19,7 +19,7 @@ type FluidProperties = {
     localCurl: number[],
     solid: boolean[]
 };
-type LabelledElement = { name: string, element: HTMLElement, label: string };
+type LabelledElement = { name: string, element: HTMLElement, label: string, units: string };
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure', 'pressureGradient'] as const;
 type SimulationMode = typeof validSimulationModes[number];

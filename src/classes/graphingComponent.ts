@@ -11,7 +11,6 @@ abstract class GraphingComponent {
 
     protected abstract setupGraph(): void;
     protected abstract updateGraph(): void;
-
     protected disableGraph(): void {
         //Change background colour
         let datasets: Chart.ChartDataSets[] = this.graph.data.datasets as Chart.ChartDataSets[];

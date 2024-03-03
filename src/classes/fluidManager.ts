@@ -52,7 +52,7 @@ class FluidManager {
     }
     //#endregion
 
-    //#region Getters
+    //#region Getters - exposing fluid properties
     get SurfaceNormals(): SurfaceNormal[] {
         return this.airfoilSurfaceNormals;
     }
@@ -96,7 +96,6 @@ class FluidManager {
     }
 
     public updateAirfoil(taggedOutline: TaggedPosition[]): void {
-        //this.airfoilOutline = outline;
         this.airfoilTaggedOutline = taggedOutline;
         this.rotateAirfoil();
         this.fluid.updateAirfoil(this.airfoilGridPoints);
@@ -116,8 +115,6 @@ class FluidManager {
     }
 
     private rotateAirfoil() {
-        //const untagPositions = (taggedPositions: TaggedPosition[]) => taggedPositions.map((value) => value.position);
-
         this.airfoilOutline = untagPositions(this.airfoilTaggedOutline);
 
         let centroid: Vector = getCentroid(roundAll(this.airfoilOutline));
@@ -141,7 +138,15 @@ class FluidManager {
         this.rotateAirfoil();
         this.fluid.updateAirfoil(this.airfoilGridPoints);
 
+        let AOALabel = document.getElementById("AOALabel") as HTMLLabelElement;
+        AOALabel.innerHTML = "Angle of Attack: " + this.radToDeg(this.angleOfAttack);
     }
+
+    private radToDeg(angleRadians: number): number {
+        let angleDegrees = -Math.round(angleRadians * (180 / Math.PI));
+        return angleDegrees;
+    }
+
     public resetParameters(): void {
         this.angleOfAttack = this.angleOfAttackInfo.defaultValue;
 

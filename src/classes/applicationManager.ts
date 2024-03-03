@@ -53,6 +53,11 @@ class ApplicationManager {
         this.FMAngleOfAttackInput = document.getElementById("angleOfAttack") as HTMLInputElement;
         this.FMFSVelocityInput = document.getElementById("freeStreamVelocity") as HTMLInputElement;
 
+        let elements: LabelledElement[] = [
+            { name: "AOA", element: document.getElementById("AOALabel") as HTMLLabelElement, label: "Angle of Attack: ", units: "Degrees" },
+            { name: "FSV", element: document.getElementById("FSVLabel") as HTMLLabelElement, label: "Free Stream Velocity: ", units: "m/s" },
+        ]
+
         this.fluidManager = new FluidManager(this.FMCanvas, this.FMSimulationModeSelector, this.FMAngleOfAttackInput, this.FMFSVelocityInput);
         this.fluidManager.updateAirfoil(this.airfoilDesigner.ShapeOutline);
         this.fluidManager.initFluid();
@@ -65,11 +70,11 @@ class ApplicationManager {
         this.RMCanvas = document.getElementById("dataGraph") as HTMLCanvasElement;
 
         let elements: LabelledElement[] = [
-            { name: "lift", element: document.getElementById("liftValue") as HTMLParagraphElement, label: "Lift: " },
-            { name: "drag", element: document.getElementById("dragValue") as HTMLParagraphElement, label: "Drag: " },
-            { name: "LTDRatio", element: document.getElementById("LTDValue") as HTMLParagraphElement, label: "L/D Ratio: " },
-            { name: "liftCoefficient", element: document.getElementById("liftCoefficientValue") as HTMLParagraphElement, label: "Lift Coefficient: " },
-            { name: "dragCoefficient", element: document.getElementById("dragCoefficientValue") as HTMLParagraphElement, label: "Drag Coefficient: " }
+            { name: "lift", element: document.getElementById("liftValue") as HTMLParagraphElement, label: "Lift: ", units: "N" },
+            { name: "drag", element: document.getElementById("dragValue") as HTMLParagraphElement, label: "Drag: ", units: "N" },
+            { name: "LTDRatio", element: document.getElementById("LTDValue") as HTMLParagraphElement, label: "L/D Ratio: ", units: "" },
+            { name: "liftCoefficient", element: document.getElementById("liftCoefficientValue") as HTMLParagraphElement, label: "Lift Coefficient: ", units: "" },
+            { name: "dragCoefficient", element: document.getElementById("dragCoefficientValue") as HTMLParagraphElement, label: "Drag Coefficient: ", units: "" }
         ];
 
         this.resultsManager = new ResultsManager(this.RMCanvas, elements);

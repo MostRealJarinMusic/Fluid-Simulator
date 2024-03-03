@@ -2,6 +2,7 @@ class ResultsManager extends GraphingComponent {
     //#region Private variables
     private values: Record<string, number>;
     private totals: Record<string, number>;
+    private queues: Record<string, CustomQueue<number>>
 
     private startTime: number;
 
@@ -20,6 +21,11 @@ class ResultsManager extends GraphingComponent {
         this.totals = { liftTotal: 0, dragTotal: 0 };
         this.startTime = Date.now();
         this.elements = elements;
+
+        this.queues = {
+            liftQueue: new CustomQueue<number>(500),
+            dragQueue: new CustomQueue<number>(500)
+        }
     }
 
     //#region Setup functions
@@ -82,7 +88,7 @@ class ResultsManager extends GraphingComponent {
                         },
                         scaleLabel: {
                             display: true,
-                            labelString: 'Pressure Gradient',
+                            labelString: 'Pressure Gradient, PG/Pa m^-1',
                             fontFamily: "'REM', sans-serif",
                             fontSize: 10,
                             fontColor: '#f8f8f2',
@@ -127,7 +133,7 @@ class ResultsManager extends GraphingComponent {
             let position = roundVector(addVectors(taggedPosition.position, this.origin));
             let graphPoint: TaggedPosition = {
                 position: {
-                    x: (taggedPosition.position.x - minX) * nodeDistance,
+                    x: (taggedPosition.position.x - minX),
                     y: this.samplePoint(position, field)
                 },
                 tag: taggedPosition.tag
@@ -178,8 +184,8 @@ class ResultsManager extends GraphingComponent {
     private adjustGraphBounds(): void {
         //Bound the x-axis depending on the graph
         let outline = untagPositions(this.fluidManager.TaggedOutline);
-        let minX = filterVectors(outline, "x", "least") * nodeDistance;
-        let maxX = filterVectors(outline, "x", "most") * nodeDistance;
+        let minX = filterVectors(outline, "x", "least");
+        let maxX = filterVectors(outline, "x", "most");
         let xRange = maxX - minX === 0 ? 0.01 : maxX - minX;
 
         let steps = Math.pow(10, Math.ceil(Math.log10(xRange / 10)))
@@ -230,19 +236,29 @@ class ResultsManager extends GraphingComponent {
         forceVector = scaleVector(forceVector, -1);
         this.totals.liftTotal += forceVector.y;
         this.totals.dragTotal += forceVector.x;
+
+        this.queues.liftQueue.enqueue(forceVector.y);
+        this.queues.dragQueue.enqueue(forceVector.x);
+
+        //console.log(forceVector.y)
     }
 
     private calculateAverageForce(): void {
         let currentTime = Date.now();
         let elapsedTime = (currentTime - this.startTime) / 1000;
-        this.values.lift = this.totals.liftTotal / elapsedTime;
-        this.values.drag = this.totals.dragTotal / elapsedTime;
+
+        this.values.lift = this.queues.liftQueue.items().reduce((acc, val) => acc + val) / this.queues.liftQueue.size();
+        //this.totals.liftTotal / elapsedTime;
+        this.values.drag = this.queues.dragQueue.items().reduce((acc, val) => acc + val) / this.queues.dragQueue.size();
+        //this.totals.dragTotal / elapsedTime;
+
+        //console.log(this.totals.liftTotal);
     }
 
     public displayValues(): void {
         for (let element of this.elements) {
             let value = this.values[element.name].toFixed(3);
-            element.element.innerHTML = element.label + value;
+            element.element.innerHTML = element.label + value + element.units;
         }
     }
 
@@ -253,13 +269,13 @@ class ResultsManager extends GraphingComponent {
     private calculateLiftCoefficient(): void {
         let airfoilArea = this.airfoilDesigner.ShapeArea;
         let dynamicPressure = this.fluidManager.DynamicPressure;
-        this.values.liftCoefficient = parseFloat(this.values.lift.toFixed(4)) / (10000 * airfoilArea * dynamicPressure);
+        this.values.liftCoefficient = parseFloat((this.values.lift / (1000 * airfoilArea * dynamicPressure)).toFixed(4));
     }
 
     private calculateDragCoefficient(): void {
         let airfoilArea = this.airfoilDesigner.ShapeArea;
         let dynamicPressure = this.fluidManager.DynamicPressure;
-        this.values.dragCoefficient = parseFloat(this.values.drag.toFixed(4)) / (10000 * airfoilArea * dynamicPressure);
+        this.values.dragCoefficient = parseFloat((this.values.drag / (1000 * airfoilArea * dynamicPressure)).toFixed(4));
     }
     //#endregion
 }

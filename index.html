@@ -81,10 +81,10 @@
 
                 <p class="moduleText">Fluid Parameters: </p>
                 <div class="parameterContainer" id="fluidSimulationParameters">
-                    <label for="freeStreamVelocity">Free Stream Velocity:</label><br>
+                    <label id="FSVLabel" for="freeStreamVelocity">Free Stream Velocity:</label><br>
                     <input type="range" id="freeStreamVelocity" min="0.05" max="0.13" value="0.1"
                         step="0.001"></input><br>
-                    <label for=" angleOfAttack">Angle of Attack:</label><br>
+                    <label id="AOALabel" for=" angleOfAttack">Angle of Attack:</label><br>
                     <input type="range" id="angleOfAttack" min="-0.35" max="0.35" value="0" step="0.005"></input><br>
                 </div>
 
@@ -114,6 +114,7 @@
     </div>
 
     <script src="dist/classes/applicationManager.js"></script>
+    <script src="dist/classes/queue.js"></script>
     <script src="dist/classes/graphingComponent.js"></script>
     <script src="dist/classes/colourMap.js"></script>
     <script src="dist/classes/utility.js"></script>

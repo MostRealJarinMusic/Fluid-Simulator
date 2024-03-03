@@ -24,10 +24,10 @@ abstract class Shape {
     /**
      * Returns the approximate area of the shape - implemented differently from shape to shape
      */
-    public abstract get Area(): number;
-    abstract get Type(): ShapeType;
+    public abstract getArea(): number;
+    public abstract getType(): ShapeType;
 
-    //#region Getters
+    //#region Getters - common implementations
     get ParameterInfo(): Record<string, ParameterInfo> {
         return this.parameterInfo;
     }
@@ -60,14 +60,14 @@ class Ellipse extends Shape {
         this.updateOutline();
     }
 
-    override get Area(): number {
+    override getArea(): number {
         let xRadius = this.parameters.xRadius;
         let yRadius = this.parameters.yRadius;
 
         return Math.PI * (xRadius * yRadius);
     }
 
-    override get Type(): ShapeType {
+    override getType(): ShapeType {
         return 'ellipse';
     }
 
@@ -108,11 +108,11 @@ class Rectangle extends Shape {
         this.updateOutline();
     }
 
-    override get Area(): number {
+    override getArea(): number {
         return this.parameters['width'] * this.parameters['height'];
     }
 
-    override get Type(): ShapeType {
+    override getType(): ShapeType {
         return 'rectangle';
     }
 
@@ -155,11 +155,11 @@ class Line extends Shape {
         this.updateOutline();
     }
 
-    override get Area(): number {
+    override getArea(): number {
         return (nodeDistance) * this.parameters.lineLength;
     }
 
-    override get Type(): ShapeType {
+    override getType(): ShapeType {
         return 'line';
     }
 
@@ -200,9 +200,10 @@ class Airfoil extends Shape {
 
         this.updateGraphDatasets();
         this.updateOutline();
+        console.log(this.getArea());
     }
 
-    override get Area(): number {
+    override getArea(): number {
         //Simpson's rule for the area of an airfoil - numerical integration
         let totalArea = 0;
         let samples = 100;
@@ -226,7 +227,7 @@ class Airfoil extends Shape {
         return totalArea;
     }
 
-    override get Type(): ShapeType {
+    override getType(): ShapeType {
         return 'airfoil';
     }
 
