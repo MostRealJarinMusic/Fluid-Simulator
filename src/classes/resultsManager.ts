@@ -10,7 +10,6 @@ class ResultsManager extends GraphingComponent {
     private elements: Record<string, LabelledElement>
     //#endregion
 
-
     constructor(canvas: HTMLCanvasElement, elements: Record<string, LabelledElement>) {
         super(canvas);
         this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };

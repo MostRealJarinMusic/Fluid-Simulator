@@ -55,7 +55,7 @@ class Fluid {
         //#endregion
 
         //#region Distribution function
-        this.distribution = create2DArrayFill(
+        this.distribution = this.create2DArrayFill(
             this.numCells,
             discreteVelocities,
             1,
@@ -98,6 +98,21 @@ class Fluid {
     }
 
     //#region Fluid setup + debug
+
+    /**
+     * Creates an array of arrays
+     * @param rows Number of rows
+     * @param columns Number of columns
+     * @param fill The initial value for every element in the array
+     */
+    private create2DArrayFill(rows: number, columns: number, fill: number): number[][] {
+        let arr = new Array(rows);
+        for (let i = 0; i < rows; i++) {
+            arr[i] = new Array(columns).fill(fill);
+        }
+        return arr;
+    }
+
     private setupProperties(): void {
         this.properties = {
             localDensity: new Array(this.numCells).fill(this.density),

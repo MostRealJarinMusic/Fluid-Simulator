@@ -79,6 +79,33 @@ class FluidManager {
     }
     //#endregion
 
+    /**
+    * Takes an outline as a set of position vectors and returns the full shape as a set of position vectors
+    * @param outline - The vector array of outline positions, as integer coordinates
+    */
+    private getFullShape(outline: Vector[]): Vector[] {
+        let fullShape: Vector[] = [];
+        let xMin = filterVectors(outline, 'x', 'least');
+        let xMax = filterVectors(outline, 'x', 'most');
+
+        for (let testX = xMin; testX <= xMax; testX++) {
+            let vectorSubset = outline.filter((vector) => vector.x === testX);
+            if (vectorSubset.length > 0) {
+                let yMin = filterVectors(vectorSubset, 'y', 'least');
+                let yMax = filterVectors(vectorSubset, 'y', 'most')
+
+                for (let testY = yMin; testY <= yMax; testY++) {
+                    let testVector: Vector = { x: testX, y: testY };
+                    if (!checkInVectorList(fullShape, testVector)) {    //Slightly redundant
+                        fullShape.push(testVector);
+                    }
+                }
+            }
+        }
+
+        return fullShape;
+    }
+
     private removeDuplicateVectors(taggedPositions: TaggedPosition[]): TaggedPosition[] {
         let finalTaggedPositions: TaggedPosition[] = [];
         let finalVectors: Vector[] = [];;
@@ -91,10 +118,63 @@ class FluidManager {
         return finalTaggedPositions;
     }
 
+    private sortClosestToVector(vector: Vector, outline: Vector[]): Vector[] {
+        outline = outline.filter((value) => {
+            return value != vector
+        });
+        outline = outline.map((value) => subVectors(value, vector));
+        let sorted = outline.sort((a, b) => absoluteVector(a) - absoluteVector(b));
+        sorted = sorted.map((value) => addVectors(value, vector));
+        return sorted;
+    }
+
+
+    private getAllSurfaceNormals(outline: Vector[]): SurfaceNormal[] {
+        let fullShape = this.getFullShape(outline);
+        let pairs: SurfaceNormal[] = [];
+        for (let i = 0; i < outline.length; i++) {
+            let currentVector = outline[i]
+            let normal = this.getSurfaceNormal(currentVector, outline);
+            let testPoint = roundVector(addVectors(currentVector, normal));
+            if (checkInVectorList(fullShape, testPoint)) {
+                //normal is facing inwards
+                normal = scaleVector(normal, -1);
+            }
+
+            pairs.push({ position: currentVector, normal: normal });
+        }
+        return pairs;
+    }
+
+
+    private getSurfaceNormal(vector: Vector, outline: Vector[]): Vector {
+        if (checkInVectorList(outline, vector)) {
+            let sortedOutline = this.sortClosestToVector(vector, outline);
+            let vector1 = sortedOutline[0];
+            let vector2 = sortedOutline[1];
+
+            let tangent = { x: vector1.x - vector2.x, y: vector1.y - vector2.y };
+            //More accurate then rotate function, which introduces some rounding errors
+            return normaliseVector({ x: -tangent.y, y: tangent.x });;
+        }
+
+        console.log("Error");
+        return { x: 0, y: 0 };
+    }
+
+    private getCentroid(fullShape: Vector[]): Vector {
+        let summation = fullShape.reduce((acc, { x, y }) => ({ x: acc.x + x, y: acc.y + y }), { x: 0, y: 0 });
+        return scaleVector(summation, 1 / fullShape.length);
+    }
+
+    private roundAll(vectorSet: Vector[]): Vector[] {
+        return vectorSet.map((vector) => roundVector(vector));
+    }
+
     private rotateAirfoil() {
         this.airfoilOutline = untagPositions(this.airfoilTaggedOutline);
 
-        let centroid: Vector = getCentroid(roundAll(this.airfoilOutline));
+        let centroid: Vector = this.getCentroid(this.roundAll(this.airfoilOutline));
         this.airfoilTaggedRotatedOutline = this.removeDuplicateVectors(
             this.airfoilTaggedOutline.map((taggedPosition) => {
                 return {
@@ -105,8 +185,8 @@ class FluidManager {
         );
 
         let tempRotated = untagPositions(this.airfoilTaggedRotatedOutline);
-        this.airfoilSurfaceNormals = getAllSurfaceNormals(tempRotated);
-        this.airfoilGridPoints = getFullShape(tempRotated);
+        this.airfoilSurfaceNormals = this.getAllSurfaceNormals(tempRotated);
+        this.airfoilGridPoints = this.getFullShape(tempRotated);
     }
 
     //#region Angle of Attack and Free Stream Velocity

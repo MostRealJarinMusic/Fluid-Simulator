@@ -1,5 +1,4 @@
 //Back end
-
 import * as path from 'path';
 import { app, BrowserWindow, Menu } from 'electron';
 

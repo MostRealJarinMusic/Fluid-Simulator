@@ -83,6 +83,7 @@ enum OppositeDirections {
 }
 //#endregion
 
+//#region General functions
 /**
  * Takes any Direction from the Directions enum and returns the opposite Direction
  * @param direction The direction
@@ -92,7 +93,6 @@ function getOppositeDirection(direction: Directions): Directions {
     //console.log(opposite);
     return Directions[opposite as keyof typeof Directions];
 }
-
 
 /**
  * Maps the GraphDataset type to the Chart.ChartDataSets type
@@ -134,20 +134,6 @@ function enforceBounds(value: number, bounds: Bound): number {
 }
 
 /**
- * Creates an array of arrays
- * @param rows Number of rows
- * @param columns Number of columns
- * @param fill The initial value for every element in the array
- */
-function create2DArrayFill(rows: number, columns: number, fill: number): number[][] {
-    let arr = new Array(rows);
-    for (let i = 0; i < rows; i++) {
-        arr[i] = new Array(columns).fill(fill);
-    }
-    return arr;
-}
-
-/**
  * Returns a colour, from given RGBA values
  * @param r Red value
  * @param g Green value
@@ -157,6 +143,20 @@ function create2DArrayFill(rows: number, columns: number, fill: number): number[
 function getColour(r: number, g: number, b: number, a: number): Colour {
     return { red: r, green: g, blue: b, alpha: a };
 }
+
+function getIndex(i: number, j: number, width: number): number {
+    return (width * j) + i;
+}
+
+function untagPositions(taggedPositions: TaggedPosition[]) {
+    return taggedPositions.map((value) => value.position);
+}
+
+function writeToElement(labelledElement: LabelledElement, value: number | string): void {
+    let units = labelledElement.units !== undefined ? labelledElement.units : ""
+    labelledElement.element.innerHTML = labelledElement.label + value + " " + units;
+}
+//#endregion
 
 //#region Vector functions
 /**
@@ -256,96 +256,3 @@ function filterVectors(vectors: Vector[], component: 'x' | 'y', comparison: 'lea
     }
 }
 //#endregion
-
-/**
- * Takes an outline as a set of position vectors and returns the full shape as a set of position vectors
- * @param outline - The vector array of outline positions, as integer coordinates
- */
-function getFullShape(outline: Vector[]): Vector[] {
-    let fullShape: Vector[] = [];
-    let xMin = filterVectors(outline, 'x', 'least');
-    let xMax = filterVectors(outline, 'x', 'most');
-
-    for (let testX = xMin; testX <= xMax; testX++) {
-        let vectorSubset = outline.filter((vector) => vector.x === testX);
-        if (vectorSubset.length > 0) {
-            let yMin = filterVectors(vectorSubset, 'y', 'least');
-            let yMax = filterVectors(vectorSubset, 'y', 'most')
-
-            for (let testY = yMin; testY <= yMax; testY++) {
-                let testVector: Vector = { x: testX, y: testY };
-                if (!checkInVectorList(fullShape, testVector)) {    //Slightly redundant
-                    fullShape.push(testVector);
-                }
-            }
-        }
-    }
-
-    return fullShape;
-}
-
-function getCentroid(fullShape: Vector[]): Vector {
-    let summation = fullShape.reduce((acc, { x, y }) => ({ x: acc.x + x, y: acc.y + y }), { x: 0, y: 0 });
-    return scaleVector(summation, 1 / fullShape.length);
-}
-
-function roundAll(vectorSet: Vector[]): Vector[] {
-    return vectorSet.map((vector) => roundVector(vector));
-}
-
-function sortClosestToVector(vector: Vector, outline: Vector[]): Vector[] {
-    outline = outline.filter((value) => {
-        return value != vector
-    });
-    outline = outline.map((value) => subVectors(value, vector));
-    let sorted = outline.sort((a, b) => absoluteVector(a) - absoluteVector(b));
-    sorted = sorted.map((value) => addVectors(value, vector));
-    return sorted;
-}
-
-
-function getAllSurfaceNormals(outline: Vector[]): SurfaceNormal[] {
-    let fullShape = getFullShape(outline);
-    let pairs: SurfaceNormal[] = [];
-    for (let i = 0; i < outline.length; i++) {
-        let currentVector = outline[i]
-        let normal = getSurfaceNormal(currentVector, outline);
-        let testPoint = roundVector(addVectors(currentVector, normal));
-        if (checkInVectorList(fullShape, testPoint)) {
-            //normal is facing inwards
-            normal = scaleVector(normal, -1);
-        }
-
-        pairs.push({ position: currentVector, normal: normal });
-    }
-    return pairs;
-}
-
-
-function getSurfaceNormal(vector: Vector, outline: Vector[]): Vector {
-    if (checkInVectorList(outline, vector)) {
-        let sortedOutline = sortClosestToVector(vector, outline);
-        let vector1 = sortedOutline[0];
-        let vector2 = sortedOutline[1];
-
-        let tangent = { x: vector1.x - vector2.x, y: vector1.y - vector2.y };
-        //More accurate then rotate function, which introduces some rounding errors
-        return normaliseVector({ x: -tangent.y, y: tangent.x });;
-    }
-
-    console.log("Error");
-    return { x: 0, y: 0 };
-}
-
-function getIndex(i: number, j: number, width: number): number {
-    return (width * j) + i;
-}
-
-function untagPositions(taggedPositions: TaggedPosition[]) {
-    return taggedPositions.map((value) => value.position);
-}
-
-function writeToElement(labelledElement: LabelledElement, value: number | string): void {
-    let units = labelledElement.units !== undefined ? labelledElement.units : ""
-    labelledElement.element.innerHTML = labelledElement.label + value + " " + units;
-}
