@@ -24,7 +24,6 @@ class AirfoilDesigner extends GraphingComponent {
     get ShapeArea(): number {
         return this.shape.getArea();
     }
-
     get ShapeType(): ShapeType {
         return this.shape.getType();
     }

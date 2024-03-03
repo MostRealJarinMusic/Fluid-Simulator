@@ -16,10 +16,10 @@ class ColourMap {
             //Requirement
             if (targetColours.length === 2) {
                 //Base case
-                return this.transitionBetweenColour(targetColours[0], targetColours[1], totalSteps[0]);
+                return this.transitionBetweenColours(targetColours[0], targetColours[1], totalSteps[0]);
             } else {
                 //General case
-                let currentTransition: Colour[] = this.transitionBetweenColour(targetColours[0], targetColours[1], totalSteps[0]);
+                let currentTransition: Colour[] = this.transitionBetweenColours(targetColours[0], targetColours[1], totalSteps[0]);
 
                 let remainingColours: Colour[] = targetColours.slice(1);
                 let remainingSteps: number[] = totalSteps.slice(1);
@@ -40,7 +40,7 @@ class ColourMap {
      * @param targetColour Ending colour
      * @param steps Number of colours between the start and target
      */
-    private transitionBetweenColour(startColour: Colour, targetColour: Colour, steps: number): Colour[] {
+    private transitionBetweenColours(startColour: Colour, targetColour: Colour, steps: number): Colour[] {
         let gradient: Colour[] = [];
         for (let i = 0; i < steps; i++) {
             let percentage = i / steps;

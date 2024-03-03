@@ -1,5 +1,5 @@
 //Back end
-import * as path from 'path';
+//import * as path from 'path';
 import { app, BrowserWindow, Menu } from 'electron';
 
 const isMac: boolean = process.platform === 'darwin';
@@ -14,7 +14,7 @@ function createMainWindow(): void {
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: true,
-            preload: path.join(__dirname, 'preload.js'),
+            //preload: path.join(__dirname, 'preload.js'),
         },
     });
 

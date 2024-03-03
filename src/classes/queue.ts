@@ -12,11 +12,12 @@ interface IQueue<T> {
 //Shuffle queue with some tweaks
 //You can see the whole queue - but you can't edit it, FIFO is still intact
 //If you try to enqueue a value, and the queue is full - the queue will dequeue the first value and add it.
-class CustomQueue<T extends Number> implements IQueue<T> {
-    private array: T[] = [];
+class CustomQueue<T> implements IQueue<T> {
+    private array: T[];
     private capacity: number;
     private numOfItems: number;
     constructor(capacity: number) {
+        this.array = []
         this.capacity = capacity;
         this.numOfItems = 0;
     }

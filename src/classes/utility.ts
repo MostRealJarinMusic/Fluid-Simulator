@@ -148,7 +148,7 @@ function getIndex(i: number, j: number, width: number): number {
     return (width * j) + i;
 }
 
-function untagPositions(taggedPositions: TaggedPosition[]) {
+function untagPositions(taggedPositions: TaggedPosition[]): Vector[] {
     return taggedPositions.map((value) => value.position);
 }
 

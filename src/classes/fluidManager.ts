@@ -7,7 +7,6 @@ class FluidManager {
     private airfoilTaggedOutline!: TaggedPosition[];
     private airfoilTaggedRotatedOutline!: TaggedPosition[];
     private airfoilGridPoints!: Vector[];
-    private airfoilOutline!: Vector[];
     private airfoilSurfaceNormals!: SurfaceNormal[];
 
     private angleOfAttack!: number;
@@ -79,6 +78,7 @@ class FluidManager {
     }
     //#endregion
 
+    //#region Helper functions
     /**
     * Takes an outline as a set of position vectors and returns the full shape as a set of position vectors
     * @param outline - The vector array of outline positions, as integer coordinates
@@ -128,7 +128,6 @@ class FluidManager {
         return sorted;
     }
 
-
     private getAllSurfaceNormals(outline: Vector[]): SurfaceNormal[] {
         let fullShape = this.getFullShape(outline);
         let pairs: SurfaceNormal[] = [];
@@ -145,7 +144,6 @@ class FluidManager {
         }
         return pairs;
     }
-
 
     private getSurfaceNormal(vector: Vector, outline: Vector[]): Vector {
         if (checkInVectorList(outline, vector)) {
@@ -172,9 +170,9 @@ class FluidManager {
     }
 
     private rotateAirfoil() {
-        this.airfoilOutline = untagPositions(this.airfoilTaggedOutline);
+        let airfoilOutline = untagPositions(this.airfoilTaggedOutline);
 
-        let centroid: Vector = this.getCentroid(this.roundAll(this.airfoilOutline));
+        let centroid: Vector = this.getCentroid(this.roundAll(airfoilOutline));
         this.airfoilTaggedRotatedOutline = this.removeDuplicateVectors(
             this.airfoilTaggedOutline.map((taggedPosition) => {
                 return {
@@ -188,6 +186,7 @@ class FluidManager {
         this.airfoilSurfaceNormals = this.getAllSurfaceNormals(tempRotated);
         this.airfoilGridPoints = this.getFullShape(tempRotated);
     }
+    //#endregion
 
     //#region Angle of Attack and Free Stream Velocity
     public updateAngleOfAttack(): void {

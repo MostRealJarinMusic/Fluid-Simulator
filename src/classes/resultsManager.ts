@@ -225,16 +225,6 @@ class ResultsManager extends GraphingComponent {
         this.values.drag = this.queues.dragQueue.items().reduce((acc, val) => acc + val) / this.queues.dragQueue.size();
     }
 
-    public displayValues(): void {
-        for (let [name, labelledElement] of Object.entries(this.elements)) {
-            let value = this.values[name.toString()].toFixed(3);
-
-            //let units = labelledElement.units !== undefined ? labelledElement.units : ""
-            //labelledElement.element.innerHTML = labelledElement.label + value + units;
-            writeToElement(labelledElement, value);
-        }
-    }
-
     private calculateLDRatio(): void {
         this.values.LTDRatio = this.values.liftCoefficient / this.values.dragCoefficient;
     }
@@ -253,6 +243,13 @@ class ResultsManager extends GraphingComponent {
 
     private getDynamicPressure(): number {
         return (1 / 2) * (this.fluidManager.fluid.Density) * (this.fluidManager.fluid.FreeStreamVelocity ** 2)
+    }
+
+    public displayValues(): void {
+        for (let [name, labelledElement] of Object.entries(this.elements)) {
+            let value = this.values[name.toString()].toFixed(3);
+            writeToElement(labelledElement, value);
+        }
     }
     //#endregion
 }
