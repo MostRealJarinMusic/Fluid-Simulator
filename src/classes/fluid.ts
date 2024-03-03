@@ -176,8 +176,8 @@ class Fluid {
     get PressureGradient(): Vector[] {
         return this.properties.pressureGradient;
     }
-    get Width(): number {
-        return this.width;
+    get Dimensions(): Vector {
+        return { x: this.width, y: this.height };
     }
     get VelocityField(): Vector[] {
         return this.properties.localVelocity;

@@ -1,7 +1,7 @@
 class FluidManager {
     //#region Private variables
     private fluidCanvas: HTMLCanvasElement;
-    private fluid: Fluid;
+    public readonly fluid: Fluid;
     private simulationMode: SimulationMode;
 
     private airfoilTaggedOutline!: TaggedPosition[];
@@ -12,28 +12,28 @@ class FluidManager {
 
     private angleOfAttack!: number;
     private angleOfAttackInfo: ParameterInfo;
-    private angleOfAttackInput: HTMLInputElement;
     private freeStreamVelocity!: number;
     private freeStreamVelocityInfo: ParameterInfo;
-    private freeStreamVelocityInput: HTMLInputElement;
 
     private simulationModeSelector: HTMLSelectElement;
+
+    private labelElements: LabelledElement[];
+    public readonly inputElements: Record<string, HTMLInputElement>;
     //#endregion
 
-
-    constructor(canvas: HTMLCanvasElement, simulationModeSelector: HTMLSelectElement, angleOfAttackInput: HTMLInputElement, fSVelocityInput: HTMLInputElement) {
+    //canvas: HTMLCanvasElement, simulationModeSelector: HTMLSelectElement, angleOfAttackInput: HTMLInputElement, fSVelocityInput: HTMLInputElement, labelElements: LabelledElement[]
+    constructor(canvas: HTMLCanvasElement, modeSelector: HTMLSelectElement, inputElements: Record<string, HTMLInputElement>, labelElements: LabelledElement[]) {
         this.fluidCanvas = canvas;
-        //timestep is 0.53
         this.fluid = new Fluid(160, 90, 1.225, 0.1, 0.01, this.fluidCanvas);
         this.simulationMode = 'velocity';
 
-        this.simulationModeSelector = simulationModeSelector;
+        this.inputElements = inputElements;
+        this.labelElements = labelElements;
 
-        this.angleOfAttackInput = angleOfAttackInput;
+        this.simulationModeSelector = modeSelector;
+
         this.angleOfAttackInfo = { name: "AOA", labelText: "n/a", defaultValue: 0, bounds: { lower: -0.35, upper: 0.35 } };
         this.angleOfAttack = this.angleOfAttackInfo.defaultValue;
-
-        this.freeStreamVelocityInput = fSVelocityInput;
         this.freeStreamVelocityInfo = { name: "FSV", labelText: "N/A", defaultValue: 0.1, bounds: { lower: 0.05, upper: 0.13 } };
         this.freeStreamVelocity = this.freeStreamVelocityInfo.defaultValue;
     }
@@ -42,43 +42,20 @@ class FluidManager {
     set ShowTracers(value: boolean) {
         this.fluid.ShowTracers = value;
     }
-
     set ShowStreamlines(value: boolean) {
         this.fluid.ShowStreamlines = value;
     }
-
     set FreeStreamVelocity(value: number) {
         this.fluid.FreeStreamVelocity = value;
     }
     //#endregion
 
-    //#region Getters - exposing fluid properties
+    //#region Getters
     get SurfaceNormals(): SurfaceNormal[] {
         return this.airfoilSurfaceNormals;
     }
-    get PressureGradient(): Vector[] {
-        return this.fluid.PressureGradient;
-    }
-    get Origin(): Vector {
-        return this.fluid.origin;
-    }
-    get FluidWidth(): number {
-        return this.fluid.Width;
-    }
-    get PressureField(): number[] {
-        return this.fluid.PressureField;
-    }
-    get VelocityField(): Vector[] {
-        return this.fluid.VelocityField;
-    }
     get TaggedOutline(): TaggedPosition[] {
         return this.airfoilTaggedRotatedOutline;
-    }
-    get DynamicPressure(): number {
-        return (1 / 2) * (this.fluid.Density) * (this.fluid.FreeStreamVelocity ** 2);
-    }
-    get Solid(): boolean[] {
-        return this.fluid.Solid;
     }
     //#endregion
 
@@ -134,7 +111,7 @@ class FluidManager {
 
     //#region Angle of Attack and Free Stream Velocity
     public updateAngleOfAttack(): void {
-        this.angleOfAttack = -parseFloat(this.angleOfAttackInput.value);
+        this.angleOfAttack = -parseFloat(this.inputElements.AOAInput.value);
         this.rotateAirfoil();
         this.fluid.updateAirfoil(this.airfoilGridPoints);
 
@@ -156,12 +133,12 @@ class FluidManager {
     }
 
     private publishParameters(): void {
-        this.angleOfAttackInput.value = this.angleOfAttack.toString();
-        this.freeStreamVelocityInput.value = this.freeStreamVelocity.toString();
+        this.inputElements.AOAInput.value = this.angleOfAttack.toString();
+        this.inputElements.FSVInput.value = this.freeStreamVelocity.toString();
     }
 
     public updateFreeStreamVelocity(): void {
-        this.freeStreamVelocity = parseFloat(this.freeStreamVelocityInput.value);
+        this.freeStreamVelocity = parseFloat(this.inputElements.FSVInput.value);
         console.log(this.freeStreamVelocity);
         this.fluid.FreeStreamVelocity = this.freeStreamVelocity;
     }

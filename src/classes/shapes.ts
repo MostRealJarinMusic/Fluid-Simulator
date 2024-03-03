@@ -191,7 +191,7 @@ class Airfoil extends Shape {
     override parameterInfo: Record<string, ParameterInfo> = {
         'm': { name: 'm', labelText: 'Max. Camber (%)', defaultValue: 0, bounds: { lower: 0, upper: 9.5 } },
         'p': { name: 'p', labelText: 'Max. Camber Pos. (%)', defaultValue: 0, bounds: { lower: 0, upper: 90 } },
-        't': { name: 't', labelText: 'Thickness', defaultValue: 12, bounds: { lower: 1, upper: 40 } }
+        't': { name: 't', labelText: 'Thickness', defaultValue: 12, bounds: { lower: 1, upper: 30 } }
     }
 
     constructor() {
@@ -200,7 +200,7 @@ class Airfoil extends Shape {
 
         this.updateGraphDatasets();
         this.updateOutline();
-        console.log(this.getArea());
+        //console.log(this.getArea());
     }
 
     override getArea(): number {
@@ -238,7 +238,6 @@ class Airfoil extends Shape {
 
         if (testM === 0) testP = 0;
         if (testM > 0 && (testP >= 0 && testP < 10)) testP = 10;
-        if (testT > 30 && testT < 40) testT = 30;
 
         this.parameters['m'] = testM;
         this.parameters['p'] = testP;

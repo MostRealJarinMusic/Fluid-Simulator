@@ -10,8 +10,6 @@ class ApplicationManager {
     private FMSimulationModeSelector!: HTMLSelectElement;
     public FMTracersCheck!: HTMLInputElement;
     public FMStreamlinesCheck!: HTMLInputElement;
-    private FMAngleOfAttackInput!: HTMLInputElement;
-    private FMFSVelocityInput!: HTMLInputElement;
     public fluidManager!: FluidManager;
 
     private RMCanvas!: HTMLCanvasElement;
@@ -50,15 +48,28 @@ class ApplicationManager {
         this.FMSimulationModeSelector = document.getElementById("simulationModeSelector") as HTMLSelectElement;
         this.FMTracersCheck = document.getElementById("fluidTracers") as HTMLInputElement;
         this.FMStreamlinesCheck = document.getElementById("fluidStreamlines") as HTMLInputElement;
-        this.FMAngleOfAttackInput = document.getElementById("angleOfAttack") as HTMLInputElement;
-        this.FMFSVelocityInput = document.getElementById("freeStreamVelocity") as HTMLInputElement;
 
-        let elements: LabelledElement[] = [
-            { name: "AOA", element: document.getElementById("AOALabel") as HTMLLabelElement, label: "Angle of Attack: ", units: "Degrees" },
-            { name: "FSV", element: document.getElementById("FSVLabel") as HTMLLabelElement, label: "Free Stream Velocity: ", units: "m/s" },
+        let inputElements: Record<string, HTMLInputElement> = {
+            "AOAInput": document.getElementById("angleOfAttack") as HTMLInputElement,
+            "FSVInput": document.getElementById("freeStreamVelocity") as HTMLInputElement,
+        }
+
+        let labelElements: LabelledElement[] = [
+            {
+                name: "AOA",
+                element: document.getElementById("AOALabel") as HTMLLabelElement,
+                label: "Angle of Attack: ",
+                units: "Degrees"
+            },
+            {
+                name: "FSV",
+                element: document.getElementById("FSVLabel") as HTMLLabelElement,
+                label: "Free Stream Velocity: ",
+                units: "m/s"
+            },
         ]
 
-        this.fluidManager = new FluidManager(this.FMCanvas, this.FMSimulationModeSelector, this.FMAngleOfAttackInput, this.FMFSVelocityInput);
+        this.fluidManager = new FluidManager(this.FMCanvas, this.FMSimulationModeSelector, inputElements, labelElements);
         this.fluidManager.updateAirfoil(this.airfoilDesigner.ShapeOutline);
         this.fluidManager.initFluid();
     }
@@ -69,12 +80,60 @@ class ApplicationManager {
     private setupResultsManager(): void {
         this.RMCanvas = document.getElementById("dataGraph") as HTMLCanvasElement;
 
+        let temp: Record<string, TempLabelledElement> = {
+            "lift": {
+                element: document.getElementById("liftValue") as HTMLParagraphElement,
+                label: "Lift: ", units: "N"
+            },
+            "drag": {
+                element: document.getElementById("dragValue") as HTMLParagraphElement,
+                label: "Drag: ", units: "N"
+            },
+            "LTDRatio": {
+                element: document.getElementById("LTDValue") as HTMLParagraphElement,
+                label: "L/D Ratio: "
+            },
+            "liftCoefficient": {
+                element: document.getElementById("liftCoefficientValue") as HTMLParagraphElement,
+                label: "Lift Coefficient: "
+            },
+            "dragCoefficient": {
+                element: document.getElementById("dragCoefficientValue") as HTMLParagraphElement,
+                label: "Drag Coefficient: "
+            }
+        }
+
         let elements: LabelledElement[] = [
-            { name: "lift", element: document.getElementById("liftValue") as HTMLParagraphElement, label: "Lift: ", units: "N" },
-            { name: "drag", element: document.getElementById("dragValue") as HTMLParagraphElement, label: "Drag: ", units: "N" },
-            { name: "LTDRatio", element: document.getElementById("LTDValue") as HTMLParagraphElement, label: "L/D Ratio: ", units: "" },
-            { name: "liftCoefficient", element: document.getElementById("liftCoefficientValue") as HTMLParagraphElement, label: "Lift Coefficient: ", units: "" },
-            { name: "dragCoefficient", element: document.getElementById("dragCoefficientValue") as HTMLParagraphElement, label: "Drag Coefficient: ", units: "" }
+            {
+                name: "lift",
+                element: document.getElementById("liftValue") as HTMLParagraphElement,
+                label: "Lift: ",
+                units: "N"
+            },
+            {
+                name: "drag",
+                element: document.getElementById("dragValue") as HTMLParagraphElement,
+                label: "Drag: ",
+                units: "N"
+            },
+            {
+                name: "LTDRatio",
+                element: document.getElementById("LTDValue") as HTMLParagraphElement,
+                label: "L/D Ratio: ",
+                units: ""
+            },
+            {
+                name: "liftCoefficient",
+                element: document.getElementById("liftCoefficientValue") as HTMLParagraphElement,
+                label: "Lift Coefficient: ",
+                units: ""
+            },
+            {
+                name: "dragCoefficient",
+                element: document.getElementById("dragCoefficientValue") as HTMLParagraphElement,
+                label: "Drag Coefficient: ",
+                units: ""
+            }
         ];
 
         this.resultsManager = new ResultsManager(this.RMCanvas, elements);
@@ -100,10 +159,10 @@ class ApplicationManager {
         this.FMSimulationModeSelector.addEventListener('change', function () {
             applicationManager.fluidManager.updateSimulationMode();
         });
-        this.FMAngleOfAttackInput.addEventListener('input', function () {
+        this.fluidManager.inputElements.AOAInput.addEventListener('input', function () {
             applicationManager.fluidManager.updateAngleOfAttack();
         });
-        this.FMFSVelocityInput.addEventListener('change', function () {
+        this.fluidManager.inputElements.FSVInput.addEventListener('change', function () {
             applicationManager.fluidManager.updateFreeStreamVelocity();
         });
     }
