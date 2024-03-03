@@ -28,24 +28,20 @@ const latticeWeights = [
 //#endregion
 
 const applicationManager = new ApplicationManager();
-applicationManager.resultsManager.resetTimer();
 
 //#region Listener events
 function updateAirfoilParameters(): void {
     applicationManager.airfoilDesigner.updateAirfoil();
     applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeOutline);
-    applicationManager.resultsManager.resetTimer();
 }
 function resetAirfoilParameters(): void {
     applicationManager.airfoilDesigner.resetAirfoil();
     //applicationManager.fluidManager.resetParameters();
     applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeOutline);
-    applicationManager.resultsManager.resetTimer();
 }
 function resetFluidParameters(): void {
     applicationManager.fluidManager.resetParameters();
     applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeOutline);
-    applicationManager.resultsManager.resetTimer();
     resetGeneralFluidControls();
 }
 function resetGeneralFluidControls(): void {

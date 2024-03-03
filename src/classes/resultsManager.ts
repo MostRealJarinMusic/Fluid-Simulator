@@ -1,10 +1,7 @@
 class ResultsManager extends GraphingComponent {
     //#region Private variables
     private values: Record<string, number>;
-    private totals: Record<string, number>;
     private queues: Record<string, CustomQueue<number>>
-
-    private startTime: number;
 
     private airfoilDesigner!: AirfoilDesigner;
     private fluidManager!: FluidManager;
@@ -18,8 +15,6 @@ class ResultsManager extends GraphingComponent {
     constructor(canvas: HTMLCanvasElement, elements: LabelledElement[]) {
         super(canvas);
         this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
-        this.totals = { liftTotal: 0, dragTotal: 0 };
-        this.startTime = Date.now();
         this.elements = elements;
 
         this.queues = {
@@ -203,12 +198,6 @@ class ResultsManager extends GraphingComponent {
     //#endregion
 
     //#region Calculations
-    public resetTimer(): void {
-        this.startTime = Date.now();
-        this.totals.liftTotal = 0;
-        this.totals.dragTotal = 0;
-    }
-
     public calculateResults(): void {
         this.calculateInstantForce();
         this.calculateAverageForce();
@@ -234,25 +223,13 @@ class ResultsManager extends GraphingComponent {
         //I have the force by the airfoil on the fluid
         //I want the force on the airfoil by the fluid - therefore by Newton's third law, flip the force
         forceVector = scaleVector(forceVector, -1);
-        this.totals.liftTotal += forceVector.y;
-        this.totals.dragTotal += forceVector.x;
-
         this.queues.liftQueue.enqueue(forceVector.y);
         this.queues.dragQueue.enqueue(forceVector.x);
-
-        //console.log(forceVector.y)
     }
 
     private calculateAverageForce(): void {
-        let currentTime = Date.now();
-        let elapsedTime = (currentTime - this.startTime) / 1000;
-
         this.values.lift = this.queues.liftQueue.items().reduce((acc, val) => acc + val) / this.queues.liftQueue.size();
-        //this.totals.liftTotal / elapsedTime;
         this.values.drag = this.queues.dragQueue.items().reduce((acc, val) => acc + val) / this.queues.dragQueue.size();
-        //this.totals.dragTotal / elapsedTime;
-
-        //console.log(this.totals.liftTotal);
     }
 
     public displayValues(): void {
