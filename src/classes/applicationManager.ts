@@ -54,20 +54,16 @@ class ApplicationManager {
             "FSVInput": document.getElementById("freeStreamVelocity") as HTMLInputElement,
         }
 
-        let labelElements: LabelledElement[] = [
-            {
-                name: "AOA",
+        let labelElements: Record<string, LabelledElement> = {
+            "AOA": {
                 element: document.getElementById("AOALabel") as HTMLLabelElement,
-                label: "Angle of Attack: ",
-                units: "Degrees"
+                label: "Angle of Attack: ", units: "degrees"
             },
-            {
-                name: "FSV",
+            "FSV": {
                 element: document.getElementById("FSVLabel") as HTMLLabelElement,
-                label: "Free Stream Velocity: ",
-                units: "m/s"
-            },
-        ]
+                label: "Free Stream Velocity: ", units: "m/s"
+            }
+        }
 
         this.fluidManager = new FluidManager(this.FMCanvas, this.FMSimulationModeSelector, inputElements, labelElements);
         this.fluidManager.updateAirfoil(this.airfoilDesigner.ShapeOutline);
@@ -80,7 +76,7 @@ class ApplicationManager {
     private setupResultsManager(): void {
         this.RMCanvas = document.getElementById("dataGraph") as HTMLCanvasElement;
 
-        let temp: Record<string, TempLabelledElement> = {
+        let elements: Record<string, LabelledElement> = {
             "lift": {
                 element: document.getElementById("liftValue") as HTMLParagraphElement,
                 label: "Lift: ", units: "N"
@@ -102,39 +98,6 @@ class ApplicationManager {
                 label: "Drag Coefficient: "
             }
         }
-
-        let elements: LabelledElement[] = [
-            {
-                name: "lift",
-                element: document.getElementById("liftValue") as HTMLParagraphElement,
-                label: "Lift: ",
-                units: "N"
-            },
-            {
-                name: "drag",
-                element: document.getElementById("dragValue") as HTMLParagraphElement,
-                label: "Drag: ",
-                units: "N"
-            },
-            {
-                name: "LTDRatio",
-                element: document.getElementById("LTDValue") as HTMLParagraphElement,
-                label: "L/D Ratio: ",
-                units: ""
-            },
-            {
-                name: "liftCoefficient",
-                element: document.getElementById("liftCoefficientValue") as HTMLParagraphElement,
-                label: "Lift Coefficient: ",
-                units: ""
-            },
-            {
-                name: "dragCoefficient",
-                element: document.getElementById("dragCoefficientValue") as HTMLParagraphElement,
-                label: "Drag Coefficient: ",
-                units: ""
-            }
-        ];
 
         this.resultsManager = new ResultsManager(this.RMCanvas, elements);
         this.resultsManager.assignFluidManager(this.fluidManager);

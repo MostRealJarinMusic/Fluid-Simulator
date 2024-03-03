@@ -17,12 +17,11 @@ class FluidManager {
 
     private simulationModeSelector: HTMLSelectElement;
 
-    private labelElements: LabelledElement[];
+    private labelElements: Record<string, LabelledElement>;
     public readonly inputElements: Record<string, HTMLInputElement>;
     //#endregion
 
-    //canvas: HTMLCanvasElement, simulationModeSelector: HTMLSelectElement, angleOfAttackInput: HTMLInputElement, fSVelocityInput: HTMLInputElement, labelElements: LabelledElement[]
-    constructor(canvas: HTMLCanvasElement, modeSelector: HTMLSelectElement, inputElements: Record<string, HTMLInputElement>, labelElements: LabelledElement[]) {
+    constructor(canvas: HTMLCanvasElement, modeSelector: HTMLSelectElement, inputElements: Record<string, HTMLInputElement>, labelElements: Record<string, LabelledElement>) {
         this.fluidCanvas = canvas;
         this.fluid = new Fluid(160, 90, 1.225, 0.1, 0.01, this.fluidCanvas);
         this.simulationMode = 'velocity';
@@ -36,6 +35,7 @@ class FluidManager {
         this.angleOfAttack = this.angleOfAttackInfo.defaultValue;
         this.freeStreamVelocityInfo = { name: "FSV", labelText: "N/A", defaultValue: 0.1, bounds: { lower: 0.05, upper: 0.13 } };
         this.freeStreamVelocity = this.freeStreamVelocityInfo.defaultValue;
+        this.publishParameters();
     }
 
     //#region Setters
@@ -115,8 +115,7 @@ class FluidManager {
         this.rotateAirfoil();
         this.fluid.updateAirfoil(this.airfoilGridPoints);
 
-        let AOALabel = document.getElementById("AOALabel") as HTMLLabelElement;
-        AOALabel.innerHTML = "Angle of Attack: " + this.radToDeg(this.angleOfAttack);
+        this.publishParameters();
     }
 
     private radToDeg(angleRadians: number): number {
@@ -133,16 +132,17 @@ class FluidManager {
     }
 
     private publishParameters(): void {
-        this.inputElements.AOAInput.value = this.angleOfAttack.toString();
+        this.inputElements.AOAInput.value = (-this.angleOfAttack).toString();
+        writeToElement(this.labelElements.AOA, this.radToDeg(this.angleOfAttack));
         this.inputElements.FSVInput.value = this.freeStreamVelocity.toString();
+        writeToElement(this.labelElements.FSV, this.freeStreamVelocity);
     }
 
     public updateFreeStreamVelocity(): void {
         this.freeStreamVelocity = parseFloat(this.inputElements.FSVInput.value);
-        console.log(this.freeStreamVelocity);
         this.fluid.FreeStreamVelocity = this.freeStreamVelocity;
+        this.publishParameters();
     }
-
     //#endregion
 
     //#region Fluid simulation settings

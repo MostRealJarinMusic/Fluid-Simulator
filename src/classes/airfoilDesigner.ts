@@ -171,7 +171,7 @@ class AirfoilDesigner extends GraphingComponent {
     public resetAirfoil(): void {
         let parameters: Record<string, number> = {};
         //Obtain default parameters
-        for (const [ID, _reference] of Object.entries(this.parameterInputIDs)) {
+        for (let [ID, _reference] of Object.entries(this.parameterInputIDs)) {
             parameters[ID] = this.shape.ParameterInfo[ID].defaultValue;
         }
 
@@ -338,8 +338,8 @@ class AirfoilDesigner extends GraphingComponent {
             container.appendChild(document.createElement("br"));
 
             let element = document.getElementById(parameterName) as HTMLInputElement;
-            this.parameterInputIDs[`${parameterName}`] = element;
-            this.parameterCache[`${parameterName}`] = parseFloat(element.value);
+            this.parameterInputIDs[parameterName.toString()] = element;
+            this.parameterCache[parameterName.toString()] = parseFloat(element.value);
         }
     }
     //#endregion

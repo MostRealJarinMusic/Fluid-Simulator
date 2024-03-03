@@ -19,10 +19,7 @@ type FluidProperties = {
     localCurl: number[],
     solid: boolean[]
 };
-
-type NamedElement = { name: string, element: HTMLElement };
-type LabelledElement = NamedElement & { label: string, units: string };
-type TempLabelledElement = { element: HTMLElement, label: string, units?: string };
+type LabelledElement = { element: HTMLElement, label: string, units?: string };
 
 const validSimulationModes = ['velocity', 'density', 'curl', 'pressure', 'pressureGradient'] as const;
 type SimulationMode = typeof validSimulationModes[number];
@@ -346,4 +343,9 @@ function getIndex(i: number, j: number, width: number): number {
 
 function untagPositions(taggedPositions: TaggedPosition[]) {
     return taggedPositions.map((value) => value.position);
+}
+
+function writeToElement(labelledElement: LabelledElement, value: number | string): void {
+    let units = labelledElement.units !== undefined ? labelledElement.units : ""
+    labelledElement.element.innerHTML = labelledElement.label + value + " " + units;
 }

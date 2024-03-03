@@ -36,7 +36,6 @@ function updateAirfoilParameters(): void {
 }
 function resetAirfoilParameters(): void {
     applicationManager.airfoilDesigner.resetAirfoil();
-    //applicationManager.fluidManager.resetParameters();
     applicationManager.fluidManager.updateAirfoil(applicationManager.airfoilDesigner.ShapeOutline);
 }
 function resetFluidParameters(): void {

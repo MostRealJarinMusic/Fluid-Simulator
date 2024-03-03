@@ -7,12 +7,11 @@ class ResultsManager extends GraphingComponent {
     private fluidManager!: FluidManager;
     private origin!: Vector;
     private fluidWidth!: number;
-
-    private elements: LabelledElement[];
+    private elements: Record<string, LabelledElement>
     //#endregion
 
 
-    constructor(canvas: HTMLCanvasElement, elements: LabelledElement[]) {
+    constructor(canvas: HTMLCanvasElement, elements: Record<string, LabelledElement>) {
         super(canvas);
         this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
         this.elements = elements;
@@ -114,7 +113,7 @@ class ResultsManager extends GraphingComponent {
             let sampleIndex = getIndex(position.x + latticeXs[value], position.y + latticeYs[value], this.fluidWidth);
             return field[sampleIndex];
         }).reduce((acc, val) => acc + val);
-        return pressureSample / latticeIndices.length;
+        return pressureSample / discreteVelocities;
     }
 
     private getDataForGraph(): void {
@@ -164,15 +163,10 @@ class ResultsManager extends GraphingComponent {
     }
 
     override updateGraph(): void {
-        //if (this.airfoilDesigner.ShapeType !== 'line') {
         this.getDataForGraph();
         this.graph.data.datasets = mapDatasets(this.datasets);
         this.adjustGraphBounds();
-        //console.log(this.graph.data.datasets)
         this.graph.update();
-        //} else {
-        //this.disableGraph();
-        //}
     }
 
     //Credit for nearest power of 10: https://stackoverflow.com/questions/19870067/round-up-to-nearest-power-of-10
@@ -233,9 +227,12 @@ class ResultsManager extends GraphingComponent {
     }
 
     public displayValues(): void {
-        for (let element of this.elements) {
-            let value = this.values[element.name].toFixed(3);
-            element.element.innerHTML = element.label + value + element.units;
+        for (let [name, labelledElement] of Object.entries(this.elements)) {
+            let value = this.values[name.toString()].toFixed(3);
+
+            //let units = labelledElement.units !== undefined ? labelledElement.units : ""
+            //labelledElement.element.innerHTML = labelledElement.label + value + units;
+            writeToElement(labelledElement, value);
         }
     }
 
