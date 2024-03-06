@@ -12,15 +12,15 @@ class ColourMap {
 
     private createFullTransition(targetColours: Colour[], totalSteps: number[]): Colour[] {
         //Recursive algorithm
-        if (targetColours.length - 1 === totalSteps.length) {
+        if (targetColours.length - 1 === totalSteps.length && totalSteps.length > 0) {
             //Requirement
+            let currentTransition: Colour[] = this.transitionBetweenColours(targetColours[0], targetColours[1], totalSteps[0]);
+
             if (targetColours.length === 2) {
                 //Base case
-                return this.transitionBetweenColours(targetColours[0], targetColours[1], totalSteps[0]);
+                return currentTransition;
             } else {
                 //General case
-                let currentTransition: Colour[] = this.transitionBetweenColours(targetColours[0], targetColours[1], totalSteps[0]);
-
                 let remainingColours: Colour[] = targetColours.slice(1);
                 let remainingSteps: number[] = totalSteps.slice(1);
                 //Recursive step - getting the remaining transitions

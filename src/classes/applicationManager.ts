@@ -131,13 +131,6 @@ class ApplicationManager {
     }
     //#endregion
 
-
-    public skipIterations(): void {
-        for (let _ = 0; _ < 100; _++) {
-            this.fluidManager.runMainLoop();
-        }
-    }
-
     /**
      * Update function that is called every frame
      */
