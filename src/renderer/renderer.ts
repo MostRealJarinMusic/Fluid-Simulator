@@ -46,7 +46,6 @@ function resetFluidParameters(): void {
 function resetGeneralFluidControls(): void {
     applicationManager.fluidManager.ShowTracers = false;
     applicationManager.fluidManager.ShowStreamlines = false;
-
     applicationManager.FMTracersCheck.checked = false;
     applicationManager.FMStreamlinesCheck.checked = false;
 }
@@ -59,5 +58,4 @@ function update(): void {
 }
 
 update();
-
 //#endregion

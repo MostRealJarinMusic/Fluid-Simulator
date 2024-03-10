@@ -10,6 +10,11 @@ class ColourMap {
         this.colourMap = this.createFullTransition(targetColours, steps);
     }
 
+    /**
+     * Creates a gradient between multiple colours, with different steps between them
+     * @param targetColours The set of colours for the gradient
+     * @param totalSteps The steps between every consecutive pair of colours
+     */
     private createFullTransition(targetColours: Colour[], totalSteps: number[]): Colour[] {
         //Recursive algorithm
         if (targetColours.length - 1 === totalSteps.length && totalSteps.length > 0) {
@@ -43,7 +48,7 @@ class ColourMap {
     private transitionBetweenColours(startColour: Colour, targetColour: Colour, steps: number): Colour[] {
         let gradient: Colour[] = [];
         for (let i = 0; i < steps; i++) {
-            let percentage = i / steps;
+            let percentage = i / (steps - 1);
             let newColour: Colour = {
                 red: Math.round(startColour.red + (targetColour.red - startColour.red) * percentage),
                 green: Math.round(startColour.green + (targetColour.green - startColour.green) * percentage),
@@ -52,7 +57,6 @@ class ColourMap {
             }
             gradient.push(newColour);
         }
-
         return gradient;
     }
 

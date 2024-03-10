@@ -141,7 +141,13 @@ function enforceBounds(value: number, bounds: Bound): number {
  * @param a Alpha value
  */
 function getColour(r: number, g: number, b: number, a: number): Colour {
-    return { red: r, green: g, blue: b, alpha: a };
+    let colourBound = { lower: 0, upper: 255 }
+    return {
+        red: enforceBounds(r, colourBound),
+        green: enforceBounds(g, colourBound),
+        blue: enforceBounds(b, colourBound),
+        alpha: enforceBounds(a, colourBound)
+    };
 }
 
 function getIndex(i: number, j: number, width: number): number {
@@ -159,21 +165,6 @@ function writeToElement(labelledElement: LabelledElement, value: number | string
 //#endregion
 
 //#region Vector functions
-/**
- * Checks if a given vector is contained within a list
- * @param currentList The list to search through
- * @param testVector The vector to search for
- */
-function checkInVectorList(currentList: Vector[], testVector: Vector): boolean {
-    for (let i = 0; i < currentList.length; i++) {
-        let currentVector = currentList[i];
-        if (testVector.x == currentVector.x && testVector.y == currentVector.y) {
-            return true;
-        }
-    }
-    return false;
-}
-
 function addVectors(vector1: Vector, vector2: Vector): Vector {
     return { x: vector1.x + vector2.x, y: vector1.y + vector2.y };
 }
@@ -254,5 +245,20 @@ function filterVectors(vectors: Vector[], component: 'x' | 'y', comparison: 'lea
             return (accumulator[component] > currentValue[component] ? accumulator : currentValue)
         })[component];
     }
+}
+
+/**
+ * Checks if a given vector is contained within a list
+ * @param currentList The list to search through
+ * @param testVector The vector to search for
+ */
+function checkInVectorList(currentList: Vector[], testVector: Vector): boolean {
+    for (let i = 0; i < currentList.length; i++) {
+        let currentVector = currentList[i];
+        if (testVector.x == currentVector.x && testVector.y == currentVector.y) {
+            return true;
+        }
+    }
+    return false;
 }
 //#endregion

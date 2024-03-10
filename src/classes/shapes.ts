@@ -31,15 +31,12 @@ abstract class Shape {
     get ParameterInfo(): Record<string, ParameterInfo> {
         return this.parameterInfo;
     }
-
     get Parameters(): Record<string, number> {
         return this.parameters;
     }
-
     get Outline(): TaggedPosition[] {
         return this.outline;
     }
-
     get GraphDatasets(): GraphDataset[] {
         return this.graphDatasets;
     }
@@ -197,10 +194,8 @@ class Airfoil extends Shape {
     constructor() {
         super();
         this.parameters = setupParameters(this.parameterInfo);
-
         this.updateGraphDatasets();
         this.updateOutline();
-        //console.log(this.getArea());
     }
 
     override getArea(): number {
@@ -296,7 +291,6 @@ class Airfoil extends Shape {
     }
 
     //#region Airfoil geometry functions
-
     private getUpperPoint(xValue: number): Vector {
         return {
             x: xValue - (this.calculateHalfThickness(xValue) * Math.sin(this.calculateTheta(xValue))),

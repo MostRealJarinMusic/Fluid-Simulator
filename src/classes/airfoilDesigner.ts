@@ -13,7 +13,6 @@ class AirfoilDesigner extends GraphingComponent {
         this.airfoilSelector = typeSelector;
         this.parameterInputContainer = parameterInputContainer
         this.airfoilProfileNumText = airfoilProfileNumText;
-
         this.changeAirfoil();
     }
 
@@ -289,6 +288,7 @@ class AirfoilDesigner extends GraphingComponent {
         let parameters: Record<string, number> = {};
         for (const [ID, reference] of Object.entries(this.parameterInputIDs)) {
             let referenceValue = parseFloat(reference.value);
+            //Checking input is valid
             if (isNaN(referenceValue)) {
                 referenceValue = this.parameterCache[ID];
             }

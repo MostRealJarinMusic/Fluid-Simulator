@@ -19,7 +19,6 @@ abstract class GraphingComponent {
             datasets[i].backgroundColor = 'rgba(192, 192, 192, 0.2)';
             datasets[i].borderColor = 'rgba(192, 192, 192, 0.2)';
         }
-
         this.graph.data.datasets = datasets;
         this.graph.update();
     }

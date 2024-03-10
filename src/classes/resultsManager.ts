@@ -2,7 +2,6 @@ class ResultsManager extends GraphingComponent {
     //#region Private variables
     private values: Record<string, number>;
     private queues: Record<string, CustomQueue<number>>
-
     private airfoilDesigner!: AirfoilDesigner;
     private fluidManager!: FluidManager;
     private origin!: Vector;
@@ -12,7 +11,13 @@ class ResultsManager extends GraphingComponent {
 
     constructor(canvas: HTMLCanvasElement, elements: Record<string, LabelledElement>) {
         super(canvas);
-        this.values = { lift: 0, drag: 0, LTDRatio: 0, liftCoefficient: 0, dragCoefficient: 0 };
+        this.values = {
+            lift: 0,
+            drag: 0,
+            LTDRatio: 0,
+            liftCoefficient: 0,
+            dragCoefficient: 0
+        };
         this.elements = elements;
 
         this.queues = {
@@ -158,7 +163,8 @@ class ResultsManager extends GraphingComponent {
         let lowerDataset: GraphDataset = { label: "Lower Airfoil Surface", points: lowerPoints, colour: 'rgba(241,250,140,1)' }
         let defaultDataset: GraphDataset = { label: "Default Surface", points: defaultPoints, colour: 'rgba(255,85,85,1)' }
 
-        return [upperDataset, lowerDataset, defaultDataset].filter((value) => value.points.length > 0);;
+        //Getting rid of any datasets that don't have any points
+        return [upperDataset, lowerDataset, defaultDataset].filter((dataset) => dataset.points.length > 0);;
     }
 
     override updateGraph(): void {
@@ -175,16 +181,14 @@ class ResultsManager extends GraphingComponent {
         let minX = filterVectors(outline, "x", "least");
         let maxX = filterVectors(outline, "x", "most");
         let xRange = maxX - minX === 0 ? 0.01 : maxX - minX;
-
         let steps = Math.pow(10, Math.ceil(Math.log10(xRange / 10)))
 
         //Typescript considers the possibility that the min and max properties are undefined
-        //They are, so I'm telling Typescript to ignore its concerns
+        //They are defined, so I'm telling Typescript to ignore the error
         //@ts-expect-error
         this.graph.options.scales.xAxes[0].ticks.min = -xRange * 0.1;
         //@ts-expect-error
         this.graph.options.scales.xAxes[0].ticks.max = maxX - minX + (xRange * 0.1);
-
         //@ts-expect-error
         this.graph.options.scales.xAxes[0].ticks.stepSize = steps;
     }
@@ -203,7 +207,7 @@ class ResultsManager extends GraphingComponent {
         let pressureGradient = this.fluidManager.fluid.PressureGradient;
         let surfaceNormals = this.fluidManager.SurfaceNormals;
 
-        //Iterate through each point at the surface normal
+        //Iterate through each point and use its surface normal and pressure gradient to calculate the force
         //x component is drag, y component is lift
         let forceVector: Vector = { x: 0, y: 0 };
         for (let pair of surfaceNormals) {
@@ -221,6 +225,7 @@ class ResultsManager extends GraphingComponent {
     }
 
     private calculateAverageForce(): void {
+        //Get the average of the recent lift and drag values
         this.values.lift = this.queues.liftQueue.items().reduce((acc, val) => acc + val) / this.queues.liftQueue.size();
         this.values.drag = this.queues.dragQueue.items().reduce((acc, val) => acc + val) / this.queues.dragQueue.size();
     }
@@ -231,14 +236,16 @@ class ResultsManager extends GraphingComponent {
 
     private calculateLiftCoefficient(): void {
         let airfoilArea = this.airfoilDesigner.ShapeArea;
+        let scaleFactor = 1000;
         let dynamicPressure = this.getDynamicPressure();
-        this.values.liftCoefficient = parseFloat((this.values.lift / (1000 * airfoilArea * dynamicPressure)).toFixed(4));
+        this.values.liftCoefficient = parseFloat((this.values.lift / (scaleFactor * airfoilArea * dynamicPressure)).toFixed(4));
     }
 
     private calculateDragCoefficient(): void {
         let airfoilArea = this.airfoilDesigner.ShapeArea;
+        let scaleFactor = 1000;
         let dynamicPressure = this.getDynamicPressure();
-        this.values.dragCoefficient = parseFloat((this.values.drag / (1000 * airfoilArea * dynamicPressure)).toFixed(4));
+        this.values.dragCoefficient = parseFloat((this.values.drag / (scaleFactor * airfoilArea * dynamicPressure)).toFixed(4));
     }
 
     private getDynamicPressure(): number {

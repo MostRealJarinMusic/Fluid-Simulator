@@ -11,7 +11,7 @@ class Fluid {
     private freeStreamVelocity: number;
     private viscosity: number;
     private timescale: number;
-    /*
+
     private dCentre!: number[];
     private dNorth!: number[];
     private dNorthEast!: number[];
@@ -21,7 +21,6 @@ class Fluid {
     private dSouthWest!: number[];
     private dWest!: number[];
     private dNorthWest!: number[];
-    */
 
     private distribution: number[][];
 
@@ -55,16 +54,13 @@ class Fluid {
         this.timescale = (viscosity / (latticeSpeedOfSound ** 2)) + 0.5;
         //#endregion
 
-        //#region Distribution function
+        //#region Distribution function + local properties
         this.distribution = this.create2DArrayFill(
             this.numCells,
             discreteVelocities,
             1,
         );
-        //this.setupDistribution();
-        //#endregion
-
-        //#region Local properties
+        this.setupDistribution();
         this.setupProperties();
         //#endregion
 
@@ -93,8 +89,6 @@ class Fluid {
     }
 
     private index(i: number, j: number): number {
-        //return i * this.height + j;
-        //return (this.width * j) + i;
         return getIndex(i, j, this.width);
     }
 
@@ -122,7 +116,7 @@ class Fluid {
             solid: new Array(this.numCells).fill(false)
         }
     }
-    /*
+
     private setupDistribution(): void {
         for (let dir = 0; dir < Object.keys(Directions).length / 2; dir++) {
             let field = `d${Directions[dir]}` as DistributionDir;
@@ -130,14 +124,16 @@ class Fluid {
             this[field] = new Array(this.numCells);
         }
     }
-    */
+
     public initFluid(): void {
         let velocityVector: Vector = { x: this.freeStreamVelocity, y: 0 };
         for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
+            /*
             for (let i = 0; i < discreteVelocities; i++) {
                 this.distribution[nodeIndex][i] = this.getEquilibrium(latticeWeights[i], this.density, velocityVector, i);
             }
-            /*
+            */
+
             for (let dir = 0; dir < Object.keys(Directions).length / 2; dir++) {
                 let latticeWeight = latticeWeights[dir];
                 let direction = Directions[dir]
@@ -145,22 +141,22 @@ class Fluid {
                 // @ts-expect-error
                 this[field][nodeIndex] = this.getEquilibrium(latticeWeight, this.density, velocityVector, dir);
             }
-            */
         }
     }
 
     public runMainLoop(): void {
         if (this.running) {
+            /*
             this.computeMoments();
             this.applyBoundaryConditions();
             this.collideLocally();
             this.stream();
-            /*
+            */
             this.newComputeMoments();
             this.newCollide();
             this.newStream();
             this.newApplyBoundaryConditions();
-            */
+
             this.computePressureGradient();
             if (this.showTracers) this.moveTracers();
         }
@@ -217,7 +213,7 @@ class Fluid {
             let velocity = this.properties.localVelocity[i];
 
             //#region Collision step
-            /*
+
             this.dCentre[i] += tauRecip * (this.getEquilibrium(latticeWeights[0], density, velocity, 0) - this.dCentre[i]);
             this.dNorth[i] += tauRecip * (this.getEquilibrium(latticeWeights[1], density, velocity, 1) - this.dNorth[i]);
             this.dNorthEast[i] += tauRecip * (this.getEquilibrium(latticeWeights[2], density, velocity, 2) - this.dNorthEast[i]);
@@ -227,7 +223,7 @@ class Fluid {
             this.dSouthWest[i] += tauRecip * (this.getEquilibrium(latticeWeights[6], density, velocity, 6) - this.dSouthWest[i]);
             this.dWest[i] += tauRecip * (this.getEquilibrium(latticeWeights[7], density, velocity, 7) - this.dWest[i]);
             this.dNorthWest[i] += tauRecip * (this.getEquilibrium(latticeWeights[8], density, velocity, 8) - this.dNorthWest[i]);
-            */
+
             //#endregion
 
             //Amazingly, this somehow slows down the simulation by a significant amount
@@ -242,9 +238,8 @@ class Fluid {
             */
         }
     }
-    /*
-    private newStream(): void {
 
+    private newStream(): void {
         //north west and north - 8 and 1
         for (let y = this.height - 2; y > 0; y--) {
             for (let x = 1; x < this.width - 1; x++) {
@@ -295,7 +290,7 @@ class Fluid {
             }
         }
     }
-    */
+
     private reflect(x: number, y: number, direction: number) {
         let offset: Vector = { x: latticeXs[direction], y: latticeYs[direction] };
         let oppositeDirection: Directions = getOppositeDirection(direction);
@@ -316,7 +311,7 @@ class Fluid {
                         this.reflect(x, y, dir);
                     }
                     */
-                    /*
+
                     this.dNorth[this.index(x, y + 1)] = this.dSouth[i];
                     this.dNorthEast[this.index(x + 1, y + 1)] = this.dSouthWest[i];
                     this.dEast[this.index(x + 1, y)] = this.dWest[i];
@@ -325,7 +320,6 @@ class Fluid {
                     this.dSouthWest[this.index(x - 1, y - 1)] = this.dNorthEast[i];
                     this.dWest[this.index(x - 1, y)] = this.dEast[i];
                     this.dNorthWest[this.index(x - 1, y + 1)] = this.dSouthEast[i];
-                    */
                     this.properties.localVelocity[i] = { x: 0, y: 0 };
                 }
             }
@@ -341,11 +335,11 @@ class Fluid {
 
         return mapToDist(latticeIndices, nodeIndex);
     }
-    /*
+
     private newComputeMoments(): void {
         for (let i = 0; i < this.numCells; i++) {
-            const summation = (arr: number[]) => arr.reduce((acc, val) => acc + val, 0);
-            const mapToLat = (arr: number[], lat: number[]) => arr.map((val, i) => val * lat[i]);
+            //const summation = (arr: number[]) => arr.reduce((acc, val) => acc + val, 0);
+            //const mapToLat = (arr: number[], lat: number[]) => arr.map((val, i) => val * lat[i]);
 
             //let nodeDistribution = this.getDistribution(i);
 
@@ -369,7 +363,7 @@ class Fluid {
             this.properties.localPressure[i] = (latticeSpeedOfSound ** 2) * nodeDensity;
         }
     }
-    */
+
     //#endregion
 
     private getEquilibrium(weight: number, rho: number, velocityVector: Vector, latticeIndex: number): number {
@@ -409,11 +403,10 @@ class Fluid {
     }
 
     private computeMoments(): void {
+        //Arrow functions
+        const summation = (arr: number[]) => arr.reduce((acc, val) => acc + val, 0);
+        const mapToLat = (arr: number[], lat: number[]) => arr.map((val, i) => val * lat[i]);
         for (let i = 0; i < this.numCells; i++) {
-            //Arrow functions
-            const summation = (arr: number[]) => arr.reduce((acc, val) => acc + val, 0);
-            const mapToLat = (arr: number[], lat: number[]) => arr.map((val, i) => val * lat[i]);
-
             let nodeDist = this.distribution[i];
             let nodeDensity = summation(nodeDist);
 
