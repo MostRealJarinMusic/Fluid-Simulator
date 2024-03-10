@@ -3,19 +3,15 @@ class FluidManager {
     private fluidCanvas: HTMLCanvasElement;
     public readonly fluid: Fluid;
     private simulationMode: SimulationMode;
-
     private airfoilTaggedOutline!: TaggedPosition[];
     private airfoilTaggedRotatedOutline!: TaggedPosition[];
     private airfoilGridPoints!: Vector[];
     private airfoilSurfaceNormals!: SurfaceNormal[];
-
     private angleOfAttack!: number;
     private angleOfAttackInfo: ParameterInfo;
     private freeStreamVelocity!: number;
     private freeStreamVelocityInfo: ParameterInfo;
-
     private simulationModeSelector: HTMLSelectElement;
-
     private labelElements: Record<string, LabelledElement>;
     public readonly inputElements: Record<string, HTMLInputElement>;
     //#endregion
@@ -27,9 +23,7 @@ class FluidManager {
 
         this.inputElements = inputElements;
         this.labelElements = labelElements;
-
         this.simulationModeSelector = modeSelector;
-
         this.angleOfAttackInfo = { name: "AOA", labelText: "n/a", defaultValue: 0, bounds: { lower: -0.35, upper: 0.35 } };
         this.angleOfAttack = this.angleOfAttackInfo.defaultValue;
         this.freeStreamVelocityInfo = { name: "FSV", labelText: "N/A", defaultValue: 0.1, bounds: { lower: 0.05, upper: 0.13 } };
@@ -62,15 +56,12 @@ class FluidManager {
     public initFluid(): void {
         this.fluid.initFluid();
     }
-
     public runMainLoop(): void {
         this.fluid.runMainLoop();
     }
-
     public drawFluid(): void {
         this.fluid.drawFluid(this.simulationMode);
     }
-
     public updateAirfoil(taggedOutline: TaggedPosition[]): void {
         this.airfoilTaggedOutline = taggedOutline;
         this.rotateAirfoil();
@@ -106,9 +97,13 @@ class FluidManager {
         return fullShape;
     }
 
+    /**
+     * Removes duplicate vectors from a given array
+     * @param taggedPositions The array to remove duplicates from
+     */
     private removeDuplicateVectors(taggedPositions: TaggedPosition[]): TaggedPosition[] {
         let finalTaggedPositions: TaggedPosition[] = [];
-        let finalVectors: Vector[] = [];;
+        let finalVectors: Vector[] = [];
         for (let taggedPosition of taggedPositions) {
             if (!checkInVectorList(finalVectors, taggedPosition.position)) {
                 finalVectors.push(taggedPosition.position);
@@ -161,6 +156,7 @@ class FluidManager {
     }
 
     private getCentroid(fullShape: Vector[]): Vector {
+        //Gets average position of all the points of a given vector array.
         let summation = fullShape.reduce((acc, { x, y }) => ({ x: acc.x + x, y: acc.y + y }), { x: 0, y: 0 });
         return scaleVector(summation, 1 / fullShape.length);
     }
@@ -170,9 +166,11 @@ class FluidManager {
     }
 
     private rotateAirfoil() {
+        //The fluid simulation works with untagged positions
+        //The result manager works with tagged positions
         let airfoilOutline = untagPositions(this.airfoilTaggedOutline);
-
         let centroid: Vector = this.getCentroid(this.roundAll(airfoilOutline));
+        //This rotates a tagged position - whilst maintain the given tag
         this.airfoilTaggedRotatedOutline = this.removeDuplicateVectors(
             this.airfoilTaggedOutline.map((taggedPosition) => {
                 return {
@@ -182,6 +180,7 @@ class FluidManager {
             })
         );
 
+        //tempRotated - used for the surface normals and the fluid simulation
         let tempRotated = untagPositions(this.airfoilTaggedRotatedOutline);
         this.airfoilSurfaceNormals = this.getAllSurfaceNormals(tempRotated);
         this.airfoilGridPoints = this.getFullShape(tempRotated);
@@ -193,7 +192,6 @@ class FluidManager {
         this.angleOfAttack = -parseFloat(this.inputElements.AOAInput.value);
         this.rotateAirfoil();
         this.fluid.updateAirfoil(this.airfoilGridPoints);
-
         this.publishParameters();
     }
 
@@ -204,7 +202,6 @@ class FluidManager {
 
     public resetParameters(): void {
         this.angleOfAttack = this.angleOfAttackInfo.defaultValue;
-
         this.freeStreamVelocity = this.freeStreamVelocityInfo.defaultValue;
         this.fluid.FreeStreamVelocity = this.freeStreamVelocity;
         this.publishParameters();

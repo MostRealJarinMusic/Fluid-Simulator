@@ -195,7 +195,6 @@ class Fluid {
         this.showStreamlines = value;
     }
     set FreeStreamVelocity(value: number) {
-        //Set the free stream velocity
         this.freeStreamVelocity = value;
         this.initFluid();
     }
@@ -381,8 +380,12 @@ class Fluid {
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
                 //Partial derivatives
-                let dYVelocityOverDx: number = this.properties.localVelocity[this.index(x + 1, y)].y - this.properties.localVelocity[this.index(x - 1, y)].y
-                let dXVelocityOverDy: number = this.properties.localVelocity[this.index(x, y + 1)].x - this.properties.localVelocity[this.index(x, y - 1)].x;
+                let dYVelocityOverDx: number =
+                    this.properties.localVelocity[this.index(x + 1, y)].y -
+                    this.properties.localVelocity[this.index(x - 1, y)].y
+                let dXVelocityOverDy: number =
+                    this.properties.localVelocity[this.index(x, y + 1)].x -
+                    this.properties.localVelocity[this.index(x, y - 1)].x;
 
                 this.properties.localCurl[this.index(x, y)] = dYVelocityOverDx - dXVelocityOverDy;
             }
@@ -394,10 +397,17 @@ class Fluid {
         for (let y = 1; y < this.height - 1; y++) {
             for (let x = 1; x < this.width - 1; x++) {
                 //Partial derivatives
-                let dPressureOverDx: number = this.properties.localPressure[this.index(x + 1, y)] - this.properties.localPressure[this.index(x - 1, y)]
-                let dPressureOverDy: number = this.properties.localPressure[this.index(x, y + 1)] - this.properties.localPressure[this.index(x, y - 1)];
+                let dPressureOverDx: number =
+                    this.properties.localPressure[this.index(x + 1, y)] -
+                    this.properties.localPressure[this.index(x - 1, y)]
+                let dPressureOverDy: number =
+                    this.properties.localPressure[this.index(x, y + 1)] -
+                    this.properties.localPressure[this.index(x, y - 1)];
 
-                this.properties.pressureGradient[this.index(x, y)] = { x: dPressureOverDx / 2, y: dPressureOverDy / 2 };
+                this.properties.pressureGradient[this.index(x, y)] = {
+                    x: dPressureOverDx / 2,
+                    y: dPressureOverDy / 2
+                };
             }
         }
     }
@@ -406,21 +416,21 @@ class Fluid {
         //Arrow functions
         const summation = (arr: number[]) => arr.reduce((acc, val) => acc + val, 0);
         const mapToLat = (arr: number[], lat: number[]) => arr.map((val, i) => val * lat[i]);
-        for (let i = 0; i < this.numCells; i++) {
-            let nodeDist = this.distribution[i];
+        for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
+            let nodeDist = this.distribution[nodeIndex];
             let nodeDensity = summation(nodeDist);
 
             //Velocity
-            this.properties.localVelocity[i] = {
+            this.properties.localVelocity[nodeIndex] = {
                 x: summation(mapToLat(nodeDist, latticeXs)) / nodeDensity,
                 y: summation(mapToLat(nodeDist, latticeYs)) / nodeDensity
             }
 
             //Density
-            this.properties.localDensity[i] = nodeDensity;
+            this.properties.localDensity[nodeIndex] = nodeDensity;
 
             //Pressure
-            this.properties.localPressure[i] = (latticeSpeedOfSound ** 2) * nodeDensity;
+            this.properties.localPressure[nodeIndex] = (latticeSpeedOfSound ** 2) * nodeDensity;
         }
     }
 
@@ -441,16 +451,16 @@ class Fluid {
     }
 
     private collideLocally(): void {
-        for (let index = 0; index < this.numCells; index++) {
+        for (let nodeIndex = 0; nodeIndex < this.numCells; nodeIndex++) {
             for (let i of latticeIndices) {
-                let localDensity = this.properties.localDensity[index];
-                let localVelocity: Vector = this.properties.localVelocity[index];
+                let localDensity = this.properties.localDensity[nodeIndex];
+                let localVelocity: Vector = this.properties.localVelocity[nodeIndex];
                 let latticeWeight = latticeWeights[i];
 
-                this.distribution[index][i] =
-                    this.distribution[index][i] -
+                this.distribution[nodeIndex][i] =
+                    this.distribution[nodeIndex][i] -
                     (1 / this.timescale) *
-                    (this.distribution[index][i] -
+                    (this.distribution[nodeIndex][i] -
                         this.getEquilibrium(latticeWeight, localDensity, localVelocity, i));
             }
         }
@@ -461,6 +471,9 @@ class Fluid {
         this.distribution[this.index(x, y)][direction] = this.distribution[this.index(x + offset.x, y + offset.y)][direction];
     }
 
+    /**
+     * Credit: 
+     */
     private stream(): void {
         //North west and north - 8 and 1
         for (let y = this.height - 2; y > 0; y--) {
@@ -561,7 +574,10 @@ class Fluid {
         }
     }
 
-    //Credit???
+    /**
+     * Credit: https://matthias-research.github.io/pages/tenMinutePhysics/17-fluidSim.pdf
+     * @param samplePosition The position to be sampled
+     */
     private sampleVelocity(samplePosition: Vector): Vector {
         //Bilinear interpolation
         let x = samplePosition.x;
@@ -581,7 +597,7 @@ class Fluid {
         let dx = (x - x1) / (x2 - x1);
         let dy = (y - y1) / (y2 - y1);
 
-        //Get Velocities
+        //Get velocities
         let topLeft = this.properties.localVelocity[this.index(x1, y1)];
         let topRight = this.properties.localVelocity[this.index(x2, y1)];
         let bottomLeft = this.properties.localVelocity[this.index(x1, y2)];
@@ -606,10 +622,12 @@ class Fluid {
 
     //#region Drawing functions
     private gridPosToImagePos(gridPosition: Vector): Vector {
+        //Flipping the y-position
         return { x: gridPosition.x, y: this.height - gridPosition.y - 1 }
     }
 
     private setupColourSchemes(): void {
+        //Setting up colour schemes for the simulation
         this.colourSchemes = {
             fire: new ColourMap([
                 getColour(0, 0, 0, 255),
@@ -643,12 +661,10 @@ class Fluid {
         switch (simulationMode) {
             case 'velocity':
                 let velocityMagnitude = absoluteVector(this.properties.localVelocity[index]);
-                colourScheme = this.colourSchemes.fire;
                 colourIndex = Math.round(colourScheme.NumColours * (velocityMagnitude * 4 * contrast));
                 break;
             case 'density':
                 let density = this.properties.localDensity[index];
-                colourScheme = this.colourSchemes.fire;
                 colourIndex = Math.round(colourScheme.NumColours * ((density - this.density) * 8 * contrast + 0.5));
                 break;
             case 'curl':
@@ -659,7 +675,6 @@ class Fluid {
             case 'pressure':
                 //Since pressure is directly proportional to density
                 let pressure = this.properties.localPressure[index];
-                colourScheme = this.colourSchemes.fire;
                 colourIndex = Math.round(colourScheme.NumColours * ((3 * pressure - this.density) * 5 * contrast + 0.5));
                 break;
             case 'pressureGradient':
@@ -686,8 +701,7 @@ class Fluid {
                 let contrast = Math.pow(1.2, 1);
 
                 if (this.properties.solid[index]) {
-                    //Solid
-                    colour = { red: 68, green: 71, blue: 90, alpha: 255 };
+                    colour = { red: 68, green: 71, blue: 90, alpha: 255 };  //Solid
                 } else {
                     colour = this.getColourFromMode(simulationMode, index, contrast);
                 }
@@ -702,6 +716,9 @@ class Fluid {
         if (this.showStreamlines) this.drawStreamlines();
     }
 
+    /**
+     * Credit: https://matthias-research.github.io/pages/tenMinutePhysics/17-fluidSim.pdf
+     */
     private drawStreamlines(): void {
         let velocityScale = 10;
         let simulationScale = this.pxPerNode;
@@ -774,11 +791,9 @@ class Fluid {
     public updateAirfoil(newGridPoints: Vector[]): void {
         this.airfoilGridPoints = newGridPoints;
         this.clearTracers();
-        this.initTracers();
-
         this.clearStreamlines();
+        this.initTracers();
         this.initStreamlines();
-
         this.setupObstacle();
     }
     //#endregion
