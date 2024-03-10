@@ -70,30 +70,9 @@ enum Directions {
     West,
     NorthWest
 }
-enum OppositeDirections {
-    Centre = 0,
-    South,
-    SouthWest,
-    West,
-    NorthWest,
-    North,
-    NorthEast,
-    East,
-    SouthEast
-}
 //#endregion
 
 //#region General functions
-/**
- * Takes any Direction from the Directions enum and returns the opposite Direction
- * @param direction The direction
- */
-function getOppositeDirection(direction: Directions): Directions {
-    let opposite: string = OppositeDirections[direction];
-    //console.log(opposite);
-    return Directions[opposite as keyof typeof Directions];
-}
-
 /**
  * Maps the GraphDataset type to the Chart.ChartDataSets type
  * @param datasets The datasets to be mapped
