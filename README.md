@@ -1,7 +1,5 @@
 # FluidSimulatorTS
  
-Migrating codebase to TypeScript
+Fluid Simulation for my NEA
 
-Fluid Simulation for my CS NEA
-
-I will be using the Lattice-Boltzmann method of simulating fluid against 4-digit NACA numbers
+I will be using the Lattice-Boltzmann method to simulate airflow against 4-digit NACA airfoils.
