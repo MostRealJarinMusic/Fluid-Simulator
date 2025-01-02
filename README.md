@@ -1,4 +1,4 @@
-# FluidSimulatorTS
+# FluidSimulator
  
 Fluid Simulation for my NEA
 
